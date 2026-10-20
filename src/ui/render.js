@@ -1,7 +1,9 @@
 // Den felles render-funksjonen. Tegner hele appen ut fra tilstanden.
 // Kalles av store etter hver endring – aldri direkte fra hendelser.
-import { feilmeldinger, knapper, navigasjon } from '../tekster.js';
+import { feilmeldinger, knapper, navigasjon, testmodus } from '../tekster.js';
+import { toDateKey } from '../logic/dates.js';
 import { escapeHtml } from './html.js';
+import { formatFullDate, formatClock } from './format.js';
 import { renderSettings } from './settings.js';
 import { renderTimeplan } from './timeplan.js';
 import { renderCalendar } from './calendar.js';
@@ -34,6 +36,14 @@ function header(state) {
     </header>`;
 }
 
+// Viser tydelig at datoen er simulert med ?dato=
+function testBanner(simulatedNow) {
+  if (!simulatedNow) return '';
+  const date = new Date(simulatedNow);
+  const label = `${formatFullDate(toDateKey(date))} kl. ${formatClock(date)}`;
+  return `<div class="test-banner" role="status">${escapeHtml(testmodus.banner(label))}</div>`;
+}
+
 // Feil som gjelder hele appen, f.eks. at lagring feilet
 function errorBanner(code) {
   if (!code) return '';
@@ -50,6 +60,7 @@ function errorBanner(code) {
 
 export function render(state, root) {
   root.innerHTML = `
+    ${testBanner(state.ui.simulatedNow)}
     ${header(state)}
     <main class="app-main app-main-${state.ui.view}">
       ${errorBanner(state.ui.error)}

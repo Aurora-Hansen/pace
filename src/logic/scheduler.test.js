@@ -175,11 +175,19 @@ describe('scheduleTasks', () => {
     ]);
   });
 
-  it('runder gjenstående tid opp til hele kvarter og tillater kort siste økt', () => {
+  it('runder gjenstående tid opp til hele kvarter og unngår en rest under 30 minutter', () => {
+    // 2,2 timer blir 2:15. Ikke 2:00 + 0:15, men 1:45 + 0:30.
     const t = task('a', 2.2, WED);
     expect(describeSessions(scheduleTasks([t], [], user, { from: MON, now }).blocks)).toEqual([
-      'a 2026-11-02 08:00–10:00',
-      'a 2026-11-02 10:15–10:30',
+      'a 2026-11-02 08:00–09:45',
+      'a 2026-11-02 10:00–10:30',
+    ]);
+  });
+
+  it('tillater kort økt når hele oppgaven er kortere enn 30 minutter', () => {
+    const t = task('a', 0.25, WED);
+    expect(describeSessions(scheduleTasks([t], [], user, { from: MON, now }).blocks)).toEqual([
+      'a 2026-11-02 08:00–08:15',
     ]);
   });
 

@@ -4,7 +4,7 @@ import { createStore } from './data/store.js';
 import * as actions from './data/actions.js';
 import { createInitialState } from './logic/models.js';
 import { toDateKey } from './logic/dates.js';
-import { now } from './data/clock.js';
+import { now, isSimulated } from './data/clock.js';
 import { render } from './ui/render.js';
 
 const root = document.querySelector('#app');
@@ -16,10 +16,17 @@ const data = loaded.state ?? createInitialState({ userId: newId() });
 // Ukevisningen er for trang på mobil, så smale skjermer starter i dagsvisning
 const calendarMode = window.matchMedia('(max-width: 40rem)').matches ? 'day' : 'week';
 
+const startNow = now();
+
 const store = createStore({
   state: {
     data,
-    ui: actions.createInitialUi({ error: loaded.error, today: toDateKey(now()), calendarMode }),
+    ui: actions.createInitialUi({
+      error: loaded.error,
+      today: toDateKey(startNow),
+      calendarMode,
+      simulatedNow: isSimulated() ? startNow.toISOString() : null,
+    }),
   },
   save,
   render: (state) => render(state, root),

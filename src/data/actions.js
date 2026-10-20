@@ -26,10 +26,12 @@ export const VIEWS = ['kalender', 'oppgaver', 'timeplan', 'innstillinger'];
 
 // `today` er dagens dato (datonøkkel) fra clock.js når appen starter.
 // `calendarMode` lar main.js starte med dagsvisning på smale skjermer.
-export function createInitialUi({ error = null, today, calendarMode = 'week' }) {
+// `simulatedNow` er ISO-tidspunktet når datoen er simulert med ?dato=, ellers null.
+export function createInitialUi({ error = null, today, calendarMode = 'week', simulatedNow = null }) {
   return {
     view: 'kalender',
     today,
+    simulatedNow,
     calendar: { mode: calendarMode, date: today },
     error,
     notice: null,

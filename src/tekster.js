@@ -73,6 +73,11 @@ export const kalender = {
   apneDag: (dag) => `Vis ${dag}`,
 };
 
+// Ikke fra innhold.md – banner for simulert dato (steg 5.5)
+export const testmodus = {
+  banner: (dato) => `Testmodus: dato satt til ${dato}`,
+};
+
 // Ikke fra innhold.md – lagt til i fase 4
 export const oppgaver = {
   overskrift: 'Oppgaver',

@@ -46,6 +46,7 @@ function createSession(task, date, start, length) {
 // - Gjenstående tid er estimat – utført – beholdte økter som ikke er fullført.
 // - Daglig kapasitet gjelder for alle oppgaver til sammen, også beholdte økter.
 // - Det er minst 15 minutter pause mellom to arbeidsøkter (ikke mellom økt og fast aktivitet).
+// - En økt gjøres kortere hvis det ellers ville blitt igjen en rest på under 30 minutter.
 // - Ferdige oppgaver og oppgaver med passert frist planlegges ikke.
 //
 // Gir { blocks: nye økter, unplaced: [{ task_id, hours }] } for tid som ikke fikk plass før fristen.
@@ -93,7 +94,10 @@ export function scheduleTasks(tasks, blocks, user, { from, now }) {
         let start = slot.start;
 
         while (remaining > 0) {
-          const length = roundDownTo(Math.min(SESSION_MAX, slotEnd - start, left, remaining), SLOT_STEP);
+          let length = roundDownTo(Math.min(SESSION_MAX, slotEnd - start, left, remaining), SLOT_STEP);
+          // Ikke la det bli igjen en rest som er kortere enn en vanlig økt
+          const rest = remaining - length;
+          if (rest > 0 && rest < SESSION_MIN) length = remaining - SESSION_MIN;
           if (length < shortest()) break;
           placed.push(createSession(task, date, start, length));
           remaining -= length;

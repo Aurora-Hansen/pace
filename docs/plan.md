@@ -80,6 +80,9 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
     - Oppgaver med passert frist planlegges ikke og kommer ikke i `unplaced`. To-do-listen viser dem som «Fristen har gått ut».
     - Økter får fast id `oppgave-id@starttid`, så funksjonen er ren.
 34. **`removeFutureSessions`** sletter økter for oppgaven som ikke er fullført og ikke er over (slutt etter «nå»). En økt som pågår, slettes også.
+35. **En økt gjøres kortere** hvis det ellers ville blitt igjen en rest på under 30 minutter (f.eks. 1:45 + 0:30 i stedet for 2:00 + 0:15).
+36. **`replan` og `rollover`** tar inn og gir tilbake `data` (den lagrede tilstanden). `replan` fjerner også ufullførte økter for oppgaver som er ferdige eller slettet, også dagens. `rollover` fjerner alle ufullførte økter (også fremtidige) og planlegger alt på nytt fra i dag. Første gang appen åpnes, kjører `rollover` og lagrer datoen.
+37. **Simulert dato:** `?dato=2026-11-03` bruker dagens klokkeslett, som går videre. `?dato=2026-11-03T14:00` står stille på det klokkeslettet. Ugyldig verdi gir ekte tid uten banner. Banneret viser dato og klokkeslett.
 
 ---
 
@@ -144,11 +147,11 @@ Planleggeren trengs allerede i «Må ha», fordi forskyvning av økter forutsett
   *Tester:* én oppgave, to oppgaver med ulik frist, kapasiteten fylles opp, frist i morgen, ingen tid igjen (gir `unplaced`), beholdte økter i dag som teller mot kapasitet og gjenstående tid, og at faste blokker aldri endres.
 - [x] **5.3 Frigjøring** (`logic/scheduler.js`). `removeFutureSessions(blocks, taskId, nå)` sletter gjenstående økter når en oppgave er ferdig.
   *Tester:* fullførte og tidligere økter beholdes.
-- [ ] **5.4 Ny plan og daglig sjekk** (`logic/rollover.js`). Begge følger antakelse 3.
+- [x] **5.4 Ny plan og daglig sjekk** (`logic/rollover.js`). Begge følger antakelse 3.
   - `replan(state, nå)` beholder dagens økter og sletter ikke fullførte økter fra i morgen. Deretter planlegger den fra «nå» i dag, med dagens økter som opptatt tid.
   - `rollover(state, nå)` fjerner tidligere, ikke fullførte økter, planlegger fra i dag og lagrer `last_checked_date`.
   *Tester:* `replan` rører ikke dagens økter. En ny oppgave med frist i morgen tidlig får økt i dag når det finnes ledig tid etter «nå», men ikke når dagen er full eller dagskapasiteten er brukt opp. `rollover` gjør ingenting samme dag, flytter økter en ny dag og håndterer flere dager borte. Begge håndterer frist som har gått ut. `rollover` gjør ingenting når «nå» er før `last_checked_date`, slik at det er trygt å gå tilbake fra simulert dato.
-- [ ] **5.5 Simulert dato for manuell testing** (`data/clock.js`). Appen henter «nå» bare via `clock.js`. Med URL-parameteren `?dato=2026-11-03` bruker appen den datoen med dagens klokkeslett. `?dato=2026-11-03T14:00` setter også klokkeslettet. Funksjonen er skjult og lenkes ikke fra noe sted, men et lite banner viser «Testmodus: dato satt til …» så den ikke forveksles med vanlig bruk. Merk at testmodus bruker de samme lagrede dataene.
+- [x] **5.5 Simulert dato for manuell testing** (`data/clock.js`). Appen henter «nå» bare via `clock.js`. Med URL-parameteren `?dato=2026-11-03` bruker appen den datoen med dagens klokkeslett. `?dato=2026-11-03T14:00` setter også klokkeslettet. Funksjonen er skjult og lenkes ikke fra noe sted, men et lite banner viser «Testmodus: dato satt til …» så den ikke forveksles med vanlig bruk. Merk at testmodus bruker de samme lagrede dataene.
   *Tester:* `parseSimulatedNow(søkestreng, ekteNå)` håndterer gyldig dato, dato med klokkeslett, ugyldig verdi (bruker ekte «nå») og manglende parameter.
 - [ ] **5.6 Kobling i appen.** `replan` kjøres ved endringer og `rollover` når appen åpnes, begge via `store.update` og med «nå» fra `clock.js`. Arbeidsøkter vises i kalenderen i emnefarge.
   *Ferdig når:* Manuell sjekk viser at en ny oppgave kan få økter i ledig tid i dag uten å endre dagens eksisterende økter, og at «ferdig» fjerner øktene. Åpnes appen med `?dato=` satt til en senere dag, flyttes uferdige økter.
