@@ -71,6 +71,15 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 30. **«Alt unnagjort for i dag!»** vises i «Aktive» når det finnes oppgaver, men ingen aktive. I steg 5.7 kan dette i stedet styres av dagens arbeidsøkter.
 31. **Sletting av oppgave** sletter også arbeidsøktene til oppgaven.
 32. **Menyen bryter over to linjer på mobil** med fire faner. Bør løses i steg 7.3 (f.eks. sidelengs scrolling eller meny nederst).
+33. **Planleggeren (5.1–5.2):**
+    - Økter og ledig tid går i hele kvarter. «Nå» rundes opp til neste kvarter.
+    - Det er minst 15 minutters pause mellom to arbeidsøkter (også beholdte), men ikke mellom en økt og en fast aktivitet.
+    - Tidsrom under 30 minutter brukes ikke. Unntaket er siste økt for en oppgave, som kan være kortere hvis det er lite igjen.
+    - Gjenstående tid rundes opp til nærmeste kvarter.
+    - Fullførte økter opptar tid og kapasitet, men trekkes ikke fra gjenstående tid (de er allerede med i `completed_hours`).
+    - Oppgaver med passert frist planlegges ikke og kommer ikke i `unplaced`. To-do-listen viser dem som «Fristen har gått ut».
+    - Økter får fast id `oppgave-id@starttid`, så funksjonen er ren.
+34. **`removeFutureSessions`** sletter økter for oppgaven som ikke er fullført og ikke er over (slutt etter «nå»). En økt som pågår, slettes også.
 
 ---
 
@@ -129,11 +138,11 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 
 Planleggeren trengs allerede i «Må ha», fordi forskyvning av økter forutsetter at noe kan planlegge på nytt.
 
-- [ ] **5.1 Ledig tid** (`logic/slots.js`). `freeSlots(dato, opptatt, innstillinger)` finner ledige tidsrom i studievinduet, utenom faste aktiviteter. Er dagen i dag, telles bare tiden etter «nå».
+- [x] **5.1 Ledig tid** (`logic/slots.js`). `freeSlots(dato, opptatt, innstillinger)` finner ledige tidsrom i studievinduet, utenom faste aktiviteter. Er dagen i dag, telles bare tiden etter «nå».
   *Tester:* tom dag, dag full av forelesninger, økt som starter før vinduet, og «nå» midt på dagen.
-- [ ] **5.2 Planlegger** (`logic/scheduler.js`). `scheduleTasks(oppgaver, opptatt, innstillinger, { fra, nå })` returnerer `{ blocks, unplaced }`. `opptatt` er faste aktiviteter pluss økter som beholdes, og `fra` er første dato det planlegges på. Er `fra` i dag, brukes bare tid etter «nå». Oppgaven med tidligst frist planlegges først. Gjenstående tid er `estimated_hours – completed_hours – (beholdte, ikke fullførte økter)`. Øktene er 30–120 min, og daglig kapasitet gjelder på tvers av alle oppgaver, også beholdte økter.
+- [x] **5.2 Planlegger** (`logic/scheduler.js`). `scheduleTasks(oppgaver, opptatt, innstillinger, { fra, nå })` returnerer `{ blocks, unplaced }`. `opptatt` er faste aktiviteter pluss økter som beholdes, og `fra` er første dato det planlegges på. Er `fra` i dag, brukes bare tid etter «nå». Oppgaven med tidligst frist planlegges først. Gjenstående tid er `estimated_hours – completed_hours – (beholdte, ikke fullførte økter)`. Øktene er 30–120 min, og daglig kapasitet gjelder på tvers av alle oppgaver, også beholdte økter.
   *Tester:* én oppgave, to oppgaver med ulik frist, kapasiteten fylles opp, frist i morgen, ingen tid igjen (gir `unplaced`), beholdte økter i dag som teller mot kapasitet og gjenstående tid, og at faste blokker aldri endres.
-- [ ] **5.3 Frigjøring** (`logic/scheduler.js`). `removeFutureSessions(blocks, taskId, nå)` sletter gjenstående økter når en oppgave er ferdig.
+- [x] **5.3 Frigjøring** (`logic/scheduler.js`). `removeFutureSessions(blocks, taskId, nå)` sletter gjenstående økter når en oppgave er ferdig.
   *Tester:* fullførte og tidligere økter beholdes.
 - [ ] **5.4 Ny plan og daglig sjekk** (`logic/rollover.js`). Begge følger antakelse 3.
   - `replan(state, nå)` beholder dagens økter og sletter ikke fullførte økter fra i morgen. Deretter planlegger den fra «nå» i dag, med dagens økter som opptatt tid.
