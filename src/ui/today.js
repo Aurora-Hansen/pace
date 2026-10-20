@@ -3,6 +3,7 @@ import { iDag as t, tommeTilstander, hjelpetekster } from '../tekster.js';
 import { todayAgenda } from '../logic/today.js';
 import { escapeHtml } from './html.js';
 import { formatFullDate, formatTimeRange } from './format.js';
+import { renderOverloadWarnings } from './overload.js';
 import allDoneUrl from '../../assets/all-done.png';
 import emptyCalendarUrl from '../../assets/empty-calendar.png';
 
@@ -57,6 +58,7 @@ export function renderToday(state) {
     const empty = tommeTilstander.ingenOppgaver;
     return `
       ${header}
+      ${renderOverloadWarnings(state)}
       <section class="card">
         <div class="empty-state">
           <img src="${emptyCalendarUrl}" alt="" width="160" height="160">
@@ -81,6 +83,7 @@ export function renderToday(state) {
 
   return `
     ${header}
+    ${renderOverloadWarnings(state)}
     ${allDone}
     <section class="card" aria-label="${t.overskrift}">
       <ol class="agenda">

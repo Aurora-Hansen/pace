@@ -48,6 +48,8 @@ function createSession(task, date, start, length) {
 // - Det er minst 15 minutter pause mellom to arbeidsøkter (ikke mellom økt og fast aktivitet).
 // - En økt gjøres kortere hvis det ellers ville blitt igjen en rest på under 30 minutter.
 // - Ferdige oppgaver og oppgaver med passert frist planlegges ikke.
+// - Oppgaver med `allow_over_capacity` («Fordel på nytt», antakelse 7) får en ekstra runde til slutt:
+//   det som ikke fikk plass, legges i ledig tid uten kapasitetsgrense.
 //
 // Gir { blocks: nye økter, unplaced: [{ task_id, hours }] } for tid som ikke fikk plass før fristen.
 export function scheduleTasks(tasks, blocks, user, { from, now }) {
@@ -73,19 +75,16 @@ export function scheduleTasks(tasks, blocks, user, { from, now }) {
   }
 
   const placed = [];
-  const unplaced = [];
 
-  for (const task of pending) {
-    let remaining = roundUpTo(remainingHours(task) * 60 - (plannedPerTask.get(task.id) ?? 0), SLOT_STEP);
-    if (remaining <= 0) continue;
-
+  // Plasserer `remaining` minutter av oppgaven og gir tilbake det som ikke fikk plass
+  function placeTask(task, remaining, ignoreCapacity) {
     const deadline = new Date(task.deadline);
     const deadlineDate = toDateKey(deadline);
+    // Siste økt kan være kortere enn minimum hvis det er lite igjen
+    const shortest = () => Math.min(SESSION_MIN, remaining);
 
     for (let date = from; date <= deadlineDate && remaining > 0; date = addDays(date, 1)) {
-      let left = capacity - (usedPerDay.get(date) ?? 0);
-      // Siste økt kan være kortere enn minimum hvis det er lite igjen
-      const shortest = () => Math.min(SESSION_MIN, remaining);
+      let left = ignoreCapacity ? Infinity : capacity - (usedPerDay.get(date) ?? 0);
       if (left < shortest()) continue;
 
       const busy = [...occupied, ...placed].map(withBreak);
@@ -100,17 +99,31 @@ export function scheduleTasks(tasks, blocks, user, { from, now }) {
           if (rest > 0 && rest < SESSION_MIN) length = remaining - SESSION_MIN;
           if (length < shortest()) break;
           placed.push(createSession(task, date, start, length));
+          usedPerDay.set(date, (usedPerDay.get(date) ?? 0) + length);
           remaining -= length;
           left -= length;
           start += length + BREAK;
         }
         if (remaining <= 0 || left < shortest()) break;
       }
-
-      usedPerDay.set(date, capacity - left);
     }
+    return remaining;
+  }
 
-    if (remaining > 0) unplaced.push({ task_id: task.id, hours: remaining / 60 });
+  // Første runde: alle oppgaver innenfor daglig kapasitet
+  const leftover = [];
+  for (const task of pending) {
+    const remaining = roundUpTo(remainingHours(task) * 60 - (plannedPerTask.get(task.id) ?? 0), SLOT_STEP);
+    if (remaining <= 0) continue;
+    const rest = placeTask(task, remaining, false);
+    if (rest > 0) leftover.push({ task, rest });
+  }
+
+  // Andre runde: «Fordel på nytt» – resten i ledig tid uten kapasitetsgrense
+  const unplaced = [];
+  for (const { task, rest } of leftover) {
+    const still = task.allow_over_capacity ? placeTask(task, rest, true) : rest;
+    if (still > 0) unplaced.push({ task_id: task.id, hours: still / 60 });
   }
 
   return { blocks: placed, unplaced };

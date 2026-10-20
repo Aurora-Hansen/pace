@@ -106,6 +106,7 @@ describe('createTask', () => {
       completed_hours: 0,
       status: STATUS.NOT_STARTED,
       created_at: '2026-11-03T09:00:00.000Z',
+      allow_over_capacity: false,
     });
   });
 

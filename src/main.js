@@ -39,6 +39,7 @@ const formActions = {
   fixedBlock: (values) => actions.submitFixedBlock(values, newId()),
   task: (values) => actions.submitTask(values, newId(), now()),
   progress: (values) => actions.submitProgress(values),
+  adjust: (values) => actions.submitAdjust(values, now()),
 };
 
 // Knapper: data-action="navn" → endring som får knappens data-attributter
@@ -65,6 +66,10 @@ const clickActions = {
   'complete-task': actions.markTaskDone,
   'reopen-task': actions.reopenTaskAction,
   'toggle-session': actions.toggleSession,
+  redistribute: actions.redistributeTask,
+  'keep-plan': actions.keepPlan,
+  'open-adjust': actions.openAdjustForm,
+  'cancel-adjust': actions.cancelAdjustForm,
   'ask-delete': actions.askDelete,
   'cancel-delete': actions.cancelDelete,
   'confirm-delete': actions.confirmDelete,

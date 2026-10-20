@@ -123,6 +123,42 @@
   gap: var(--space-3);
 }
 
+/* Varsel når arbeid hoper seg opp */
+.overload h3 {
+  margin-bottom: var(--space-1);
+  font-size: 1.0625rem;
+}
+
+.overload p {
+  margin: 0 0 var(--space-3);
+}
+
+.overload .overload-task {
+  margin-bottom: var(--space-2);
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.adjust-form {
+  padding-top: var(--space-3);
+  border-top: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
+}
+
+.badge-risk {
+  display: inline-block;
+  margin-left: var(--space-1);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-warning);
+  border-radius: 999px;
+  color: var(--color-text);
+  background: var(--color-warning-soft);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  vertical-align: middle;
+  text-decoration: none;
+}
+
 .empty-state-compact {
   padding: var(--space-2) 0;
 }

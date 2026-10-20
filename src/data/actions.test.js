@@ -34,6 +34,11 @@ import {
   startDay,
   newDay,
   toggleSession,
+  redistributeTask,
+  keepPlan,
+  openAdjustForm,
+  cancelAdjustForm,
+  submitAdjust,
 } from './actions.js';
 import { createInitialState, RECURRENCE } from '../logic/models.js';
 import { load, save } from './storage.js';
@@ -402,6 +407,87 @@ describe('planlegging i appen', () => {
   it('ny dag gjør ingenting samme dag', () => {
     const state = withPlannedTask();
     expect(newDay(new Date(2026, 10, 4, 22, 0))(state)).toBe(state);
+  });
+});
+
+describe('når arbeid hoper seg opp', () => {
+  // Onsdag 4.11.2026 kl. 07:00, kapasitet 4 timer
+  const now = new Date(2026, 10, 4, 7, 0);
+  // 6 timer med frist i dag kl. 21: 2 timer får ikke plass
+  const tooMuch = {
+    title: 'Eksamen',
+    course_id: '',
+    description: '',
+    estimated_hours: '6',
+    deadline_date: '2026-11-04',
+    deadline_time: '21:00',
+  };
+  const overloaded = () => withReplan(submitTask(tooMuch, 't1', now), now)(initial());
+
+  it('finner oppgaven i fare når planen bygges', () => {
+    expect(overloaded().ui.overload.atRisk).toEqual([
+      { taskId: 't1', day: '2026-11-04', hoursNeeded: 6, missingHours: 2 },
+    ]);
+  });
+
+  it('«Fordel på nytt» legger resten over kapasiteten og markerer dagen', () => {
+    const state = withReplan(redistributeTask({ id: 't1' }), now)(overloaded());
+    expect(state.data.tasks[0].allow_over_capacity).toBe(true);
+    expect(state.ui.overload).toEqual({ atRisk: [], overloadedDays: ['2026-11-04'] });
+  });
+
+  it('«Behold planen» lukker varselet uten å endre planen', () => {
+    const before = overloaded();
+    const state = keepPlan({ id: 't1' })(before);
+    expect(state.ui.dismissedOverload).toEqual(['t1']);
+    expect(state.data).toBe(before.data);
+    expect(keepPlan({ id: 't1' })(state)).toBe(state);
+  });
+
+  it('«Juster arbeidsmengde» åpner skjema med kapasitet, estimat og frist', () => {
+    const state = openAdjustForm({ id: 't1' })(overloaded());
+    expect(state.ui.forms.adjust.values).toEqual({
+      task_id: 't1',
+      daily_available_study_hours: '4',
+      estimated_hours: '6',
+      deadline_date: '2026-11-04',
+      deadline_time: '21:00',
+    });
+  });
+
+  it('høyere kapasitet fjerner varselet', () => {
+    const state = run(overloaded(), openAdjustForm({ id: 't1' }), (s) =>
+      withReplan(submitAdjust({ ...s.ui.forms.adjust.values, daily_available_study_hours: '6' }, now), now)(s),
+    );
+    expect(state.data.user.daily_available_study_hours).toBe(6);
+    expect(state.ui.overload.atRisk).toEqual([]);
+    expect(state.ui.forms.adjust).toBeUndefined();
+  });
+
+  it('lavere estimat eller senere frist fjerner også varselet', () => {
+    const adjust = (changes) =>
+      run(overloaded(), openAdjustForm({ id: 't1' }), (s) =>
+        withReplan(submitAdjust({ ...s.ui.forms.adjust.values, ...changes }, now), now)(s),
+      );
+    expect(adjust({ estimated_hours: '4' }).ui.overload.atRisk).toEqual([]);
+    expect(adjust({ deadline_date: '2026-11-05' }).ui.overload.atRisk).toEqual([]);
+  });
+
+  it('viser feil i justeringsskjemaet', () => {
+    const state = run(overloaded(), openAdjustForm({ id: 't1' }), (s) =>
+      submitAdjust({ ...s.ui.forms.adjust.values, daily_available_study_hours: '', deadline_date: '2026-11-01' }, now)(s),
+    );
+    expect(state.ui.forms.adjust.errors.map((e) => e.code)).toEqual(['MANGLER_FELT', 'FRIST_I_FORTIDEN']);
+  });
+
+  it('avbryt lukker justeringsskjemaet', () => {
+    expect(run(overloaded(), openAdjustForm({ id: 't1' }), cancelAdjustForm()).ui.forms.adjust).toBeUndefined();
+  });
+
+  it('daglig sjekk regner ut overbelastning også når planen ikke endres', () => {
+    const state = overloaded();
+    const reset = { ...state, ui: { ...state.ui, overload: { atRisk: [], overloadedDays: [] } } };
+    expect(startDay(now)(reset).ui.overload.atRisk).toHaveLength(1);
   });
 });
 

@@ -10,6 +10,7 @@ import {
   taskFromInput,
   updateTaskFromInput,
   taskToInput,
+  deadlineFromInput,
 } from '../logic/models.js';
 import {
   ERRORS,
@@ -23,6 +24,7 @@ import { registerProgress, completeTask, reopenTask } from '../logic/progress.js
 import { addDays, isValidDateKey, toDateKey } from '../logic/dates.js';
 import { replan, rollover } from '../logic/rollover.js';
 import { completeSession, uncompleteSession } from '../logic/today.js';
+import { detectOverload } from '../logic/overload.js';
 
 export const VIEWS = ['idag', 'kalender', 'oppgaver', 'timeplan', 'innstillinger'];
 
@@ -35,6 +37,10 @@ export function createInitialUi({ error = null, today, calendarMode = 'week', si
     today,
     simulatedNow,
     calendar: { mode: calendarMode, date: today },
+    // Regnes ut sammen med planen (withReplan og startDay), så render ikke trenger «nå»
+    overload: { atRisk: [], overloadedDays: [] },
+    // Oppgaver der brukeren har valgt «Behold planen» (bare til appen lastes på nytt)
+    dismissedOverload: [],
     error,
     notice: null,
     confirm: null,
@@ -64,17 +70,19 @@ const replaceById = (list, item) => list.map((existing) => (existing.id === item
 
 // --- Planlegging (steg 5.6) ---
 
+const withOverload = (state, now) => withUi(state, { overload: detectOverload(state.data, now) });
+
 // Kjører en endring og bygger planen på nytt hvis lagrede data ble endret (antakelse 3)
 export const withReplan = (change, now) => (state) => {
   const next = change(state);
   if (next === state || next.data === state.data) return next;
-  return { ...next, data: replan(next.data, now) };
+  return withOverload({ ...next, data: replan(next.data, now) }, now);
 };
 
-// Daglig sjekk når appen åpnes
+// Daglig sjekk når appen åpnes. Overbelastning regnes alltid ut, også når planen ikke endres.
 export const startDay = (now) => (state) => {
   const data = rollover(state.data, now);
-  return data === state.data ? state : { ...state, data };
+  return withOverload(data === state.data ? state : { ...state, data }, now);
 };
 
 // Når appen har stått åpen over midnatt: daglig sjekk og ny dato i visningene
@@ -267,6 +275,60 @@ export const markTaskDone = ({ id }) => (state) => {
 };
 
 export const reopenTaskAction = ({ id }) => (state) => updateTask(state, id, reopenTask);
+
+// --- Når arbeid hoper seg opp (steg 6.2) ---
+
+// «Fordel på nytt»: oppgaven får gå over daglig kapasitet (planleggeren gjør resten via withReplan)
+export const redistributeTask = ({ id }) => (state) => {
+  const updated = updateTask(state, id, (task) => ({ ...task, allow_over_capacity: true }));
+  return withUi(updated, { dismissedOverload: state.ui.dismissedOverload.filter((taskId) => taskId !== id) });
+};
+
+// «Behold planen»: lukker varselet for oppgaven
+export const keepPlan = ({ id }) => (state) => {
+  if (state.ui.dismissedOverload.includes(id)) return state;
+  return withUi(state, { dismissedOverload: [...state.ui.dismissedOverload, id] });
+};
+
+// «Juster arbeidsmengde»: daglig kapasitet, estimat og frist i ett skjema
+export const openAdjustForm = ({ id }) => (state) => {
+  const task = state.data.tasks.find((t) => t.id === id);
+  if (!task) return state;
+  const { estimated_hours, deadline_date, deadline_time } = taskToInput(task);
+  const values = {
+    task_id: id,
+    daily_available_study_hours: numberToInput(state.data.user.daily_available_study_hours),
+    estimated_hours,
+    deadline_date,
+    deadline_time,
+  };
+  return withForm(state, 'adjust', { values, errors: [] });
+};
+
+export const cancelAdjustForm = () => (state) => ({ ...state, ui: withoutForm(state.ui, 'adjust') });
+
+export const submitAdjust = (values, now) => (state) => {
+  const existing = state.data.tasks.find((t) => t.id === values.task_id);
+  if (!existing) return state;
+
+  const user = { ...state.data.user, daily_available_study_hours: parseNumber(values.daily_available_study_hours) };
+  const task = {
+    ...existing,
+    estimated_hours: parseNumber(values.estimated_hours),
+    deadline: deadlineFromInput(values.deadline_date, values.deadline_time),
+  };
+
+  let errors = [...validateSettings(user), ...validateTask(task, now)];
+  if (task.deadline === existing.deadline) {
+    errors = errors.filter((error) => error.code !== ERRORS.FRIST_I_FORTIDEN);
+  }
+  if (errors.length > 0) return withForm(state, 'adjust', { values, errors });
+
+  return {
+    data: { ...state.data, user, tasks: replaceById(state.data.tasks, task) },
+    ui: withoutForm(state.ui, 'adjust'),
+  };
+};
 
 // --- Sletting med bekreftelse ---
 

@@ -218,6 +218,15 @@ export const hoperSegOpp = {
   },
 };
 
+// Ikke fra innhold.md – tillegg til varselet (steg 6.2)
+export const overbelastning = {
+  oppgave: (tittel, frist) => `${tittel} · frist ${frist}`,
+  dagOverKapasitet: 'Mer enn dagskapasiteten',
+  fristIFare: 'Frist i fare',
+  dag: (dager, ukedag, dato) =>
+    dager === 0 ? 'i dag' : dager === 1 ? 'i morgen' : dager < 7 ? `på ${ukedag}` : `${dato}`,
+};
+
 // Nøklene er feilkodene fra logikken (se steg 1.2 og 1.3 i plan.md)
 export const feilmeldinger = {
   LAGRING_FEILET: {

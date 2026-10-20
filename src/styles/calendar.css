@@ -177,6 +177,22 @@ button.cal-head-day:hover {
   background-size: 100% var(--hour-height);
 }
 
+/* Dag med mer arbeid enn daglig kapasitet (krav.md del 5: markeres i rødt) */
+.cal-head-day.cal-overloaded .cal-date {
+  background: var(--color-warning);
+  color: var(--color-surface);
+}
+
+.cal-head-day.cal-overloaded .cal-weekday {
+  color: var(--color-warning);
+  font-weight: 500;
+}
+
+.cal-day.cal-overloaded {
+  background-color: var(--color-warning-soft);
+  box-shadow: inset 0 3px 0 var(--color-warning);
+}
+
 /* Blokker */
 .cal-block {
   position: absolute;

@@ -1,7 +1,7 @@
 // Formatering av datoer og klokkeslett for visning (norsk)
-import { formatTime, minutesSinceMidnight, fromDateKey } from '../logic/dates.js';
+import { formatTime, minutesSinceMidnight, fromDateKey, daysBetween } from '../logic/dates.js';
 import { RECURRENCE } from '../logic/models.js';
-import { fasteAktiviteter } from '../tekster.js';
+import { fasteAktiviteter, overbelastning } from '../tekster.js';
 
 const weekdayFormat = new Intl.DateTimeFormat('nb-NO', { weekday: 'long' });
 const shortWeekdayFormat = new Intl.DateTimeFormat('nb-NO', { weekday: 'short' });
@@ -49,6 +49,14 @@ export const formatLongDate = (dateKey) => longDateFormat.format(fromDateKey(dat
 
 // «mandag 2. november 2026»
 export const formatFullDate = (dateKey) => fullDateFormat.format(fromDateKey(dateKey));
+
+// «i dag», «i morgen», «på torsdag» eller «mandag 16. november» – brukes i varselet
+export const formatRelativeDay = (dateKey, today) =>
+  overbelastning.dag(
+    daysBetween(today, dateKey),
+    weekdayFormat.format(fromDateKey(dateKey)),
+    longDateFormat.format(fromDateKey(dateKey)),
+  );
 
 // «2.–8. november 2026» eller «26. oktober–1. november 2026»
 export const formatDateRange = (from, to) => rangeFormat.formatRange(fromDateKey(from), fromDateKey(to));

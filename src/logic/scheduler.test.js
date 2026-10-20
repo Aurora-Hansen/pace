@@ -204,6 +204,36 @@ describe('scheduleTasks', () => {
     expect(scheduleTasks([done, overdue], [], user, { from: MON, now })).toEqual({ blocks: [], unplaced: [] });
   });
 
+  it('«Fordel på nytt» legger resten i ledig tid uten kapasitetsgrense', () => {
+    // 6 timer med frist i dag kl. 21, kapasitet 4: 2 timer får ikke plass innenfor kapasiteten
+    const t = task('a', 6, MON, 21, { allow_over_capacity: true });
+    const { blocks, unplaced } = scheduleTasks([t], [], user, { from: MON, now });
+    expect(totalHours(blocks, 'a')).toBe(6);
+    expect(unplaced).toEqual([]);
+    expect(describeSessions(blocks)).toEqual([
+      'a 2026-11-02 08:00–10:00',
+      'a 2026-11-02 10:15–12:15',
+      'a 2026-11-02 12:30–14:30',
+    ]);
+  });
+
+  it('bruker kapasiteten først for alle oppgaver før noen får gå over', () => {
+    // Oppgave a (tidligst frist) får gå over, men b skal fortsatt få sin plass innenfor kapasiteten tirsdag
+    const a = task('a', 6, MON, 21, { allow_over_capacity: true });
+    const b = task('b', 2, TUE);
+    const { blocks, unplaced } = scheduleTasks([a, b], [], user, { from: MON, now });
+    expect(totalHours(blocks, 'a')).toBe(6);
+    expect(totalHours(blocks, 'b')).toBe(2);
+    expect(unplaced).toEqual([]);
+  });
+
+  it('gir fortsatt unplaced når det ikke finnes ledig tid selv uten kapasitetsgrense', () => {
+    const t = task('a', 20, MON, 21, { allow_over_capacity: true });
+    const { unplaced } = scheduleTasks([t], [], user, { from: MON, now });
+    expect(unplaced[0].task_id).toBe('a');
+    expect(unplaced[0].hours).toBeGreaterThan(0);
+  });
+
   it('planlegger på riktig lokal tid den dagen sommertiden slutter', () => {
     const dstNow = atMinutes('2026-10-24', h(22));
     const { blocks } = scheduleTasks([task('a', 3, '2026-10-26')], [], user, { from: '2026-10-25', now: dstNow });

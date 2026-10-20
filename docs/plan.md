@@ -88,6 +88,11 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 40. **«I dag» (5.7)** er startvisningen. Avhuking kan angres (`uncompleteSession` trekker tiden fra igjen). «Alt unnagjort for i dag!» vises når alle dagens økter er huket av. Uten noe i dag vises «Ingen oppgaver ennå» (når det ikke finnes oppgaver) eller «Ingenting planlagt i dag». Det vises ikke «Ikke gjennomført» på økter som er over, fordi render ikke skal hente «nå».
 41. **En fast aktivitet som legges inn oppå en av dagens økter**, flytter ikke økten (dagens økter står fast). Økter fra i morgen planlegges rundt den.
 42. **Menyen scroller sidelengs på smale skjermer** i stedet for å bryte over to linjer (midlertidig løsning på punkt 32).
+43. **«Fordel på nytt» lagres på oppgaven** som `allow_over_capacity: true` (utvidelse av datamodellen). Ellers ville neste `replan` presset arbeidet tilbake innenfor kapasiteten. Planleggeren har to runder: først alle oppgaver innenfor kapasiteten, deretter resten for disse oppgavene i ledig tid uten kapasitetsgrense. Flagget blir stående til oppgaven er ferdig.
+44. **«Behold planen»** lukker varselet for oppgaven til appen lastes på nytt (`ui.dismissedOverload`, lagres ikke).
+45. **{antall} og {dag} i varselet:** {dag} er den siste dagen oppgaven har økter før fristen (fristdagen hvis den ikke har noen), skrevet som «i dag», «i morgen», «på torsdag» eller full dato. {antall} er timene som allerede ligger den dagen pluss det som mangler.
+46. **Overbelastning regnes ut sammen med planen** (`withReplan` og `startDay`) og ligger i `ui.overload`, så render ikke trenger «nå». Dager over kapasitet markeres med rød dato og rødlig kolonne i kalenderen. Oppgaver i fare får merkelappen «Frist i fare» i to-do-listen. Varselet vises øverst i «I dag» og «Oppgaver».
+47. **«Juster arbeidsmengde»** åpner et skjema i varselet med daglig kapasitet, estimat og frist (krav.md del 5: øke kapasitet, redusere omfang, flytte frist).
 
 ---
 
@@ -166,9 +171,9 @@ Planleggeren trengs allerede i «Må ha», fordi forskyvning av økter forutsett
 
 ## Fase 6 – Bør ha
 
-- [ ] **6.1 Overbelastning** (`logic/overload.js`). `detectOverload(plan, oppgaver, innstillinger)` returnerer oppgaver i fare med `{ taskId, dag, timerNødvendig }` og dager over kapasitet.
+- [x] **6.1 Overbelastning** (`logic/overload.js`). `detectOverload(data, nå)` returnerer oppgaver i fare med `{ taskId, dag, timerNødvendig }` og dager over kapasitet.
   *Tester:* ingen overbelastning, én oppgave i fare og flere oppgaver som konkurrerer.
-- [ ] **6.2 Varsel og rød markering.** Varselet «Her hoper det seg opp» med `{antall}` og `{dag}` utfylt, og knappene «Fordel på nytt» og «Behold planen» (antakelse 7). Dager over kapasitet blir røde (#EF4444) i kalenderen. «Juster arbeidsmengde» åpner kapasitet, estimat og frist.
+- [x] **6.2 Varsel og rød markering.** Varselet «Her hoper det seg opp» med `{antall}` og `{dag}` utfylt, og knappene «Fordel på nytt» og «Behold planen» (antakelse 7). Dager over kapasitet blir røde (#EF4444) i kalenderen. «Juster arbeidsmengde» åpner kapasitet, estimat og frist.
 - [ ] **6.3 Tidsestimat** (`logic/estimate.js`). `estimateHours(tekst)` returnerer `{ timer, begrunnelser[] }`. Den er regelbasert og ser på antall ord og sider, krav til kilder, oppgavetype (essay, rapport, presentasjon, programmering, lab), gruppearbeid og lengden på selve teksten.
   *Tester:* minst seks eksempeltekster, tom tekst som gir feil, og at resultatet alltid er rundet og større enn 0.
 - [ ] **6.4 «Foreslå tidsbruk» i oppgaveskjemaet.** Tom tilstand og feilen «Vi trenger litt tekst». Forslaget vises med begrunnelser og hjelpetekst og kan godtas eller justeres.

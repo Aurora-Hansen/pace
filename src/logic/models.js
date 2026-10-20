@@ -98,6 +98,8 @@ export function createTask(input, { id, now }) {
     completed_hours: 0,
     status: STATUS.NOT_STARTED,
     created_at: now.toISOString(),
+    // Utvidelse av datamodellen: «Fordel på nytt» er valgt (antakelse 7 i plan.md)
+    allow_over_capacity: false,
   };
 }
 

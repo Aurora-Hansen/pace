@@ -1,10 +1,11 @@
 // Visning: oppgaver og to-do-liste (steg 4.2, 4.3 og 4.5)
-import { oppgaver as t, knapper, fasteAktiviteter, tommeTilstander } from '../tekster.js';
+import { oppgaver as t, knapper, fasteAktiviteter, tommeTilstander, overbelastning } from '../tekster.js';
 import { STATUS } from '../logic/models.js';
 import { groupTasks, daysUntil } from '../logic/todo.js';
 import { progressPercent } from '../logic/progress.js';
 import { escapeHtml, formErrorSummary, invalidAttrs } from './html.js';
 import { formatDeadline, formatHoursShort } from './format.js';
+import { renderOverloadWarnings } from './overload.js';
 import emptyTasksUrl from '../../assets/empty-tasks.png';
 import allDoneUrl from '../../assets/all-done.png';
 
@@ -147,12 +148,13 @@ function taskCard(state, task, courseById) {
   const percent = progressPercent(task);
   const done = task.status === STATUS.COMPLETED;
   const progressOpen = state.ui.forms.progress?.values.task_id === task.id;
+  const atRisk = state.ui.overload.atRisk.some((risk) => risk.taskId === task.id);
 
   return `
     <li class="task-card${done ? ' task-done' : ''}" style="--task-color: ${escapeHtml(course?.color ?? 'var(--color-border)')}">
       <div class="task-head">
         <div>
-          <h4 class="task-title">${escapeHtml(task.title)}</h4>
+          <h4 class="task-title">${escapeHtml(task.title)}${atRisk ? ` <span class="badge-risk">${overbelastning.fristIFare}</span>` : ''}</h4>
           <p class="task-meta">
             ${course ? `<span>${escapeHtml(course.name)}</span> · ` : ''}${deadlineText(task, state.ui.today)}
           </p>
@@ -222,6 +224,7 @@ export function renderTasks(state) {
 
   return `
     ${header}
+    ${renderOverloadWarnings(state)}
     ${formOpen ? taskForm(state) : ''}
     <div class="card task-groups">
       ${taskGroup(state, t.aktive, groups.active, courseById, allDoneHtml)}

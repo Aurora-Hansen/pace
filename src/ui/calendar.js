@@ -1,5 +1,5 @@
 // Visning: kalender med uke- og dagsvisning (steg 3.2 og 3.3)
-import { kalender as t, tommeTilstander } from '../tekster.js';
+import { kalender as t, tommeTilstander, overbelastning } from '../tekster.js';
 import { blocksForRange, layoutDay, visibleHours } from '../logic/calendar.js';
 import { weekDays, isoWeek, minutesSinceMidnight, formatTime } from '../logic/dates.js';
 import { escapeHtml } from './html.js';
@@ -100,10 +100,13 @@ export function renderCalendar(state) {
   const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
   const timeLabels = hours.map((hour) => `<div class="cal-hour">${formatTime(hour * 60)}</div>`).join('');
 
+  // Dager der planlagt arbeid er mer enn daglig kapasitet, markeres i rødt (krav.md del 5)
+  const overloaded = new Set(state.ui.overload.overloadedDays);
   const heads = days
     .map((day) => {
-      const today = day === state.ui.today ? ' cal-today' : '';
-      const label = `<span class="cal-weekday">${formatShortWeekday(day)}</span><span class="cal-date">${Number(day.slice(8))}</span>`;
+      const today = (day === state.ui.today ? ' cal-today' : '') + (overloaded.has(day) ? ' cal-overloaded' : '');
+      const warning = overloaded.has(day) ? `<span class="visually-hidden">${overbelastning.dagOverKapasitet}</span>` : '';
+      const label = `<span class="cal-weekday">${formatShortWeekday(day)}</span><span class="cal-date">${Number(day.slice(8))}</span>${warning}`;
       return mode === 'week'
         ? `<button type="button" class="cal-head-day${today}" data-action="calendar-open-day" data-date="${day}"
              aria-label="${t.apneDag(formatLongDate(day))}">${label}</button>`
@@ -115,7 +118,8 @@ export function renderCalendar(state) {
     .map((day) => {
       const dayItems = layoutDay(items.filter((item) => item.date === day));
       return `
-        <div class="cal-day${day === state.ui.today ? ' cal-today' : ''}" role="group" aria-label="${formatLongDate(day)}">
+        <div class="cal-day${day === state.ui.today ? ' cal-today' : ''}${overloaded.has(day) ? ' cal-overloaded' : ''}" role="group"
+          aria-label="${formatLongDate(day)}${overloaded.has(day) ? `, ${overbelastning.dagOverKapasitet.toLowerCase()}` : ''}">
           ${dayItems.map((item) => blockHtml(item, range, courseById, taskById)).join('')}
         </div>`;
     })
