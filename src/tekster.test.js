@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { formatHours, hoperSegOpp, feilmeldinger } from './tekster.js';
+import { formatHours, hoperSegOpp, feilmeldinger, estimat } from './tekster.js';
+import { estimateHours, TASK_TYPES } from './logic/estimate.js';
 
 describe('hoperSegOpp.tekst', () => {
   it('fyller inn antall timer og dag', () => {
@@ -26,6 +27,27 @@ describe('formatHours', () => {
 
   it('runder til én desimal', () => {
     expect(formatHours(1.25)).toBe('1,3 timer');
+  });
+});
+
+describe('estimat.begrunnelse', () => {
+  it('har tekst for alle begrunnelser estimatet kan gi', () => {
+    const result = estimateHours(
+      'Gruppen skal skrive en rapport på 2 000 ord med minst 4 kilder, og presentere den. ' + 'Les nøye. '.repeat(160),
+    );
+    const texts = result.reasons.map((reason) => estimat.begrunnelse[reason.code](reason));
+    expect(texts).toEqual([
+      // Intl bruker hardt mellomrom (U+00A0) som tusenskille på norsk
+      '2 000 ord å skrive: 10 timer',
+      '4 kilder: + 2 timer',
+      'Presentasjon: + 3 timer',
+      'Gruppearbeid og koordinering: + 1 time',
+      'Lang oppgavetekst å sette seg inn i: + 1 time',
+    ]);
+  });
+
+  it('har navn på alle oppgavetyper', () => {
+    for (const { type } of TASK_TYPES) expect(estimat.typer[type]).toBeTruthy();
   });
 });
 

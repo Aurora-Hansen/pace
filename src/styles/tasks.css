@@ -123,6 +123,37 @@
   gap: var(--space-3);
 }
 
+/* Tidsestimat i oppgaveskjemaet */
+.estimate-panel {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-small);
+  background: var(--color-bg);
+}
+
+.estimate-panel.has-estimate {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-surface));
+  background: var(--color-primary-soft);
+}
+
+.estimate-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+.estimate-panel .field-help {
+  margin: var(--space-1) 0 var(--space-3);
+}
+
+.estimate-reasons {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-6);
+  font-size: 0.875rem;
+}
+
 /* Varsel når arbeid hoper seg opp */
 .overload h3 {
   margin-bottom: var(--space-1);

@@ -1,5 +1,13 @@
 // Visning: oppgaver og to-do-liste (steg 4.2, 4.3 og 4.5)
-import { oppgaver as t, knapper, fasteAktiviteter, tommeTilstander, overbelastning } from '../tekster.js';
+import {
+  oppgaver as t,
+  knapper,
+  fasteAktiviteter,
+  tommeTilstander,
+  overbelastning,
+  estimat,
+  hjelpetekster,
+} from '../tekster.js';
 import { STATUS } from '../logic/models.js';
 import { groupTasks, daysUntil } from '../logic/todo.js';
 import { progressPercent } from '../logic/progress.js';
@@ -8,6 +16,36 @@ import { formatDeadline, formatHoursShort } from './format.js';
 import { renderOverloadWarnings } from './overload.js';
 import emptyTasksUrl from '../../assets/empty-tasks.png';
 import allDoneUrl from '../../assets/all-done.png';
+
+// --- Tidsestimat i oppgaveskjemaet (steg 6.4) ---
+
+function estimatePanel(estimate) {
+  const suggestButton = `<button class="btn btn-secondary btn-small" type="submit" name="intent" value="estimate">${knapper.foreslaTidsbruk}</button>`;
+
+  if (!estimate) {
+    const empty = tommeTilstander.tidsestimat;
+    return `
+      <div class="estimate-panel" id="estimate-panel">
+        <p class="estimate-title">${empty.overskrift}</p>
+        <p class="field-help">${empty.tekst}</p>
+        ${suggestButton}
+      </div>`;
+  }
+
+  const reasons = estimate.reasons
+    .map((reason) => `<li>${escapeHtml(estimat.begrunnelse[reason.code](reason))}</li>`)
+    .join('');
+  return `
+    <div class="estimate-panel has-estimate" id="estimate-panel" role="status">
+      <p class="estimate-title">${estimat.forslag(estimate.hours)}</p>
+      <ul class="estimate-reasons">${reasons}</ul>
+      <p class="field-help">${hjelpetekster.tidsestimat}</p>
+      <div class="row-actions">
+        <button class="btn btn-accent btn-small" type="submit" name="intent" value="use-estimate">${estimat.brukForslaget}</button>
+        ${suggestButton}
+      </div>
+    </div>`;
+}
 
 // --- Skjema for ny eller endret oppgave ---
 
@@ -24,6 +62,8 @@ function taskForm(state) {
   return `
     <section class="card" aria-labelledby="task-form-title">
       <form data-form="task" novalidate>
+        <!-- Enter i et felt bruker første submit-knapp i skjemaet, og det skal være «Lagre» -->
+        <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true">${knapper.lagre}</button>
         <h2 id="task-form-title">${editing ? t.rediger : t.ny}</h2>
         ${editing ? `<input type="hidden" name="id" value="${escapeHtml(values.id)}">` : ''}
         ${formErrorSummary(errors)}
@@ -45,8 +85,11 @@ function taskForm(state) {
 
         <div class="form-field">
           <label for="task-description">${t.beskrivelse}</label>
-          <textarea id="task-description" name="description" rows="3">${escapeHtml(values.description)}</textarea>
+          <textarea id="task-description" name="description" rows="4"
+            aria-describedby="estimate-panel"${invalidAttrs(errors, 'description')}>${escapeHtml(values.description)}</textarea>
         </div>
+
+        ${estimatePanel(state.ui.forms.task.estimate)}
 
         <div class="form-row">
           <div class="form-field">

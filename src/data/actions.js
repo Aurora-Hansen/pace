@@ -25,6 +25,7 @@ import { addDays, isValidDateKey, toDateKey } from '../logic/dates.js';
 import { replan, rollover } from '../logic/rollover.js';
 import { completeSession, uncompleteSession } from '../logic/today.js';
 import { detectOverload } from '../logic/overload.js';
+import { estimateHours } from '../logic/estimate.js';
 
 export const VIEWS = ['idag', 'kalender', 'oppgaver', 'timeplan', 'innstillinger'];
 
@@ -232,7 +233,8 @@ export const openTaskFromToday = () => (state) => openTaskForm()(showView({ view
 export const cancelTaskForm = () => (state) => ({ ...state, ui: withoutForm(state.ui, 'task') });
 
 // Ny oppgave når `values.id` er tom, ellers endring. `now` brukes for opprettet-tid og fristsjekk.
-export const submitTask = (values, newId, now) => (state) => {
+export const submitTask = (rawValues, newId, now) => (state) => {
+  const values = formValues(rawValues);
   const existing = values.id ? state.data.tasks.find((t) => t.id === values.id) : null;
   const task = existing ? updateTaskFromInput(existing, values) : taskFromInput(values, { id: newId, now });
 
@@ -245,6 +247,27 @@ export const submitTask = (values, newId, now) => (state) => {
 
   const tasks = existing ? replaceById(state.data.tasks, task) : [...state.data.tasks, task];
   return saveAndCloseForm(state, { tasks }, 'task');
+};
+
+// «Foreslå tidsbruk» i oppgaveskjemaet: estimat fra beskrivelsen (steg 6.4).
+// Skjemaverdiene beholdes, så ingenting av det brukeren har skrevet forsvinner.
+const formValues = ({ intent: _intent, ...values }) => values;
+
+export const suggestEstimate = (values) => (state) => {
+  const result = estimateHours(values.description);
+  const clean = formValues(values);
+  if (result.error) {
+    return withForm(state, 'task', { values: clean, errors: [{ code: result.error, field: 'description' }] });
+  }
+  return withForm(state, 'task', { values: clean, errors: [], estimate: result });
+};
+
+// «Bruk forslaget»: fyller inn estimatet, som brukeren fortsatt kan justere
+export const useEstimate = (values) => (state) => {
+  const estimate = state.ui.forms.task?.estimate;
+  if (!estimate) return state;
+  const filled = { ...formValues(values), estimated_hours: numberToInput(estimate.hours) };
+  return withForm(state, 'task', { values: filled, errors: [], estimate });
 };
 
 export const openProgressForm = ({ id }) => (state) => {

@@ -37,7 +37,12 @@ const formActions = {
   settings: (values) => actions.submitSettings(values),
   course: (values) => actions.submitCourse(values, newId()),
   fixedBlock: (values) => actions.submitFixedBlock(values, newId()),
-  task: (values) => actions.submitTask(values, newId(), now()),
+  // Oppgaveskjemaet har tre knapper: lagre, «Foreslå tidsbruk» og «Bruk forslaget»
+  task: (values) => {
+    if (values.intent === 'estimate') return actions.suggestEstimate(values);
+    if (values.intent === 'use-estimate') return actions.useEstimate(values);
+    return actions.submitTask(values, newId(), now());
+  },
   progress: (values) => actions.submitProgress(values),
   adjust: (values) => actions.submitAdjust(values, now()),
 };
@@ -80,7 +85,9 @@ root.addEventListener('submit', (event) => {
   const action = formActions[event.target.dataset.form];
   if (!action) return;
   event.preventDefault();
-  store.update(actions.withReplan(action(Object.fromEntries(new FormData(event.target))), now()));
+  // `submitter` tar med navnet på knappen som ble trykket (f.eks. intent=estimate)
+  const values = Object.fromEntries(new FormData(event.target, event.submitter));
+  store.update(actions.withReplan(action(values), now()));
 });
 
 root.addEventListener('click', (event) => {

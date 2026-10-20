@@ -93,6 +93,11 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 45. **{antall} og {dag} i varselet:** {dag} er den siste dagen oppgaven har økter før fristen (fristdagen hvis den ikke har noen), skrevet som «i dag», «i morgen», «på torsdag» eller full dato. {antall} er timene som allerede ligger den dagen pluss det som mangler.
 46. **Overbelastning regnes ut sammen med planen** (`withReplan` og `startDay`) og ligger i `ui.overload`, så render ikke trenger «nå». Dager over kapasitet markeres med rød dato og rødlig kolonne i kalenderen. Oppgaver i fare får merkelappen «Frist i fare» i to-do-listen. Varselet vises øverst i «I dag» og «Oppgaver».
 47. **«Juster arbeidsmengde»** åpner et skjema i varselet med daglig kapasitet, estimat og frist (krav.md del 5: øke kapasitet, redusere omfang, flytte frist).
+48. **Tidsestimat (6.3):**
+    - `estimateHours(tekst)` gir `{ hours, reasons }`, der `reasons` er koder med tall (f.eks. `{ code: 'ORD', words: 2000, hours: 10 }`). Teksten til hver kode ligger i `tekster.js` (`estimat.begrunnelse`). Tom tekst gir `{ error: 'TOMT_ESTIMAT' }`.
+    - Reglene: 1 time per 200 ord, 400 ord per side, grunntid per oppgavetype når lengde mangler (programmering 10 t legges alltid til), +0,5 t per kilde (maks 5 t, +2 t uten tall), +3 t presentasjon, +1 t gruppearbeid, +1–2 t for lang oppgavetekst. Rundes til nærmeste halve time og er minst 1 time.
+    - Alle tallene står som konstanter øverst i `logic/estimate.js`, så de er lette å justere.
+49. **«Foreslå tidsbruk» (6.4)** bruker beskrivelsesfeltet i oppgaveskjemaet. Knappene «Foreslå tidsbruk» og «Bruk forslaget» er egne submit-knapper (`name="intent"`), så skjemaverdiene ikke forsvinner. En skjult «Lagre»-knapp står først i skjemaet, så Enter i et felt lagrer.
 
 ---
 
@@ -174,9 +179,9 @@ Planleggeren trengs allerede i «Må ha», fordi forskyvning av økter forutsett
 - [x] **6.1 Overbelastning** (`logic/overload.js`). `detectOverload(data, nå)` returnerer oppgaver i fare med `{ taskId, dag, timerNødvendig }` og dager over kapasitet.
   *Tester:* ingen overbelastning, én oppgave i fare og flere oppgaver som konkurrerer.
 - [x] **6.2 Varsel og rød markering.** Varselet «Her hoper det seg opp» med `{antall}` og `{dag}` utfylt, og knappene «Fordel på nytt» og «Behold planen» (antakelse 7). Dager over kapasitet blir røde (#EF4444) i kalenderen. «Juster arbeidsmengde» åpner kapasitet, estimat og frist.
-- [ ] **6.3 Tidsestimat** (`logic/estimate.js`). `estimateHours(tekst)` returnerer `{ timer, begrunnelser[] }`. Den er regelbasert og ser på antall ord og sider, krav til kilder, oppgavetype (essay, rapport, presentasjon, programmering, lab), gruppearbeid og lengden på selve teksten.
+- [x] **6.3 Tidsestimat** (`logic/estimate.js`). `estimateHours(tekst)` returnerer `{ hours, reasons }`. Den er regelbasert og ser på antall ord og sider, krav til kilder, oppgavetype (essay, rapport, presentasjon, programmering, lab), gruppearbeid og lengden på selve teksten.
   *Tester:* minst seks eksempeltekster, tom tekst som gir feil, og at resultatet alltid er rundet og større enn 0.
-- [ ] **6.4 «Foreslå tidsbruk» i oppgaveskjemaet.** Tom tilstand og feilen «Vi trenger litt tekst». Forslaget vises med begrunnelser og hjelpetekst og kan godtas eller justeres.
+- [x] **6.4 «Foreslå tidsbruk» i oppgaveskjemaet.** Tom tilstand og feilen «Vi trenger litt tekst». Forslaget vises med begrunnelser og hjelpetekst og kan godtas eller justeres.
 
 ## Fase 7 – Landingsside og ferdigstilling
 

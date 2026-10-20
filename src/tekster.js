@@ -218,6 +218,31 @@ export const hoperSegOpp = {
   },
 };
 
+// Tidsestimat (steg 6.4). Hjelpeteksten og tom tilstand står i innhold.md, resten er nytt.
+const timer = (antall) => formatHours(antall);
+export const estimat = {
+  forslag: (antall) => `Forslag: ${formatHours(antall)}`,
+  brukForslaget: 'Bruk forslaget',
+  typer: {
+    programmering: 'Programmering',
+    labrapport: 'Labrapport',
+    rapport: 'Rapport',
+    essay: 'Essay eller drøfting',
+    refleksjon: 'Refleksjonsnotat',
+  },
+  begrunnelse: {
+    ORD: ({ words, hours }) => `${tall.format(words)} ord å skrive: ${timer(hours)}`,
+    SIDER: ({ pages, hours }) => `${tall.format(pages)} sider å skrive: ${timer(hours)}`,
+    TYPE: ({ type, hours }) => `${estimat.typer[type]}: ${timer(hours)}`,
+    STANDARD: ({ hours }) => `Vanlig innlevering: ${timer(hours)}`,
+    KILDER: ({ sources, hours }) => `${tall.format(sources)} kilder: + ${timer(hours)}`,
+    KILDER_UTEN_TALL: ({ hours }) => `Krav til kilder: + ${timer(hours)}`,
+    PRESENTASJON: ({ hours }) => `Presentasjon: + ${timer(hours)}`,
+    GRUPPE: ({ hours }) => `Gruppearbeid og koordinering: + ${timer(hours)}`,
+    LANG_TEKST: ({ hours }) => `Lang oppgavetekst å sette seg inn i: + ${timer(hours)}`,
+  },
+};
+
 // Ikke fra innhold.md – tillegg til varselet (steg 6.2)
 export const overbelastning = {
   oppgave: (tittel, frist) => `${tittel} · frist ${frist}`,

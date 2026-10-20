@@ -39,6 +39,8 @@ import {
   openAdjustForm,
   cancelAdjustForm,
   submitAdjust,
+  suggestEstimate,
+  useEstimate,
 } from './actions.js';
 import { createInitialState, RECURRENCE } from '../logic/models.js';
 import { load, save } from './storage.js';
@@ -329,6 +331,34 @@ describe('oppgaver', () => {
     const state = openTaskFromToday()(initial());
     expect(state.ui.view).toBe('oppgaver');
     expect(state.ui.forms.task).toEqual({ values: {}, errors: [] });
+  });
+
+  it('«Foreslå tidsbruk» gir forslag fra beskrivelsen og beholder skjemaverdiene', () => {
+    const typed = { ...values, estimated_hours: '', description: 'Essay på 1000 ord.', intent: 'estimate' };
+    const state = run(initial(), openTaskForm(), suggestEstimate(typed));
+    expect(state.ui.forms.task.estimate.hours).toBe(5);
+    expect(state.ui.forms.task.values).toEqual({ ...values, estimated_hours: '', description: 'Essay på 1000 ord.' });
+    expect(state.data.tasks).toEqual([]);
+  });
+
+  it('«Foreslå tidsbruk» uten beskrivelse viser «Vi trenger litt tekst»', () => {
+    const state = suggestEstimate({ ...values, description: ' ' })(initial());
+    expect(state.ui.forms.task.errors).toEqual([{ code: 'TOMT_ESTIMAT', field: 'description' }]);
+  });
+
+  it('«Bruk forslaget» fyller inn estimatet, som kan justeres før lagring', () => {
+    const typed = { ...values, estimated_hours: '', description: 'Essay på 1000 ord.' };
+    const suggested = run(initial(), openTaskForm(), suggestEstimate(typed));
+    const used = useEstimate(typed)(suggested);
+    expect(used.ui.forms.task.values.estimated_hours).toBe('5');
+    const saved = submitTask({ ...used.ui.forms.task.values, estimated_hours: '6,5' }, 't1', now)(used);
+    expect(saved.data.tasks[0].estimated_hours).toBe(6.5);
+    expect(saved.ui.forms.task).toBeUndefined();
+  });
+
+  it('«Bruk forslaget» gjør ingenting uten forslag', () => {
+    const state = run(initial(), openTaskForm());
+    expect(useEstimate(values)(state)).toBe(state);
   });
 
   it('avbryt lukker skjemaene', () => {
