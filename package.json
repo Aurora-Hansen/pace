@@ -1,0 +1,23 @@
+{
+  "name": "pace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Oblig 2, Innføring i generativ KI. Planlegger for studieprogresjon.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aurora-Hansen/pace.git"
+  },
+  "homepage": "https://github.com/Aurora-Hansen/pace#readme",
+  "devDependencies": {
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  }
+}

@@ -1,0 +1,7 @@
+# Netlify-oppsett: bygg med Vite og publiser dist/
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"

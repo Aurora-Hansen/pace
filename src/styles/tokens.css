@@ -1,0 +1,37 @@
+/* Designtokens fra docs/design.md. Bruk alltid disse variablene, ikke hex-koder direkte. */
+:root {
+  /* Farger fra design.md */
+  --color-primary: #2E5B88;   /* Dyp Harmoniblå */
+  --color-accent: #FF8C61;    /* Varmerød / Korall */
+  --color-bg: #F8FAFC;        /* Kritthvit */
+  --color-surface: #FFFFFF;   /* Ren hvit – kort og kalender */
+  --color-text: #1E293B;      /* Mørk skifergrå */
+  --color-warning: #EF4444;   /* Myk rød – bare overbelastning og frister i fare */
+
+  /* Avledede nyanser (blandet fra fargene over) */
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 85%, black);
+  --color-accent-hover: color-mix(in srgb, var(--color-accent) 88%, black);
+  --color-primary-soft: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+  --color-warning-soft: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface));
+  --color-text-muted: color-mix(in srgb, var(--color-text) 72%, var(--color-surface));
+  --color-border: color-mix(in srgb, var(--color-text) 14%, var(--color-surface));
+
+  /* Tekst på farget bakgrunn. Hvit på korall har for lav kontrast, så aksentknapper får mørk tekst. */
+  --color-on-primary: var(--color-surface);
+  --color-on-accent: var(--color-text);
+
+  /* Fonter */
+  --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Mål */
+  --radius: 0.75rem;
+  --radius-small: 0.5rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --shadow-card: 0 1px 2px rgb(30 41 59 / 0.06), 0 2px 8px rgb(30 41 59 / 0.06);
+}

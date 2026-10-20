@@ -46,16 +46,19 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 5. **To-do-kategorier:** *Aktive* er påbegynt eller har frist innen 7 dager. *Kommende* har senere frist. *Fullførte* har `status = completed`.
 6. **Uken starter mandag.** Datoer vises på norsk format.
 7. **Overbelastning:** Planleggeren holder seg først innenfor daglig kapasitet. Timer som ikke får plass, gir et varsel. «Fordel på nytt» plasserer resten i ledig tid uten kapasitetsgrense, og de dagene markeres røde. «Behold planen» lukker varselet.
+8. **Kontrast:** Hvit tekst på korall (#FF8C61) har for lav kontrast, så aksentknapper får mørk tekst (#1E293B). Rød (#EF4444) brukes som kant og markering, ikke som bakgrunn bak tekst.
+9. **Stilark lenkes uten `media="screen"`**, fordi Vite da ikke bygger CSS-en riktig.
+10. **Feilkoder:** I tillegg til kodene fra 1.2 finnes `LAGRING_FEILET` og `TOMT_ESTIMAT`. Nøklene i `feilmeldinger` i `tekster.js` er disse kodene.
 
 ---
 
 ## Fase 0 – Oppsett
 
-- [ ] **0.1 Prosjektoppsett.** `npm init`, Vite, Vitest, `.gitignore` (`node_modules`, `dist`), skriptene `dev`, `build`, `preview` og `test`. `vite.config.js` med `index.html` og `app.html`.
+- [x] **0.1 Prosjektoppsett.** `npm init`, Vite, Vitest, `.gitignore` (`node_modules`, `dist`), skriptene `dev`, `build`, `preview` og `test`. `vite.config.js` med `index.html` og `app.html`.
   *Ferdig når:* `npm run dev` viser begge sidene, og `npm test` kjører en eksempeltest som går grønt.
-- [ ] **0.2 Designgrunnlag.** `tokens.css` med fargene fra design.md som CSS-variabler, Plus Jakarta Sans (600/700) og Inter (400/500) fra Google Fonts, grunnstiler, og logo som favicon.
+- [x] **0.2 Designgrunnlag.** `tokens.css` med fargene fra design.md som CSS-variabler, Plus Jakarta Sans (600/700) og Inter (400/500) fra Google Fonts, grunnstiler, og logo som favicon.
   *Ferdig når:* En testside viser overskrift, brødtekst og knapper (primær/aksent) i riktige farger og fonter.
-- [ ] **0.3 Tekster.** `src/tekster.js` med alle tekstene fra innhold.md: knapper, tomme tilstander, varsel, feilmeldinger og hjelpetekster. Varselteksten er en funksjon med `{antall}` og `{dag}`.
+- [x] **0.3 Tekster.** `src/tekster.js` med alle tekstene fra innhold.md: knapper, tomme tilstander, varsel, feilmeldinger og hjelpetekster. Varselteksten er en funksjon med `{antall}` og `{dag}`.
   *Ferdig når:* En test sjekker at varselteksten fylles ut riktig.
 - [ ] **0.4 Første publisering.** Koble repoet til Netlify eller Vercel med byggkommando `npm run build` og mappe `dist`.
   *Ferdig når:* Den tomme appen ligger ute på en offentlig URL.

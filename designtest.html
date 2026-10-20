@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pace – designtest</title>
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
+  <link href="/src/styles/main.css" rel="stylesheet">
+  <style>
+    main { max-width: 52rem; margin: 0 auto; padding: var(--space-8) var(--space-4); }
+    section { margin-bottom: var(--space-8); }
+    .row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+    .swatch { width: 9rem; }
+    .swatch div { height: 3.5rem; border-radius: var(--radius-small); border: 1px solid var(--color-border); }
+    .swatch code { font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <!-- Testside for designgrunnlaget (steg 0.2). Bare for utviklingsserveren – bygges ikke til dist/. -->
+  <main>
+    <section>
+      <h1>Studiehverdagen, i ditt tempo.</h1>
+      <p>Pace fordeler arbeidskravene dine rundt forelesningene automatisk. Blir du forsinket, tilpasser planen seg – uten pekefingre eller stress.</p>
+      <p class="muted">Dempet tekst: Estimatet er et forslag basert på omfanget av oppgaven. Du kan alltid justere det.</p>
+      <h2>Overskrift nivå 2</h2>
+      <h3>Overskrift nivå 3</h3>
+    </section>
+
+    <section>
+      <h2>Knapper</h2>
+      <div class="row">
+        <button class="btn btn-accent" type="button">+ Ny oppgave</button>
+        <button class="btn btn-primary" type="button">Lagre</button>
+        <button class="btn btn-secondary" type="button">Avbryt</button>
+        <button class="btn btn-primary" type="button" disabled>Deaktivert</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Farger</h2>
+      <div class="row">
+        <div class="swatch"><div style="background: var(--color-primary)"></div><code>--color-primary</code></div>
+        <div class="swatch"><div style="background: var(--color-accent)"></div><code>--color-accent</code></div>
+        <div class="swatch"><div style="background: var(--color-bg)"></div><code>--color-bg</code></div>
+        <div class="swatch"><div style="background: var(--color-surface)"></div><code>--color-surface</code></div>
+        <div class="swatch"><div style="background: var(--color-text)"></div><code>--color-text</code></div>
+        <div class="swatch"><div style="background: var(--color-warning)"></div><code>--color-warning</code></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Kort, varsel og skjema</h2>
+      <div class="card">
+        <h3>ITF10619 Programmering 2</h3>
+        <p class="muted">Frist: torsdag 5. november</p>
+        <label for="kapasitet">Daglig studiekapasitet</label>
+        <input id="kapasitet" type="number" value="4">
+      </div>
+      <p></p>
+      <div class="alert-warning">
+        <h4>Her hoper det seg opp</h4>
+        <p>For å rekke fristen må du jobbe <strong>6 timer</strong> i morgen. Det er mer enn dagskapasiteten din. Vil du fordele arbeidet annerledes?</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
