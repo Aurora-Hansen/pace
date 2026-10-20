@@ -31,7 +31,14 @@ describe('formatHours', () => {
 
 describe('feilmeldinger', () => {
   it('har overskrift og tekst for alle feilkoder', () => {
-    const koder = ['LAGRING_FEILET', 'FRIST_I_FORTIDEN', 'TOMT_ESTIMAT', 'MANGLER_FELT', 'SLUTT_FOR_START'];
+    const koder = [
+      'LAGRING_FEILET',
+      'LESING_FEILET',
+      'FRIST_I_FORTIDEN',
+      'TOMT_ESTIMAT',
+      'MANGLER_FELT',
+      'SLUTT_FOR_START',
+    ];
     for (const kode of koder) {
       expect(feilmeldinger[kode].overskrift).toBeTruthy();
       expect(feilmeldinger[kode].tekst).toBeTruthy();

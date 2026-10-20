@@ -42,6 +42,23 @@ export const knapper = {
   justerArbeidsmengde: 'Juster arbeidsmengde',
   lagre: 'Lagre',
   avbryt: 'Avbryt',
+  // Ikke fra innhold.md
+  lukk: 'Lukk',
+};
+
+// Ikke fra innhold.md – lagt til i steg 1.4
+export const innstillinger = {
+  overskrift: 'Innstillinger',
+  navn: 'Navn (valgfritt)',
+  dagligKapasitet: 'Daglig studiekapasitet (timer)',
+  studietidFra: 'Studietid fra',
+  studietidTil: 'Studietid til',
+  studievindu: 'Pace legger arbeidsøkter bare innenfor dette tidsrommet.',
+};
+
+// Bekreftelser etter vellykkede handlinger. Ikke fra innhold.md.
+export const bekreftelser = {
+  INNSTILLINGER_LAGRET: 'Innstillingene er lagret.',
 };
 
 export const tommeTilstander = {
@@ -108,6 +125,11 @@ export const feilmeldinger = {
   SLUTT_FOR_START: {
     overskrift: 'Sjekk klokkeslettet',
     tekst: 'Sluttid må være etter starttid.',
+  },
+  // Ikke fra innhold.md – lagrede data som ikke kan leses (steg 1.3)
+  LESING_FEILET: {
+    overskrift: 'Vi kunne ikke lese planen din',
+    tekst: 'De lagrede dataene var skadet, så Pace startet med en tom plan. En kopi av de gamle dataene er tatt vare på i nettleseren.',
   },
 };
 

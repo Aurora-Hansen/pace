@@ -48,7 +48,12 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 7. **Overbelastning:** Planleggeren holder seg først innenfor daglig kapasitet. Timer som ikke får plass, gir et varsel. «Fordel på nytt» plasserer resten i ledig tid uten kapasitetsgrense, og de dagene markeres røde. «Behold planen» lukker varselet.
 8. **Kontrast:** Hvit tekst på korall (#FF8C61) har for lav kontrast, så aksentknapper får mørk tekst (#1E293B). Rød (#EF4444) brukes som kant og markering, ikke som bakgrunn bak tekst.
 9. **Stilark lenkes uten `media="screen"`**, fordi Vite da ikke bygger CSS-en riktig.
-10. **Feilkoder:** I tillegg til kodene fra 1.2 finnes `LAGRING_FEILET` og `TOMT_ESTIMAT`. Nøklene i `feilmeldinger` i `tekster.js` er disse kodene.
+10. **Feilkoder:** I tillegg til kodene fra 1.2 finnes `LAGRING_FEILET`, `LESING_FEILET` og `TOMT_ESTIMAT`. Nøklene i `feilmeldinger` i `tekster.js` er disse kodene. Validering returnerer en liste `{ code, field }`, og skjemaet viser én melding øverst (manglende felt først) og markerer feltene.
+11. **Tidspunkter lagres som ISO-strenger i UTC** (`toISOString()`). All dagslogikk regner i lokal tid via datonøkler `YYYY-MM-DD` i `logic/dates.js`. Testene kjører i tidssonen Europe/Oslo.
+12. **Tilstanden er `{ data, ui }`.** `data` er det som lagres (datamodellen). `ui` er midlertidig: åpne skjema med verdier og feil, bekreftelser og feil for hele appen. Endringer ligger i `data/actions.js` som funksjoner `(...) → state → nyState` og testes der.
+13. **Korrupte lagrede data** kopieres til `pace:v1:backup`, appen starter tom og viser `LESING_FEILET`.
+14. **Rød brukes også til skjemafeil** (kant og markering), i tillegg til overbelastning.
+15. **Tekster som ikke står i innhold.md** er merket med en kommentar i `tekster.js` (innstillinger, «Lukk», bekreftelser, `LESING_FEILET`).
 
 ---
 
@@ -65,15 +70,15 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 
 ## Fase 1 – Datagrunnlag
 
-- [ ] **1.1 Dato-hjelpere** (`logic/dates.js`). Lokal dato som `YYYY-MM-DD`, minutter siden midnatt, `addDays`, `startOfWeek` (mandag), ukedag, og overlapp mellom tidsrom.
+- [x] **1.1 Dato-hjelpere** (`logic/dates.js`). Lokal dato som `YYYY-MM-DD`, minutter siden midnatt, `addDays`, `startOfWeek` (mandag), ukedag, og overlapp mellom tidsrom.
   *Tester:* månedsskifte, årsskifte, og sommertid slutt 25.10.2026.
-- [ ] **1.2 Modeller og validering** (`logic/models.js`, `logic/validation.js`). Funksjonene `createCourse`, `createTask` og `createFixedBlock` lager objekter med feltene fra krav.md del 4 og standardverdier. Valideringen returnerer feilkoder: `MANGLER_FELT`, `FRIST_I_FORTIDEN`, `SLUTT_FOR_START`.
+- [x] **1.2 Modeller og validering** (`logic/models.js`, `logic/validation.js`). Funksjonene `createCourse`, `createTask` og `createFixedBlock` lager objekter med feltene fra krav.md del 4 og standardverdier. Valideringen returnerer feilkoder: `MANGLER_FELT`, `FRIST_I_FORTIDEN`, `SLUTT_FOR_START`.
   *Tester:* gyldige og ugyldige objekter, og frist sammenlignet med en innsendt «nå».
-- [ ] **1.3 Lagring** (`data/storage.js`). `load()` og `save(state)` med versjonsnummer. Lagringen skal tåle korrupt eller manglende data. Feil ved lagring vises som «Endringene ble ikke lagret».
+- [x] **1.3 Lagring** (`data/storage.js`). `load()` og `save(state)` med versjonsnummer. Lagringen skal tåle korrupt eller manglende data. Feil ved lagring vises som «Endringene ble ikke lagret».
   *Tester:* med en falsk `localStorage` i minnet, både lagre/hente på nytt, korrupt JSON og en `setItem` som kaster feil.
-- [ ] **1.4 Innstillinger.** Skjema for navn (valgfritt), daglig studiekapasitet med hjelpetekst og studievindu.
+- [x] **1.4 Innstillinger.** Skjema for navn (valgfritt), daglig studiekapasitet med hjelpetekst og studievindu.
   *Ferdig når:* Verdiene er lagret etter at siden lastes inn på nytt.
-- [ ] **1.5 Store og felles render** (`data/store.js`, `ui/render.js`). Hele tilstanden ligger i `store.js`. Den endres bare via `update(endring)`, der `endring` er en ren funksjon `state → nyState`. Etter hver endring lagrer store via `storage.js` og kaller den felles funksjonen `render(state)` én gang. `render` tegner alle visningene. Senere UI-steg legger visningene sine inn i `render` og oppdaterer aldri DOM direkte fra hendelser.
+- [x] **1.5 Store og felles render** (`data/store.js`, `ui/render.js`). Hele tilstanden ligger i `store.js`. Den endres bare via `update(endring)`, der `endring` er en ren funksjon `state → nyState`. Etter hver endring lagrer store via `storage.js` og kaller den felles funksjonen `render(state)` én gang. `render` tegner alle visningene. Senere UI-steg legger visningene sine inn i `render` og oppdaterer aldri DOM direkte fra hendelser.
   *Tester:* `update` kaller `render` nøyaktig én gang med ny tilstand, lagrer, og endrer ikke den gamle tilstanden. Testene bruker falsk lagring og en falsk render-funksjon.
 
 ## Fase 2 – Emner og faste aktiviteter (Må ha · F1)

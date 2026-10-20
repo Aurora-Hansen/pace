@@ -29,7 +29,7 @@ Prosjektet bruker vanilla JavaScript (ES-moduler), Vite og Vitest. Det publisere
 ### Design
 - Følg `docs/design.md`. Bruk fargene via CSS-variablene i `src/styles/tokens.css`, ikke hex-koder direkte i komponentene.
 - Bruk Plus Jakarta Sans (600/700) for overskrifter og Inter (400/500) for brødtekst og UI.
-- Advarselsfargen (#EF4444) brukes bare til overbelastning og frister i fare.
+- Advarselsfargen (#EF4444) brukes bare til overbelastning, frister i fare og skjemafeil.
 
 ### Tekst
 - All tekst i grensesnittet er på norsk bokmål, og alle sider har `lang="nb"`.
