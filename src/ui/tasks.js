@@ -14,6 +14,7 @@ import { progressPercent } from '../logic/progress.js';
 import { escapeHtml, formErrorSummary, invalidAttrs } from './html.js';
 import { formatDeadline, formatHoursShort } from './format.js';
 import { renderOverloadWarnings } from './overload.js';
+import { sampleDataButton } from './sample.js';
 import emptyTasksUrl from '../images/empty-tasks.webp';
 import allDoneUrl from '../images/all-done.webp';
 
@@ -250,7 +251,10 @@ export function renderTasks(state) {
             <img src="${emptyTasksUrl}" alt="" width="160" height="160">
             <h3>${empty.overskrift}</h3>
             <p>${empty.tekst}</p>
-            <button class="btn btn-accent" type="button" data-action="open-task">${empty.knapp}</button>
+            <div class="empty-actions">
+              <button class="btn btn-accent" type="button" data-action="open-task">${empty.knapp}</button>
+              ${sampleDataButton(state)}
+            </div>
           </div>
         </section>`}`;
   }

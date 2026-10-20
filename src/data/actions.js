@@ -11,6 +11,7 @@ import {
   updateTaskFromInput,
   taskToInput,
   deadlineFromInput,
+  createInitialState,
 } from '../logic/models.js';
 import {
   ERRORS,
@@ -26,6 +27,7 @@ import { replan, rollover } from '../logic/rollover.js';
 import { completeSession, uncompleteSession } from '../logic/today.js';
 import { detectOverload } from '../logic/overload.js';
 import { estimateHours } from '../logic/estimate.js';
+import { createSampleData } from '../logic/sample.js';
 
 export const VIEWS = ['idag', 'kalender', 'oppgaver', 'timeplan', 'innstillinger'];
 
@@ -352,6 +354,41 @@ export const submitAdjust = (values, now) => (state) => {
     ui: withoutForm(state.ui, 'adjust'),
   };
 };
+
+// --- Eksempeldata og sletting av alle data ---
+
+const hasData = (data) => data.courses.length > 0 || data.tasks.length > 0 || data.blocks.length > 0;
+
+// Ny start for ui: «I dag», ingen åpne skjema og en bekreftelse
+const freshUi = (state, notice) => ({
+  ...state.ui,
+  view: 'idag',
+  calendar: { ...state.ui.calendar, date: state.ui.today },
+  forms: {},
+  confirm: null,
+  dismissedOverload: [],
+  notice,
+});
+
+// Legger inn eksempeldata og kjører daglig sjekk, så gårsdagens uferdige økt flyttes med en gang
+export const loadSampleData = (now) => (state) => {
+  const data = rollover(createSampleData(state.data.user, now), now);
+  return withOverload({ data, ui: freshUi(state, 'EKSEMPELDATA_LAGT_INN') }, now);
+};
+
+// «Prøv med eksempeldata»: spør først hvis det finnes data som blir erstattet
+export const requestSampleData = (now) => (state) =>
+  hasData(state.data) ? withUi(state, { confirm: { kind: 'sample' } }) : loadSampleData(now)(state);
+
+export const askClearAll = () => (state) => withUi(state, { confirm: { kind: 'reset' } });
+
+// Sletter alle data. Bruker-id beholdes, alt annet (også innstillinger) settes tilbake til start.
+export const clearAllData = () => (state) => ({
+  data: createInitialState({ userId: state.data.user.id }),
+  ui: { ...freshUi(state, 'DATA_SLETTET'), overload: { atRisk: [], overloadedDays: [] } },
+});
+
+export const dismissNotice = () => (state) => withUi(state, { notice: null });
 
 // --- Sletting med bekreftelse ---
 

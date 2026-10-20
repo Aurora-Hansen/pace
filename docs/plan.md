@@ -103,6 +103,13 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 52. **Kontrast (7.2):** Rød tekst og hvit tekst på rødt har for lav kontrast (3,8:1). «Fristen har gått ut» er derfor mørk tekst med rød prikk, og dager over kapasitet får rød ring i stedet for rød fylling.
 53. **Mobilmeny (7.3):** Under 40rem ligger menyen fast nederst med ikon over teksten (erstatter punkt 32 og 42).
 54. **Tilgjengelighet:** «Hopp til innhold» på begge sidene. Appen har en skjult `h1` med navnet på visningen. Sluttsjekken kjørte axe-core (WCAG 2.1 AA og «best practice») på landingssiden og alle visningene, og fant ingen feil.
+55. **Eksempeldata (lagt til etter planen):**
+    - `createSampleData(bruker, nå)` i `logic/sample.js` lager tre emner, fem ukentlige aktiviteter og fire arbeidskrav. Datoene regnes ut fra «nå», og id-ene er faste (`eksempel-…`).
+    - Data fra i går (en gjennomført og en droppet økt) og `last_checked_date` = i går gjør at daglig sjekk flytter den droppede økten med en gang.
+    - Eksamensforberedelsen (14 t, frist om to dager kl. 12) får aldri plass med 4 t om dagen. Derfor vises varselet uansett når på døgnet dataene lastes. Testene sjekker dette for seks tidspunkter, også dagen sommertiden slutter.
+    - Eksempeldataene beholder navn og bruker-id, men setter kapasitet og studievindu til standard.
+    - Knappen finnes i tomme tilstander («I dag», «Kalender», «Oppgaver») og under Innstillinger. Finnes det data fra før, spør den før de erstattes.
+    - «Slett alle data» (under Innstillinger) spør først. Den beholder bare bruker-id-en, og innstillingene settes tilbake til standard.
 
 ---
 

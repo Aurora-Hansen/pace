@@ -1,6 +1,6 @@
 // Den felles render-funksjonen. Tegner hele appen ut fra tilstanden.
 // Kalles av store etter hver endring – aldri direkte fra hendelser.
-import { feilmeldinger, knapper, navigasjon, testmodus } from '../tekster.js';
+import { feilmeldinger, knapper, navigasjon, testmodus, bekreftelser } from '../tekster.js';
 import { toDateKey } from '../logic/dates.js';
 import { escapeHtml } from './html.js';
 import { formatFullDate, formatClock } from './format.js';
@@ -73,6 +73,16 @@ function errorBanner(code) {
     </div>`;
 }
 
+// Bekreftelser som gjelder hele appen. «Innstillingene er lagret» vises i selve skjemaet.
+function noticeBanner(code) {
+  if (!code || code === 'INNSTILLINGER_LAGRET') return '';
+  return `
+    <div class="notice-banner" role="status">
+      <p>${escapeHtml(bekreftelser[code])}</p>
+      <button class="btn btn-secondary btn-small" type="button" data-action="dismiss-notice">${knapper.lukk}</button>
+    </div>`;
+}
+
 export function render(state, root) {
   root.innerHTML = `
     ${testBanner(state.ui.simulatedNow)}
@@ -80,6 +90,7 @@ export function render(state, root) {
     <main id="innhold" class="app-main app-main-${state.ui.view}" tabindex="-1">
       <h1 class="visually-hidden">Pace – ${navigasjon[state.ui.view]}</h1>
       ${errorBanner(state.ui.error)}
+      ${noticeBanner(state.ui.notice)}
       ${views[state.ui.view](state)}
     </main>`;
 

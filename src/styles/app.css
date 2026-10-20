@@ -371,6 +371,40 @@ legend {
   max-width: 28rem;
 }
 
+.empty-actions,
+.data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.data-actions {
+  justify-content: flex-start;
+}
+
+.empty-state .confirm {
+  text-align: left;
+}
+
+/* Bekreftelse for hele appen, f.eks. etter eksempeldata */
+.notice-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-small);
+  background: var(--color-primary-soft);
+}
+
+.notice-banner p {
+  flex: 1 1 18rem;
+  margin: 0;
+}
+
 /* Feil i skjema og for hele appen */
 .form-error,
 .error-banner {

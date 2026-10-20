@@ -1,9 +1,39 @@
 // Visning: innstillinger (steg 1.4)
-import { innstillinger as t, hjelpetekster, knapper, bekreftelser } from '../tekster.js';
+import { innstillinger as t, hjelpetekster, knapper, bekreftelser, data as tData } from '../tekster.js';
+import { sampleDataButton } from './sample.js';
 import { escapeHtml, formErrorSummary, invalidAttrs } from './html.js';
 import { numberToInput } from '../logic/models.js';
 
+// Eksempeldata og sletting av alle data
+function dataSection(state) {
+  const confirmReset = state.ui.confirm?.kind === 'reset';
+  const reset = confirmReset
+    ? `
+      <div class="confirm">
+        <p>${tData.slettSporsmal}</p>
+        <div class="row-actions">
+          <button class="btn btn-danger btn-small" type="button" data-action="confirm-reset" data-autofocus>${tData.jaSlettAlt}</button>
+          <button class="btn btn-secondary btn-small" type="button" data-action="cancel-delete">${knapper.avbryt}</button>
+        </div>
+      </div>`
+    : `<button class="btn btn-danger" type="button" data-action="clear-all">${tData.slettAlt}</button>`;
+
+  return `
+    <section class="card" aria-labelledby="data-title">
+      <h2 id="data-title">${tData.overskrift}</h2>
+      <p class="muted">${tData.tekst}</p>
+      <div class="data-actions">
+        ${confirmReset ? '' : sampleDataButton(state)}
+        ${state.ui.confirm?.kind === 'sample' ? '' : reset}
+      </div>
+    </section>`;
+}
+
 export function renderSettings(state) {
+  return `${settingsForm(state)}${dataSection(state)}`;
+}
+
+function settingsForm(state) {
   const form = state.ui.forms.settings;
   const errors = form?.errors ?? [];
   // Viser det brukeren skrev hvis skjemaet hadde feil, ellers det som er lagret

@@ -41,6 +41,11 @@ import {
   submitAdjust,
   suggestEstimate,
   useEstimate,
+  requestSampleData,
+  loadSampleData,
+  askClearAll,
+  clearAllData,
+  dismissNotice,
 } from './actions.js';
 import { createInitialState, RECURRENCE } from '../logic/models.js';
 import { load, save } from './storage.js';
@@ -518,6 +523,53 @@ describe('når arbeid hoper seg opp', () => {
     const state = overloaded();
     const reset = { ...state, ui: { ...state.ui, overload: { atRisk: [], overloadedDays: [] } } };
     expect(startDay(now)(reset).ui.overload.atRisk).toHaveLength(1);
+  });
+});
+
+describe('eksempeldata og sletting av alle data', () => {
+  const now = new Date(2026, 10, 4, 9, 0);
+
+  it('legger inn eksempeldata med en gang når det ikke finnes data', () => {
+    const state = requestSampleData(now)(run(initial(), showView({ view: 'innstillinger' })));
+    expect(state.data.tasks).toHaveLength(4);
+    expect(state.data.last_checked_date).toBe('2026-11-04');
+    expect(state.ui).toMatchObject({ view: 'idag', notice: 'EKSEMPELDATA_LAGT_INN', confirm: null });
+    expect(state.ui.overload.atRisk.map((r) => r.taskId)).toContain('eksempel-exphil-eksamen');
+  });
+
+  it('spør før eksisterende data erstattes, og avbryt beholder dem', () => {
+    const withCourse = submitCourse({ name: 'Mitt emne', color: '#3F8F6B' }, 'c1')(initial());
+    const asked = requestSampleData(now)(withCourse);
+    expect(asked.ui.confirm).toEqual({ kind: 'sample' });
+    expect(asked.data).toBe(withCourse.data);
+    expect(cancelDelete()(asked).data.courses.map((c) => c.name)).toEqual(['Mitt emne']);
+  });
+
+  it('erstatter eksisterende data når det er bekreftet', () => {
+    const withCourse = submitCourse({ name: 'Mitt emne', color: '#3F8F6B' }, 'c1')(initial());
+    const state = loadSampleData(now)(requestSampleData(now)(withCourse));
+    expect(state.data.courses.map((c) => c.id)).not.toContain('c1');
+    expect(state.ui.confirm).toBeNull();
+  });
+
+  it('beholder brukerens navn og id', () => {
+    const named = submitSettings({ name: 'Kari', daily_available_study_hours: '6', study_window_start: '09:00', study_window_end: '20:00' })(initial());
+    const state = loadSampleData(now)(named);
+    expect(state.data.user).toMatchObject({ id: 'u1', name: 'Kari', daily_available_study_hours: 4 });
+  });
+
+  it('sletter alle data etter bekreftelse og beholder bruker-id', () => {
+    const loaded = loadSampleData(now)(initial());
+    const asked = askClearAll()(loaded);
+    expect(asked.ui.confirm).toEqual({ kind: 'reset' });
+    expect(asked.data).toBe(loaded.data);
+    const cleared = clearAllData()(asked);
+    expect(cleared.data).toEqual(createInitialState({ userId: 'u1' }));
+    expect(cleared.ui).toMatchObject({ notice: 'DATA_SLETTET', confirm: null, overload: { atRisk: [], overloadedDays: [] } });
+  });
+
+  it('bekreftelsen kan lukkes', () => {
+    expect(dismissNotice()(loadSampleData(now)(initial())).ui.notice).toBeNull();
   });
 });
 

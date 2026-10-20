@@ -4,6 +4,7 @@ import { todayAgenda } from '../logic/today.js';
 import { escapeHtml } from './html.js';
 import { formatFullDate, formatTimeRange } from './format.js';
 import { renderOverloadWarnings } from './overload.js';
+import { sampleDataButton } from './sample.js';
 import allDoneUrl from '../images/all-done.webp';
 import emptyCalendarUrl from '../images/empty-calendar.webp';
 
@@ -64,7 +65,11 @@ export function renderToday(state) {
           <img src="${emptyCalendarUrl}" alt="" width="160" height="160">
           <h3>${noTasks ? empty.overskrift : t.ingenting}</h3>
           <p>${noTasks ? empty.tekst : t.ingentingTekst}</p>
-          ${noTasks ? `<button class="btn btn-accent" type="button" data-action="open-task-from-today">${empty.knapp}</button>` : ''}
+          ${noTasks ? `
+            <div class="empty-actions">
+              <button class="btn btn-accent" type="button" data-action="open-task-from-today">${empty.knapp}</button>
+              ${sampleDataButton(state)}
+            </div>` : ''}
         </div>
       </section>`;
   }

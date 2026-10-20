@@ -181,6 +181,24 @@ export const innstillinger = {
 // Bekreftelser etter vellykkede handlinger. Ikke fra innhold.md.
 export const bekreftelser = {
   INNSTILLINGER_LAGRET: 'Innstillingene er lagret.',
+  EKSEMPELDATA_LAGT_INN:
+    'Eksempeldataene er lagt inn. En arbeidsøkt som ikke ble gjort i går, er flyttet til ledig tid, og én frist er i fare.',
+  DATA_SLETTET: 'Alle data er slettet.',
+};
+
+// Ikke fra innhold.md – eksempeldata og sletting av alle data
+export const eksempeldata = {
+  knapp: 'Prøv med eksempeldata',
+  sporsmal: 'Eksempeldataene erstatter emnene, timeplanen og oppgavene dine. Vil du fortsette?',
+  jaErstatt: 'Ja, bruk eksempeldata',
+};
+
+export const data = {
+  overskrift: 'Data',
+  tekst: 'Alt du legger inn, lagres bare i denne nettleseren. Eksempeldata viser hvordan planlegging, flytting av økter og varsler fungerer.',
+  slettAlt: 'Slett alle data',
+  slettSporsmal: 'Vil du slette alle emner, timeplanen, oppgaver og innstillinger? Det kan ikke angres.',
+  jaSlettAlt: 'Ja, slett alt',
 };
 
 export const tommeTilstander = {

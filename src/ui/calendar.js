@@ -11,8 +11,9 @@ import {
   formatDateRange,
 } from './format.js';
 import emptyCalendarUrl from '../images/empty-calendar.webp';
+import { sampleDataButton } from './sample.js';
 
-function emptyState() {
+function emptyState(state) {
   const empty = tommeTilstander.tomKalender;
   return `
     <section class="card" aria-labelledby="calendar-title">
@@ -21,7 +22,10 @@ function emptyState() {
         <img src="${emptyCalendarUrl}" alt="" width="160" height="160">
         <h3>${empty.overskrift}</h3>
         <p>${empty.tekst}</p>
-        <button class="btn btn-accent" type="button" data-action="add-fixed-from-calendar">${empty.knapp}</button>
+        <div class="empty-actions">
+          <button class="btn btn-accent" type="button" data-action="add-fixed-from-calendar">${empty.knapp}</button>
+          ${sampleDataButton(state)}
+        </div>
       </div>
     </section>`;
 }
@@ -87,7 +91,7 @@ function blockHtml({ block, column, columns }, range, courseById, taskById) {
 
 export function renderCalendar(state) {
   const { blocks, courses, tasks, user } = state.data;
-  if (blocks.length === 0) return emptyState();
+  if (blocks.length === 0) return emptyState(state);
 
   const { mode, date } = state.ui.calendar;
   const days = mode === 'week' ? weekDays(date) : [date];
