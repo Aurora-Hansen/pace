@@ -65,7 +65,7 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
   *Ferdig når:* En testside viser overskrift, brødtekst og knapper (primær/aksent) i riktige farger og fonter.
 - [x] **0.3 Tekster.** `src/tekster.js` med alle tekstene fra innhold.md: knapper, tomme tilstander, varsel, feilmeldinger og hjelpetekster. Varselteksten er en funksjon med `{antall}` og `{dag}`.
   *Ferdig når:* En test sjekker at varselteksten fylles ut riktig.
-- [ ] **0.4 Første publisering.** Koble repoet til Netlify eller Vercel med byggkommando `npm run build` og mappe `dist`.
+- [x] **0.4 Første publisering.** Koble repoet til Netlify eller Vercel med byggkommando `npm run build` og mappe `dist`. Publisert på https://pacewa.netlify.app/.
   *Ferdig når:* Den tomme appen ligger ute på en offentlig URL.
 
 ## Fase 1 – Datagrunnlag
