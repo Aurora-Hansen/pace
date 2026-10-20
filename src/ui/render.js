@@ -8,10 +8,12 @@ import { renderSettings } from './settings.js';
 import { renderTimeplan } from './timeplan.js';
 import { renderCalendar } from './calendar.js';
 import { renderTasks } from './tasks.js';
+import { renderToday } from './today.js';
 import logoUrl from '../../assets/logo.png';
 
 // Rekkefølgen her er rekkefølgen i menyen
 const views = {
+  idag: renderToday,
   kalender: renderCalendar,
   oppgaver: renderTasks,
   timeplan: renderTimeplan,

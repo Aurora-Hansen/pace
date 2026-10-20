@@ -83,6 +83,11 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 35. **En økt gjøres kortere** hvis det ellers ville blitt igjen en rest på under 30 minutter (f.eks. 1:45 + 0:30 i stedet for 2:00 + 0:15).
 36. **`replan` og `rollover`** tar inn og gir tilbake `data` (den lagrede tilstanden). `replan` fjerner også ufullførte økter for oppgaver som er ferdige eller slettet, også dagens. `rollover` fjerner alle ufullførte økter (også fremtidige) og planlegger alt på nytt fra i dag. Første gang appen åpnes, kjører `rollover` og lagrer datoen.
 37. **Simulert dato:** `?dato=2026-11-03` bruker dagens klokkeslett, som går videre. `?dato=2026-11-03T14:00` står stille på det klokkeslettet. Ugyldig verdi gir ekte tid uten banner. Banneret viser dato og klokkeslett.
+38. **Kobling (5.6):** Alle klikk og skjema i appen går gjennom `withReplan(endring, nå)`, som kjører `replan` bare når `data` faktisk ble endret. `rollover` kjøres via `startDay` når appen åpnes, og via `newDay` når appen blir synlig igjen etter midnatt.
+39. **Arbeidsøkter henter navn og emne fra oppgaven** i kalender og «I dag». Da følger også dagens økter med hvis oppgaven får nytt navn eller emne. I kalenderen har økter hvit bakgrunn og stiplet kant, og fullførte økter har ✓.
+40. **«I dag» (5.7)** er startvisningen. Avhuking kan angres (`uncompleteSession` trekker tiden fra igjen). «Alt unnagjort for i dag!» vises når alle dagens økter er huket av. Uten noe i dag vises «Ingen oppgaver ennå» (når det ikke finnes oppgaver) eller «Ingenting planlagt i dag». Det vises ikke «Ikke gjennomført» på økter som er over, fordi render ikke skal hente «nå».
+41. **En fast aktivitet som legges inn oppå en av dagens økter**, flytter ikke økten (dagens økter står fast). Økter fra i morgen planlegges rundt den.
+42. **Menyen scroller sidelengs på smale skjermer** i stedet for å bryte over to linjer (midlertidig løsning på punkt 32).
 
 ---
 
@@ -153,9 +158,9 @@ Planleggeren trengs allerede i «Må ha», fordi forskyvning av økter forutsett
   *Tester:* `replan` rører ikke dagens økter. En ny oppgave med frist i morgen tidlig får økt i dag når det finnes ledig tid etter «nå», men ikke når dagen er full eller dagskapasiteten er brukt opp. `rollover` gjør ingenting samme dag, flytter økter en ny dag og håndterer flere dager borte. Begge håndterer frist som har gått ut. `rollover` gjør ingenting når «nå» er før `last_checked_date`, slik at det er trygt å gå tilbake fra simulert dato.
 - [x] **5.5 Simulert dato for manuell testing** (`data/clock.js`). Appen henter «nå» bare via `clock.js`. Med URL-parameteren `?dato=2026-11-03` bruker appen den datoen med dagens klokkeslett. `?dato=2026-11-03T14:00` setter også klokkeslettet. Funksjonen er skjult og lenkes ikke fra noe sted, men et lite banner viser «Testmodus: dato satt til …» så den ikke forveksles med vanlig bruk. Merk at testmodus bruker de samme lagrede dataene.
   *Tester:* `parseSimulatedNow(søkestreng, ekteNå)` håndterer gyldig dato, dato med klokkeslett, ugyldig verdi (bruker ekte «nå») og manglende parameter.
-- [ ] **5.6 Kobling i appen.** `replan` kjøres ved endringer og `rollover` når appen åpnes, begge via `store.update` og med «nå» fra `clock.js`. Arbeidsøkter vises i kalenderen i emnefarge.
+- [x] **5.6 Kobling i appen.** `replan` kjøres ved endringer og `rollover` når appen åpnes, begge via `store.update` og med «nå» fra `clock.js`. Arbeidsøkter vises i kalenderen i emnefarge.
   *Ferdig når:* Manuell sjekk viser at en ny oppgave kan få økter i ledig tid i dag uten å endre dagens eksisterende økter, og at «ferdig» fjerner øktene. Åpnes appen med `?dato=` satt til en senere dag, flyttes uferdige økter.
-- [ ] **5.7 «I dag»-visning** (`logic/today.js`, `ui/today.js`). Viser dagens faste aktiviteter og arbeidsøkter i tidsrekkefølge, med emnefarge og oppgavetittel. Arbeidsøkter kan hukes av. Da settes `is_completed = true`, og varigheten legges til oppgavens `completed_hours` (antakelse 4). Dette blir startvisningen i appen.
+- [x] **5.7 «I dag»-visning** (`logic/today.js`, `ui/today.js`). Viser dagens faste aktiviteter og arbeidsøkter i tidsrekkefølge, med emnefarge og oppgavetittel. Arbeidsøkter kan hukes av. Da settes `is_completed = true`, og varigheten legges til oppgavens `completed_hours` (antakelse 4). Dette blir startvisningen i appen.
   *Tester:* `todayAgenda(state, nå)` gir riktig utvalg og sortering, med ukentlige faste aktiviteter utvidet. `completeSession(state, blockId)` oppdaterer økt og oppgave og endrer status til `in_progress`. Å huke av to ganger gir ikke dobbel tid.
   *Ferdig når:* Avhuking vises med en gang via felles render, og tiden er lagret etter at siden lastes inn på nytt.
 

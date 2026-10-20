@@ -52,6 +52,7 @@ export const knapper = {
 // Ikke fra innhold.md – lagt til i fase 2
 export const navigasjon = {
   meny: 'Hovedmeny',
+  idag: 'I dag',
   kalender: 'Kalender',
   oppgaver: 'Oppgaver',
   timeplan: 'Timeplan',
@@ -71,6 +72,18 @@ export const kalender = {
   nesteDag: 'Neste dag',
   ukenummer: (nummer) => `Uke ${nummer}`,
   apneDag: (dag) => `Vis ${dag}`,
+};
+
+// Ikke fra innhold.md – «I dag»-visningen og arbeidsøkter (steg 5.6–5.7)
+export const iDag = {
+  overskrift: 'I dag',
+  arbeidsokt: 'Arbeidsøkt',
+  fastAktivitet: 'Fast aktivitet',
+  fremdrift: (gjort, totalt) => `${gjort} av ${totalt} ${totalt === 1 ? 'arbeidsøkt' : 'arbeidsøkter'} gjennomført`,
+  ingenting: 'Ingenting planlagt i dag',
+  ingentingTekst: 'Du har ingen forelesninger eller arbeidsøkter i dag.',
+  ingenOkter: 'Ingen arbeidsøkter i dag.',
+  merkGjennomfort: (tittel, tid) => `${tittel}, ${tid}, gjennomført`,
 };
 
 // Ikke fra innhold.md – banner for simulert dato (steg 5.5)

@@ -20,16 +20,18 @@ import {
   validateProgressInput,
 } from '../logic/validation.js';
 import { registerProgress, completeTask, reopenTask } from '../logic/progress.js';
-import { addDays, isValidDateKey } from '../logic/dates.js';
+import { addDays, isValidDateKey, toDateKey } from '../logic/dates.js';
+import { replan, rollover } from '../logic/rollover.js';
+import { completeSession, uncompleteSession } from '../logic/today.js';
 
-export const VIEWS = ['kalender', 'oppgaver', 'timeplan', 'innstillinger'];
+export const VIEWS = ['idag', 'kalender', 'oppgaver', 'timeplan', 'innstillinger'];
 
 // `today` er dagens dato (datonøkkel) fra clock.js når appen starter.
 // `calendarMode` lar main.js starte med dagsvisning på smale skjermer.
 // `simulatedNow` er ISO-tidspunktet når datoen er simulert med ?dato=, ellers null.
 export function createInitialUi({ error = null, today, calendarMode = 'week', simulatedNow = null }) {
   return {
-    view: 'kalender',
+    view: 'idag',
     today,
     simulatedNow,
     calendar: { mode: calendarMode, date: today },
@@ -59,6 +61,38 @@ function saveAndCloseForm(state, data, formName) {
 }
 
 const replaceById = (list, item) => list.map((existing) => (existing.id === item.id ? item : existing));
+
+// --- Planlegging (steg 5.6) ---
+
+// Kjører en endring og bygger planen på nytt hvis lagrede data ble endret (antakelse 3)
+export const withReplan = (change, now) => (state) => {
+  const next = change(state);
+  if (next === state || next.data === state.data) return next;
+  return { ...next, data: replan(next.data, now) };
+};
+
+// Daglig sjekk når appen åpnes
+export const startDay = (now) => (state) => {
+  const data = rollover(state.data, now);
+  return data === state.data ? state : { ...state, data };
+};
+
+// Når appen har stått åpen over midnatt: daglig sjekk og ny dato i visningene
+export const newDay = (now) => (state) => {
+  const today = toDateKey(now);
+  if (today === state.ui.today) return state;
+  const checked = startDay(now)(state);
+  const calendarDate = state.ui.calendar.date === state.ui.today ? today : state.ui.calendar.date;
+  return withUi(checked, { today, calendar: { ...checked.ui.calendar, date: calendarDate } });
+};
+
+// Huker av eller fjerner avhuking for en arbeidsøkt («I dag»-visningen)
+export const toggleSession = ({ id }) => (state) => {
+  const block = state.data.blocks.find((b) => b.id === id);
+  if (!block || block.is_fixed) return state;
+  const data = block.is_completed ? uncompleteSession(state.data, id) : completeSession(state.data, id);
+  return data === state.data ? state : { ...state, data };
+};
 
 // --- Navigasjon ---
 
@@ -183,6 +217,9 @@ export const editTask = ({ id }) => (state) => {
   if (!task) return state;
   return withForm(withUi(state, { confirm: null }), 'task', { values: taskToInput(task), errors: [] });
 };
+
+// Fra tom «I dag»-visning: gå til oppgaver med skjemaet åpent
+export const openTaskFromToday = () => (state) => openTaskForm()(showView({ view: 'oppgaver' })(state));
 
 export const cancelTaskForm = () => (state) => ({ ...state, ui: withoutForm(state.ui, 'task') });
 

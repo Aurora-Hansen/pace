@@ -226,6 +226,22 @@ button.cal-block:hover {
   color: var(--color-text-muted);
 }
 
+/* Arbeidsøkter skiller seg fra faste aktiviteter: hvit bakgrunn og stiplet kant i emnefargen */
+.cal-session {
+  background: var(--color-surface);
+  outline: 1px dashed var(--block-color);
+  outline-offset: -1px;
+}
+
+.cal-session.is-done {
+  outline-style: solid;
+  background: color-mix(in srgb, var(--block-color) 8%, var(--color-surface));
+}
+
+.cal-session.is-done .cal-block-title {
+  color: var(--color-text-muted);
+}
+
 /* Korte blokker: bare tittel og tid, eller bare tittel */
 .cal-block-short .cal-block-course,
 .cal-block-tiny .cal-block-time {

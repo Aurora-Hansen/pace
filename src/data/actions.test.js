@@ -21,6 +21,7 @@ import {
   cancelDelete,
   confirmDelete,
   openTaskForm,
+  openTaskFromToday,
   editTask,
   cancelTaskForm,
   submitTask,
@@ -29,6 +30,10 @@ import {
   submitProgress,
   markTaskDone,
   reopenTaskAction,
+  withReplan,
+  startDay,
+  newDay,
+  toggleSession,
 } from './actions.js';
 import { createInitialState, RECURRENCE } from '../logic/models.js';
 import { load, save } from './storage.js';
@@ -48,14 +53,14 @@ describe('showView', () => {
     expect(state.ui.notice).toBeNull();
   });
 
-  it('starter på kalenderen', () => {
-    expect(initial().ui.view).toBe('kalender');
+  it('starter på «I dag»', () => {
+    expect(initial().ui.view).toBe('idag');
   });
 
   it('ignorerer ukjente visninger og samme visning', () => {
     const state = initial();
     expect(showView({ view: 'finnes-ikke' })(state)).toBe(state);
-    expect(showView({ view: 'kalender' })(state)).toBe(state);
+    expect(showView({ view: 'idag' })(state)).toBe(state);
   });
 });
 
@@ -315,9 +320,88 @@ describe('oppgaver', () => {
     expect(state.data.blocks.map((b) => b.id)).toEqual(['fast']);
   });
 
+  it('«Legg til første oppgave» i «I dag» går til oppgaver med skjemaet åpent', () => {
+    const state = openTaskFromToday()(initial());
+    expect(state.ui.view).toBe('oppgaver');
+    expect(state.ui.forms.task).toEqual({ values: {}, errors: [] });
+  });
+
   it('avbryt lukker skjemaene', () => {
     expect(run(initial(), openTaskForm(), cancelTaskForm()).ui.forms.task).toBeUndefined();
     expect(run(withTask(), openProgressForm({ id: 't1' }), cancelProgressForm()).ui.forms.progress).toBeUndefined();
+  });
+});
+
+describe('planlegging i appen', () => {
+  // Onsdag 4.11.2026 kl. 07:00
+  const now = new Date(2026, 10, 4, 7, 0);
+  const taskValues = {
+    title: 'Rapport',
+    course_id: '',
+    description: '',
+    estimated_hours: '3',
+    deadline_date: '2026-11-06',
+    deadline_time: '',
+  };
+  const sessionsOf = (state) => state.data.blocks.filter((b) => !b.is_fixed);
+  const hoursOf = (blocks) =>
+    blocks.reduce((sum, b) => sum + (new Date(b.end_time) - new Date(b.start_time)), 0) / 3_600_000;
+  const withPlannedTask = () => withReplan(submitTask(taskValues, 't1', now), now)(initial());
+
+  it('ny oppgave gir arbeidsøkter', () => {
+    const state = withPlannedTask();
+    expect(hoursOf(sessionsOf(state))).toBe(3);
+    expect(sessionsOf(state).every((b) => b.task_id === 't1')).toBe(true);
+  });
+
+  it('kjører ikke replan når bare ui endres eller skjemaet har feil', () => {
+    const state = withPlannedTask();
+    expect(withReplan(showView({ view: 'oppgaver' }), now)(state).data).toBe(state.data);
+    expect(withReplan(submitTask({ ...taskValues, title: '' }, 't2', now), now)(state).data).toBe(state.data);
+  });
+
+  it('«Marker som ferdig» fjerner øktene og frigjør tiden', () => {
+    const state = withReplan(markTaskDone({ id: 't1' }), now)(withPlannedTask());
+    expect(sessionsOf(state)).toEqual([]);
+  });
+
+  it('avhuking av en økt registrerer tid og gir færre timer igjen i planen', () => {
+    const planned = withPlannedTask();
+    const first = sessionsOf(planned)[0];
+    const state = withReplan(toggleSession({ id: first.id }), now)(planned);
+    const task = state.data.tasks[0];
+    expect(task.completed_hours).toBe(hoursOf([first]));
+    expect(task.status).toBe('in_progress');
+    // Den fullførte økten står, og resten av planen dekker bare det som gjenstår
+    const open = sessionsOf(state).filter((b) => !b.is_completed);
+    expect(hoursOf(open)).toBe(3 - hoursOf([first]));
+  });
+
+  it('avhuking kan angres', () => {
+    const planned = withPlannedTask();
+    const first = sessionsOf(planned)[0];
+    const state = run(planned, toggleSession({ id: first.id }), toggleSession({ id: first.id }));
+    expect(state.data.tasks[0].completed_hours).toBe(0);
+  });
+
+  it('daglig sjekk flytter gårsdagens uferdige økter', () => {
+    const planned = withPlannedTask();
+    const tomorrow = new Date(2026, 10, 5, 8, 0);
+    const state = startDay(tomorrow)(planned);
+    expect(state.data.last_checked_date).toBe('2026-11-05');
+    expect(sessionsOf(state).every((b) => new Date(b.start_time) >= tomorrow)).toBe(true);
+    expect(hoursOf(sessionsOf(state))).toBe(3);
+  });
+
+  it('ny dag oppdaterer dagens dato og kalenderen', () => {
+    const state = newDay(new Date(2026, 10, 5, 8, 0))(withPlannedTask());
+    expect(state.ui.today).toBe('2026-11-05');
+    expect(state.ui.calendar.date).toBe('2026-11-05');
+  });
+
+  it('ny dag gjør ingenting samme dag', () => {
+    const state = withPlannedTask();
+    expect(newDay(new Date(2026, 10, 4, 22, 0))(state)).toBe(state);
   });
 });
 

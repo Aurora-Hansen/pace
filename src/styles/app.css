@@ -36,7 +36,18 @@
   gap: var(--space-1);
 }
 
+/* På smale skjermer scroller menyen sidelengs i stedet for å bryte over flere linjer */
+@media (max-width: 40rem) {
+  .app-nav {
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}
+
 .nav-tab {
+  flex: none;
   padding: var(--space-2) var(--space-3);
   border: 0;
   border-radius: var(--radius-small);

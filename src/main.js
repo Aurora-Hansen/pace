@@ -57,28 +57,36 @@ const clickActions = {
   'edit-fixed-block': actions.editFixedBlock,
   'cancel-fixed-block': actions.cancelFixedBlockForm,
   'open-task': actions.openTaskForm,
+  'open-task-from-today': actions.openTaskFromToday,
   'edit-task': actions.editTask,
   'cancel-task': actions.cancelTaskForm,
   'open-progress': actions.openProgressForm,
   'cancel-progress': actions.cancelProgressForm,
   'complete-task': actions.markTaskDone,
   'reopen-task': actions.reopenTaskAction,
+  'toggle-session': actions.toggleSession,
   'ask-delete': actions.askDelete,
   'cancel-delete': actions.cancelDelete,
   'confirm-delete': actions.confirmDelete,
 };
 
+// Alle endringer går via withReplan, så planen bygges på nytt når lagrede data endres
 root.addEventListener('submit', (event) => {
   const action = formActions[event.target.dataset.form];
   if (!action) return;
   event.preventDefault();
-  store.update(action(Object.fromEntries(new FormData(event.target))));
+  store.update(actions.withReplan(action(Object.fromEntries(new FormData(event.target))), now()));
 });
 
 root.addEventListener('click', (event) => {
   const button = event.target.closest('[data-action]');
   const action = clickActions[button?.dataset.action];
-  if (action) store.update(action({ ...button.dataset }));
+  if (action) store.update(actions.withReplan(action({ ...button.dataset }), now()));
 });
 
+// Daglig sjekk når appen åpnes, og når den vises igjen etter å ha stått åpen over midnatt
 store.start();
+store.update(actions.startDay(startNow));
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) store.update(actions.newDay(now()));
+});

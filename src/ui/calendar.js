@@ -54,10 +54,13 @@ function toolbar(state, days) {
 }
 
 // Én blokk plassert i dagkolonnen. Posisjonen settes med CSS-variabler.
-function blockHtml({ block, column, columns }, range, courseById) {
+function blockHtml({ block, column, columns }, range, courseById, taskById) {
   const start = minutesSinceMidnight(new Date(block.start_time));
   const end = Math.min(start + (new Date(block.end_time) - new Date(block.start_time)) / 60_000, range.end);
-  const course = courseById.get(block.course_id);
+  // Arbeidsøkter henter navn og emne fra oppgaven, så de følger med når oppgaven endres
+  const task = block.is_fixed ? null : taskById.get(block.task_id);
+  const title = task?.title ?? block.title;
+  const course = courseById.get(task ? task.course_id : block.course_id);
   const total = range.end - range.start;
   const style = [
     `--top: ${((start - range.start) / total) * 100}%`,
@@ -67,7 +70,7 @@ function blockHtml({ block, column, columns }, range, courseById) {
     `--block-color: ${course?.color ?? 'var(--color-text-muted)'}`,
   ].join('; ');
   const content = `
-      <span class="cal-block-title">${escapeHtml(block.title)}</span>
+      <span class="cal-block-title">${block.is_completed ? '✓ ' : ''}${escapeHtml(title)}</span>
       <span class="cal-block-time">${formatTimeRange(block.start_time, block.end_time)}</span>
       ${course ? `<span class="cal-block-course">${escapeHtml(course.name)}</span>` : ''}`;
 
@@ -79,11 +82,11 @@ function blockHtml({ block, column, columns }, range, courseById) {
   return block.is_fixed
     ? `<button type="button" class="cal-block${size}" style="${escapeHtml(style)}"
         data-action="edit-fixed-from-calendar" data-id="${escapeHtml(block.source_id)}">${content}</button>`
-    : `<div class="cal-block cal-session${size}" style="${escapeHtml(style)}">${content}</div>`;
+    : `<div class="cal-block cal-session${block.is_completed ? ' is-done' : ''}${size}" style="${escapeHtml(style)}">${content}</div>`;
 }
 
 export function renderCalendar(state) {
-  const { blocks, courses, user } = state.data;
+  const { blocks, courses, tasks, user } = state.data;
   if (blocks.length === 0) return emptyState();
 
   const { mode, date } = state.ui.calendar;
@@ -92,6 +95,7 @@ export function renderCalendar(state) {
   const { startHour, endHour } = visibleHours(user, items);
   const range = { start: startHour * 60, end: endHour * 60 };
   const courseById = new Map(courses.map((course) => [course.id, course]));
+  const taskById = new Map(tasks.map((task) => [task.id, task]));
 
   const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
   const timeLabels = hours.map((hour) => `<div class="cal-hour">${formatTime(hour * 60)}</div>`).join('');
@@ -112,7 +116,7 @@ export function renderCalendar(state) {
       const dayItems = layoutDay(items.filter((item) => item.date === day));
       return `
         <div class="cal-day${day === state.ui.today ? ' cal-today' : ''}" role="group" aria-label="${formatLongDate(day)}">
-          ${dayItems.map((item) => blockHtml(item, range, courseById)).join('')}
+          ${dayItems.map((item) => blockHtml(item, range, courseById, taskById)).join('')}
         </div>`;
     })
     .join('');
