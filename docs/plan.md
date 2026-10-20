@@ -193,4 +193,4 @@ Planleggeren trengs allerede i «Må ha», fordi forskyvning av økter forutsett
 - [x] **7.1 Landingsside** (`index.html`). Hero med `hero.jpg`, overskrifter og knapper fra innhold.md og de tre fordelene. «Kom i gang» lenker til `app.html`.
 - [x] **7.2 Metadata og tilgjengelighet.** `lang="nb"`, OG-tagger med `og-image.png`, alt-tekster fra innhold.md, synlig tastaturfokus og fargekontrast.
 - [x] **7.3 Responsivitet.** To-do og dagsvisning fungerer på mobil (ca. 400 px), og ukevisning på nettbrett og PC.
-- [ ] **7.4 Sluttsjekk.** `npm test` er grønn, `npm run build` gir ingen feil, og en gjennomgang av alle brukerhistoriene under «Må ha» og «Bør ha» på den publiserte siden er gjort.
+- [x] **7.4 Sluttsjekk.** `npm test` er grønn, `npm run build` gir ingen feil, og en gjennomgang av alle brukerhistoriene under «Må ha» og «Bør ha» på den publiserte siden er gjort.
