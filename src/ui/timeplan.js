@@ -11,7 +11,7 @@ import { COURSE_COLORS, suggestCourseColor } from '../logic/models.js';
 import { sortFixedBlocks } from '../logic/recurrence.js';
 import { escapeHtml, formErrorSummary, invalidAttrs } from './html.js';
 import { formatFixedBlockWhen } from './format.js';
-import emptyCalendarUrl from '../../assets/empty-calendar.png';
+import emptyCalendarUrl from '../images/empty-calendar.webp';
 
 const isConfirming = (state, kind, id) => state.ui.confirm?.kind === kind && state.ui.confirm.id === id;
 

@@ -49,6 +49,24 @@ img {
   outline-offset: 2px;
 }
 
+/* Lenke for tastaturbrukere, synlig bare når den har fokus */
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-small);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 500;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
 .muted {
   color: var(--color-text-muted);
 }

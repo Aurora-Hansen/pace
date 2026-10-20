@@ -10,7 +10,7 @@ import {
   formatFullDate,
   formatDateRange,
 } from './format.js';
-import emptyCalendarUrl from '../../assets/empty-calendar.png';
+import emptyCalendarUrl from '../images/empty-calendar.webp';
 
 function emptyState() {
   const empty = tommeTilstander.tomKalender;

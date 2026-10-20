@@ -36,17 +36,10 @@
   gap: var(--space-1);
 }
 
-/* På smale skjermer scroller menyen sidelengs i stedet for å bryte over flere linjer */
-@media (max-width: 40rem) {
-  .app-nav {
-    flex-wrap: nowrap;
-    width: 100%;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-}
-
 .nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   flex: none;
   padding: var(--space-2) var(--space-3);
   border: 0;
@@ -56,6 +49,59 @@
   font: inherit;
   font-weight: 500;
   cursor: pointer;
+}
+
+.nav-icon {
+  display: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Smale skjermer: menyen ligger fast nederst, med ikon over teksten */
+@media (max-width: 40rem) {
+  .app-nav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    padding: var(--space-1) var(--space-1) calc(var(--space-1) + env(safe-area-inset-bottom, 0px));
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -2px 8px rgb(30 41 59 / 0.06);
+  }
+
+  .nav-tab {
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding: var(--space-1) 2px;
+    font-size: 0.6875rem;
+  }
+
+  .nav-tab span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-icon {
+    display: block;
+  }
+
+  .nav-tab:hover,
+  .nav-tab[aria-current='page'] {
+    background: transparent;
+  }
 }
 
 .nav-tab:hover {
@@ -74,6 +120,17 @@
   padding: var(--space-6) var(--space-4);
   display: grid;
   gap: var(--space-4);
+}
+
+.app-main:focus {
+  outline: none;
+}
+
+/* Plass til bunnmenyen under innholdet på smale skjermer */
+@media (max-width: 40rem) {
+  .app-main {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* Uten dette kan brede barn (som kalenderen) gjøre hele siden bredere enn skjermen */
@@ -161,6 +218,8 @@ legend {
 }
 
 .visually-hidden {
+  margin: 0;
+  padding: 0;
   position: absolute;
   width: 1px;
   height: 1px;

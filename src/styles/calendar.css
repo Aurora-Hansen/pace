@@ -178,13 +178,18 @@ button.cal-head-day:hover {
 }
 
 /* Dag med mer arbeid enn daglig kapasitet (krav.md del 5: markeres i rødt) */
+/* Rød ring i stedet for rød bakgrunn: hvit tekst på rødt har for lav kontrast (3,8:1) */
 .cal-head-day.cal-overloaded .cal-date {
-  background: var(--color-warning);
-  color: var(--color-surface);
+  box-shadow: inset 0 0 0 2px var(--color-warning);
+  color: var(--color-text);
+}
+
+.cal-head-day.cal-overloaded.cal-today .cal-date {
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-warning);
+  color: var(--color-on-primary);
 }
 
 .cal-head-day.cal-overloaded .cal-weekday {
-  color: var(--color-warning);
   font-weight: 500;
 }
 

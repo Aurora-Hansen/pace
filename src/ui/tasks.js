@@ -14,8 +14,8 @@ import { progressPercent } from '../logic/progress.js';
 import { escapeHtml, formErrorSummary, invalidAttrs } from './html.js';
 import { formatDeadline, formatHoursShort } from './format.js';
 import { renderOverloadWarnings } from './overload.js';
-import emptyTasksUrl from '../../assets/empty-tasks.png';
-import allDoneUrl from '../../assets/all-done.png';
+import emptyTasksUrl from '../images/empty-tasks.webp';
+import allDoneUrl from '../images/all-done.webp';
 
 // --- Tidsestimat i oppgaveskjemaet (steg 6.4) ---
 

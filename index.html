@@ -2,17 +2,91 @@
 <html lang="nb">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pace</title>
-  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>{{landingsside.tittel}}</title>
+  <meta name="description" content="{{landingsside.hero.underoverskrift}}">
+  <meta name="theme-color" content="#2E5B88">
+
+  <!-- Deling i sosiale medier (OG-taggene må ha absolutte URL-er) -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="nb_NO">
+  <meta property="og:site_name" content="Pace">
+  <meta property="og:url" content="{{SITE_URL}}/">
+  <meta property="og:title" content="{{landingsside.tittel}}">
+  <meta property="og:description" content="{{landingsside.hero.underoverskrift}}">
+  <meta property="og:image" content="{{SITE_URL}}/og-image.jpg">
+  <meta property="og:image:width" content="1584">
+  <meta property="og:image:height" content="672">
+  <meta property="og:image:alt" content="{{altTekster.hero}}">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
   <link href="/src/styles/main.css" rel="stylesheet">
+  <link href="/src/styles/landing.css" rel="stylesheet">
 </head>
 <body>
-  <!-- Landingsside – bygges i steg 7.1 -->
-  <h1>Pace</h1>
-  <p><a href="app.html">Til appen</a></p>
+  <a class="skip-link" href="#innhold">{{navigasjon.hoppTilInnhold}}</a>
+
+  <header class="site-header">
+    <a class="app-logo" href="/">
+      <img src="/src/images/logo-64.png" alt="" width="32" height="32">
+      <span>Pace</span>
+    </a>
+    <a class="btn btn-secondary btn-small" href="app.html">{{landingsside.tilAppen}}</a>
+  </header>
+
+  <main id="innhold">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-text">
+        <h1 id="hero-title">{{landingsside.hero.overskrift}}</h1>
+        <p class="hero-lead">{{landingsside.hero.underoverskrift}}</p>
+        <div class="hero-actions">
+          <a class="btn btn-accent btn-large" href="app.html">{{landingsside.hero.hovedknapp}}</a>
+          <a class="btn btn-secondary btn-large" href="#slik-fungerer-det">{{landingsside.hero.sekundaerknapp}}</a>
+        </div>
+      </div>
+      <img class="hero-image"
+        src="/src/images/hero-1376.webp"
+        srcset="/src/images/hero-800.webp 800w, /src/images/hero-1376.webp 1376w"
+        sizes="100vw"
+        width="1376" height="768"
+        alt="{{altTekster.hero}}"
+        fetchpriority="high">
+    </section>
+
+    <section id="slik-fungerer-det" class="benefits" aria-labelledby="benefits-title">
+      <h2 id="benefits-title">{{landingsside.fordelerOverskrift}}</h2>
+      <ol class="benefit-list">
+        <li class="benefit">
+          <img src="/src/images/all-done.webp" alt="" width="160" height="160" loading="lazy">
+          <h3>{{landingsside.fordeler.0.overskrift}}</h3>
+          <p>{{landingsside.fordeler.0.tekst}}</p>
+        </li>
+        <li class="benefit">
+          <img src="/src/images/empty-calendar.webp" alt="" width="160" height="160" loading="lazy">
+          <h3>{{landingsside.fordeler.1.overskrift}}</h3>
+          <p>{{landingsside.fordeler.1.tekst}}</p>
+        </li>
+        <li class="benefit">
+          <img src="/src/images/empty-tasks.webp" alt="" width="160" height="160" loading="lazy">
+          <h3>{{landingsside.fordeler.2.overskrift}}</h3>
+          <p>{{landingsside.fordeler.2.tekst}}</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="closing" aria-labelledby="closing-title">
+      <h2 id="closing-title">{{landingsside.avslutning}}</h2>
+      <a class="btn btn-accent btn-large" href="app.html">{{landingsside.hero.hovedknapp}}</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>{{landingsside.bunntekst}}</p>
+  </footer>
 </body>
 </html>

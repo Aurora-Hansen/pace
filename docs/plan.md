@@ -98,6 +98,11 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
     - Reglene: 1 time per 200 ord, 400 ord per side, grunntid per oppgavetype når lengde mangler (programmering 10 t legges alltid til), +0,5 t per kilde (maks 5 t, +2 t uten tall), +3 t presentasjon, +1 t gruppearbeid, +1–2 t for lang oppgavetekst. Rundes til nærmeste halve time og er minst 1 time.
     - Alle tallene står som konstanter øverst i `logic/estimate.js`, så de er lette å justere.
 49. **«Foreslå tidsbruk» (6.4)** bruker beskrivelsesfeltet i oppgaveskjemaet. Knappene «Foreslå tidsbruk» og «Bruk forslaget» er egne submit-knapper (`name="intent"`), så skjemaverdiene ikke forsvinner. En skjult «Lagre»-knapp står først i skjemaet, så Enter i et felt lagrer.
+50. **Bildene (7.2):** Originalene i `assets/` er urørt. Optimaliserte versjoner er laget med canvas i headless Chrome. Nesten-hvit bakgrunn som henger sammen med kanten, er gjort gjennomsiktig. Illustrasjonene (400 px, WebP), hero (800 og 1376 px, WebP) og logo (64 px) ligger i `src/images/`. Favicon, apple-touch-icon og `og-image.jpg` ligger i `public/`, fordi de trenger faste adresser. Til sammen gikk bildene fra ca. 3,1 MB til ca. 160 kB. Byttes et bilde, må det optimaliseres på nytt.
+51. **Tekster i HTML-filene (7.1):** En liten Vite-plugin i `vite.config.js` erstatter `{{landingsside.hero.overskrift}}` osv. med tekst fra `tekster.js` når siden bygges. Landingssiden er dermed vanlig HTML (virker uten JavaScript), men tekstene har fortsatt én kilde. Mangler en tekst, stopper bygget med en feilmelding.
+52. **Kontrast (7.2):** Rød tekst og hvit tekst på rødt har for lav kontrast (3,8:1). «Fristen har gått ut» er derfor mørk tekst med rød prikk, og dager over kapasitet får rød ring i stedet for rød fylling.
+53. **Mobilmeny (7.3):** Under 40rem ligger menyen fast nederst med ikon over teksten (erstatter punkt 32 og 42).
+54. **Tilgjengelighet:** «Hopp til innhold» på begge sidene. Appen har en skjult `h1` med navnet på visningen. Sluttsjekken kjørte axe-core (WCAG 2.1 AA og «best practice») på landingssiden og alle visningene, og fant ingen feil.
 
 ---
 
@@ -185,7 +190,7 @@ Planleggeren trengs allerede i «Må ha», fordi forskyvning av økter forutsett
 
 ## Fase 7 – Landingsside og ferdigstilling
 
-- [ ] **7.1 Landingsside** (`index.html`). Hero med `hero.jpg`, overskrifter og knapper fra innhold.md og de tre fordelene. «Kom i gang» lenker til `app.html`.
-- [ ] **7.2 Metadata og tilgjengelighet.** `lang="nb"`, OG-tagger med `og-image.png`, alt-tekster fra innhold.md, synlig tastaturfokus og fargekontrast.
-- [ ] **7.3 Responsivitet.** To-do og dagsvisning fungerer på mobil (ca. 400 px), og ukevisning på nettbrett og PC.
+- [x] **7.1 Landingsside** (`index.html`). Hero med `hero.jpg`, overskrifter og knapper fra innhold.md og de tre fordelene. «Kom i gang» lenker til `app.html`.
+- [x] **7.2 Metadata og tilgjengelighet.** `lang="nb"`, OG-tagger med `og-image.png`, alt-tekster fra innhold.md, synlig tastaturfokus og fargekontrast.
+- [x] **7.3 Responsivitet.** To-do og dagsvisning fungerer på mobil (ca. 400 px), og ukevisning på nettbrett og PC.
 - [ ] **7.4 Sluttsjekk.** `npm test` er grønn, `npm run build` gir ingen feil, og en gjennomgang av alle brukerhistoriene under «Må ha» og «Bør ha» på den publiserte siden er gjort.

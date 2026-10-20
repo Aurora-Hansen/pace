@@ -9,6 +9,13 @@ export function formatHours(antall) {
 }
 
 export const landingsside = {
+  // Ikke fra innhold.md – lagt til i steg 7.1–7.2
+  tittel: 'Pace – studiehverdagen, i ditt tempo',
+  tilAppen: 'Åpne Pace',
+  fordelerOverskrift: 'Slik hjelper Pace deg',
+  avslutning: 'Klar for et roligere semester?',
+  bunntekst: 'Pace lagrer planen din bare i denne nettleseren. Ingen konto, ingen innlogging.',
+  appTittel: 'Pace',
   hero: {
     overskrift: 'Studiehverdagen, i ditt tempo.',
     underoverskrift:
@@ -52,6 +59,7 @@ export const knapper = {
 // Ikke fra innhold.md – lagt til i fase 2
 export const navigasjon = {
   meny: 'Hovedmeny',
+  hoppTilInnhold: 'Hopp til innhold',
   idag: 'I dag',
   kalender: 'Kalender',
   oppgaver: 'Oppgaver',

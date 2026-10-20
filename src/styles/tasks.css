@@ -66,9 +66,21 @@
   color: var(--color-text-muted);
 }
 
+/* Rød tekst på hvitt har for lav kontrast (3,8:1), så teksten er mørk med rød markør */
 .task-overdue {
-  color: var(--color-warning);
+  color: var(--color-text);
   font-weight: 500;
+}
+
+.task-overdue::before {
+  content: '';
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: var(--space-1);
+  border-radius: 50%;
+  background: var(--color-warning);
+  vertical-align: 0.1em;
 }
 
 .task-description {

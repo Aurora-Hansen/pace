@@ -4,8 +4,8 @@ import { todayAgenda } from '../logic/today.js';
 import { escapeHtml } from './html.js';
 import { formatFullDate, formatTimeRange } from './format.js';
 import { renderOverloadWarnings } from './overload.js';
-import allDoneUrl from '../../assets/all-done.png';
-import emptyCalendarUrl from '../../assets/empty-calendar.png';
+import allDoneUrl from '../images/all-done.webp';
+import emptyCalendarUrl from '../images/empty-calendar.webp';
 
 function itemHtml(item, taskById, courseById) {
   const task = taskById.get(item.task_id);
