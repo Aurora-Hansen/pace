@@ -44,6 +44,57 @@ export const knapper = {
   avbryt: 'Avbryt',
   // Ikke fra innhold.md
   lukk: 'Lukk',
+  rediger: 'Rediger',
+  slett: 'Slett',
+  jaSlett: 'Ja, slett',
+};
+
+// Ikke fra innhold.md – lagt til i fase 2
+export const navigasjon = {
+  meny: 'Hovedmeny',
+  timeplan: 'Timeplan',
+  innstillinger: 'Innstillinger',
+};
+
+// Ikke fra innhold.md – lagt til i steg 2.1
+export const emner = {
+  overskrift: 'Emner',
+  ingen: 'Du har ikke lagt inn noen emner ennå. Emner gir oppgaver og aktiviteter en egen farge.',
+  navn: 'Navn på emnet',
+  navnEksempel: 'F.eks. ITF10619 Programmering 2',
+  farge: 'Farge',
+  leggTil: 'Legg til emne',
+  rediger: 'Rediger emne',
+  slettSporsmal: (navn) => `Vil du slette «${navn}»? Oppgaver og aktiviteter i emnet beholdes, men mister emnet.`,
+};
+
+export const fargeNavn = {
+  '#2E5B88': 'Blå',
+  '#FF8C61': 'Korall',
+  '#3F8F6B': 'Grønn',
+  '#7B5EA7': 'Lilla',
+  '#D9A21B': 'Gul',
+  '#2A9BA8': 'Turkis',
+  '#C2577A': 'Rosa',
+  '#64748B': 'Grå',
+};
+
+// Ikke fra innhold.md – lagt til i steg 2.3
+export const fasteAktiviteter = {
+  overskrift: 'Faste aktiviteter',
+  ny: 'Ny forelesning/aktivitet',
+  rediger: 'Rediger aktivitet',
+  tittel: 'Tittel',
+  tittelEksempel: 'F.eks. Forelesning eller Deltidsjobb',
+  emne: 'Emne',
+  utenEmne: 'Uten emne',
+  dato: 'Dato',
+  datoHjelp: 'Første gang aktiviteten skjer. Ukentlige aktiviteter gjentas samme ukedag.',
+  start: 'Starttid',
+  slutt: 'Sluttid',
+  ukentlig: 'Gjentas hver uke',
+  hver: (ukedag) => `Hver ${ukedag}`,
+  slettSporsmal: (tittel) => `Vil du slette «${tittel}»?`,
 };
 
 // Ikke fra innhold.md – lagt til i steg 1.4

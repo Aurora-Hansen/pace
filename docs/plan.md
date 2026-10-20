@@ -53,7 +53,12 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 12. **Tilstanden er `{ data, ui }`.** `data` er det som lagres (datamodellen). `ui` er midlertidig: åpne skjema med verdier og feil, bekreftelser og feil for hele appen. Endringer ligger i `data/actions.js` som funksjoner `(...) → state → nyState` og testes der.
 13. **Korrupte lagrede data** kopieres til `pace:v1:backup`, appen starter tom og viser `LESING_FEILET`.
 14. **Rød brukes også til skjemafeil** (kant og markering), i tillegg til overbelastning.
-15. **Tekster som ikke står i innhold.md** er merket med en kommentar i `tekster.js` (innstillinger, «Lukk», bekreftelser, `LESING_FEILET`).
+15. **Tekster som ikke står i innhold.md** er merket med en kommentar i `tekster.js` (innstillinger, «Lukk», bekreftelser, `LESING_FEILET`, meny, emner og faste aktiviteter).
+16. **Meny:** Appen har faner i toppen. Fase 2 legger til «Timeplan» (faste aktiviteter og emner) og «Innstillinger». «I dag», «Kalender» og «Oppgaver» kommer i senere faser. Gjeldende visning ligger i `ui.view`.
+17. **Faste aktiviteter legges inn med dato for første gang**, ikke bare ukedag. Ukentlige aktiviteter gjentas fra den datoen. De har ingen sluttdato (f.eks. semesterslutt), og aktiviteter over midnatt støttes ikke.
+18. **Emnefarger** velges fra 8 faste farger (`COURSE_COLORS` i `models.js`, navn i `tekster.js`). Nytt emne får første ubrukte farge. Dette er brukerdata og ikke en del av designpaletten.
+19. **Sletting** skjer etter et ja/nei-spørsmål i raden. Når et emne slettes, beholdes oppgaver og aktiviteter i emnet, men `course_id` settes til `null`.
+20. **Bildene i `assets/`** har nesten hvit, ikke gjennomsiktig, bakgrunn og viser en svak firkant på hvite kort. Bør fikses i bildene (gjennomsiktig PNG) i steg 7.2.
 
 ---
 
@@ -83,11 +88,11 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 
 ## Fase 2 – Emner og faste aktiviteter (Må ha · F1)
 
-- [ ] **2.1 Emner.** Legge til, endre og slette emner med navn og farge.
+- [x] **2.1 Emner.** Legge til, endre og slette emner med navn og farge.
   *Ferdig når:* Emner lagres og vises med fargeprikk.
-- [ ] **2.2 Gjentakelse** (`logic/recurrence.js`). `expandFixedBlocks(blocks, fra, til)` gjør ukentlige aktiviteter om til konkrete forekomster i et datointervall.
+- [x] **2.2 Gjentakelse** (`logic/recurrence.js`). `expandFixedBlocks(blocks, fra, til)` gjør ukentlige aktiviteter om til konkrete forekomster i et datointervall.
   *Tester:* `none` og `weekly`, intervall over flere uker, og sommertid.
-- [ ] **2.3 Skjema «+ Ny forelesning/aktivitet».** Tittel, emne, ukedag/dato, start/slutt og gjentakelse, med hjelpeteksten for fast aktivitet og feilmeldingen «Sjekk klokkeslettet».
+- [x] **2.3 Skjema «+ Ny forelesning/aktivitet».** Tittel, emne, ukedag/dato, start/slutt og gjentakelse, med hjelpeteksten for fast aktivitet og feilmeldingen «Sjekk klokkeslettet».
   *Ferdig når:* Aktiviteten lagres, og ugyldig tid gir riktig melding.
 
 ## Fase 3 – Kalender (Må ha · F1)

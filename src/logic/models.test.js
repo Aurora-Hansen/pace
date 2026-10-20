@@ -3,6 +3,10 @@ import {
   STATUS,
   RECURRENCE,
   DEFAULT_SETTINGS,
+  COURSE_COLORS,
+  suggestCourseColor,
+  fixedBlockFromInput,
+  fixedBlockToInput,
   parseNumber,
   toIsoString,
   createInitialState,
@@ -97,6 +101,40 @@ describe('createTask', () => {
     expect(task.course_id).toBeNull();
     expect(task.deadline).toBeNull();
     expect(task.estimated_hours).toBeNull();
+  });
+});
+
+describe('suggestCourseColor', () => {
+  it('foreslår første farge som ikke er brukt', () => {
+    expect(suggestCourseColor([])).toBe(COURSE_COLORS[0]);
+    expect(suggestCourseColor([{ color: COURSE_COLORS[0] }, { color: COURSE_COLORS[1].toLowerCase() }])).toBe(
+      COURSE_COLORS[2],
+    );
+  });
+
+  it('bruker standardfargen når alle er brukt', () => {
+    expect(suggestCourseColor(COURSE_COLORS.map((color) => ({ color })))).toBe(COURSE_COLORS[0]);
+  });
+});
+
+describe('fixedBlockFromInput og fixedBlockToInput', () => {
+  const values = { title: 'Forelesning', course_id: 'c1', date: '2026-11-02', start: '10:15', end: '12:00', weekly: 'on' };
+
+  it('lager ukentlig aktivitet med lokale klokkeslett', () => {
+    const block = fixedBlockFromInput(values, { id: 'b1' });
+    expect(block.start_time).toBe(new Date(2026, 10, 2, 10, 15).toISOString());
+    expect(block.end_time).toBe(new Date(2026, 10, 2, 12, 0).toISOString());
+    expect(block.recurrence).toBe(RECURRENCE.WEEKLY);
+    expect(block.course_id).toBe('c1');
+  });
+
+  it('lager enkeltstående aktivitet når «gjentas» ikke er krysset av', () => {
+    const { weekly: _weekly, ...once } = values;
+    expect(fixedBlockFromInput(once, { id: 'b1' }).recurrence).toBe(RECURRENCE.NONE);
+  });
+
+  it('gir tilbake de samme skjemaverdiene', () => {
+    expect(fixedBlockToInput(fixedBlockFromInput(values, { id: 'b1' }))).toEqual({ id: 'b1', ...values });
   });
 });
 

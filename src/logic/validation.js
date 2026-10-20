@@ -1,6 +1,6 @@
 // Validering. Hver funksjon returnerer en liste med feil { code, field }.
 // Tom liste betyr gyldig. Kodene er nøkler i `feilmeldinger` i src/tekster.js.
-import { parseTime } from './dates.js';
+import { parseTime, isValidDateKey } from './dates.js';
 
 export const ERRORS = {
   MANGLER_FELT: 'MANGLER_FELT',
@@ -37,6 +37,22 @@ export function validateFixedBlock(block) {
   if (!block.end_time) errors.push(missing('end_time'));
   if (block.start_time && block.end_time && new Date(block.end_time) <= new Date(block.start_time)) {
     errors.push({ code: ERRORS.SLUTT_FOR_START, field: 'end_time' });
+  }
+  return errors;
+}
+
+// Skjemaet for fast aktivitet: { title, date, start, end } som tekst
+export function validateFixedBlockInput(values) {
+  const errors = [];
+  if (!values.title?.trim()) errors.push(missing('title'));
+  if (!isValidDateKey(values.date)) errors.push(missing('date'));
+
+  const start = parseTime(values.start);
+  const end = parseTime(values.end);
+  if (start === null) errors.push(missing('start'));
+  if (end === null) errors.push(missing('end'));
+  if (start !== null && end !== null && end <= start) {
+    errors.push({ code: ERRORS.SLUTT_FOR_START, field: 'end' });
   }
   return errors;
 }

@@ -4,6 +4,7 @@ import {
   validateCourse,
   validateTask,
   validateFixedBlock,
+  validateFixedBlockInput,
   validateSettings,
   primaryError,
 } from './validation.js';
@@ -76,6 +77,28 @@ describe('validateFixedBlock', () => {
   it('markerer felt som mangler', () => {
     const fields = validateFixedBlock({ title: '', start_time: null, end_time: null }).map((e) => e.field);
     expect(fields).toEqual(['title', 'start_time', 'end_time']);
+  });
+});
+
+describe('validateFixedBlockInput', () => {
+  const valid = { title: 'Forelesning', date: '2026-11-02', start: '10:15', end: '12:00' };
+
+  it('godtar gyldige skjemaverdier', () => {
+    expect(validateFixedBlockInput(valid)).toEqual([]);
+  });
+
+  it('markerer felt som mangler eller er ugyldige', () => {
+    const fields = validateFixedBlockInput({ title: '  ', date: '2026-02-30', start: '', end: '25:00' }).map(
+      (e) => e.field,
+    );
+    expect(fields).toEqual(['title', 'date', 'start', 'end']);
+  });
+
+  it('avviser sluttid før eller lik starttid', () => {
+    expect(validateFixedBlockInput({ ...valid, end: '10:00' })).toEqual([
+      { code: ERRORS.SLUTT_FOR_START, field: 'end' },
+    ]);
+    expect(validateFixedBlockInput({ ...valid, end: '10:15' })).toHaveLength(1);
   });
 });
 

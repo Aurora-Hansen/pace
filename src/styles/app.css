@@ -1,7 +1,9 @@
 /* Oppsett for selve appen (app.html) */
 .app-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: var(--space-2) var(--space-6);
   padding: var(--space-3) var(--space-4);
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
@@ -16,6 +18,33 @@
   font-size: 1.25rem;
   font-weight: 700;
   text-decoration: none;
+}
+
+.app-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.nav-tab {
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.nav-tab:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-text);
+}
+
+.nav-tab[aria-current='page'] {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
 }
 
 .app-main {
@@ -61,6 +90,195 @@
 
 .form-notice:empty {
   display: none;
+}
+
+.form-field.checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.form-field.checkbox input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+.form-field.checkbox label {
+  margin: 0;
+}
+
+legend {
+  padding: 0;
+  margin-bottom: var(--space-1);
+  font-weight: 500;
+}
+
+/* Skjema inne i et kort, under en liste */
+.subform {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.subform > .field-help {
+  margin: 0 0 var(--space-4);
+}
+
+.form-row + .field-help {
+  margin: calc(-1 * var(--space-3)) 0 var(--space-4);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Knapper i lister */
+.btn-small {
+  min-height: 2.25rem;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.875rem;
+}
+
+.btn-danger {
+  background: var(--color-warning-soft);
+  border-color: var(--color-warning);
+  color: var(--color-text);
+}
+
+.btn-danger:hover {
+  background: color-mix(in srgb, var(--color-warning) 20%, var(--color-surface));
+}
+
+/* Lister med emner og aktiviteter */
+.item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.item:last-child {
+  border-bottom: 0;
+}
+
+.item-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.item-title {
+  display: block;
+  font-weight: 500;
+}
+
+.item-meta {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.item-meta::first-letter {
+  text-transform: uppercase;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.confirm {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 28rem;
+}
+
+.confirm p {
+  margin: 0;
+}
+
+.color-dot {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+/* Fargevelger for emner */
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.swatch {
+  position: relative;
+  margin: 0;
+  cursor: pointer;
+}
+
+.swatch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.swatch-color {
+  display: block;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--swatch);
+  border: 3px solid var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-border);
+}
+
+.swatch input:checked + .swatch-color {
+  box-shadow: 0 0 0 3px var(--color-text);
+}
+
+.swatch input:focus-visible + .swatch-color {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+/* Tom tilstand */
+.empty-state {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  padding: var(--space-4) 0;
+}
+
+.empty-state img {
+  width: 10rem;
+  margin-bottom: var(--space-2);
+}
+
+.empty-state p {
+  max-width: 28rem;
 }
 
 /* Feil i skjema og for hele appen */

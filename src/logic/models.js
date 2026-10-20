@@ -1,5 +1,6 @@
 // Oppretter objekter etter datamodellen i docs/krav.md del 4.
 // Funksjonene er rene: id og «nå» sendes inn, de lages ikke her.
+import { atMinutes, parseTime, toDateKey, formatTime, minutesSinceMidnight } from './dates.js';
 
 export const STATUS = {
   NOT_STARTED: 'not_started',
@@ -19,7 +20,16 @@ export const DEFAULT_SETTINGS = {
   study_window_end: '21:00',
 };
 
-export const DEFAULT_COURSE_COLOR = '#2E5B88';
+// Farger brukeren kan velge for emner. Navnene står i src/tekster.js.
+export const COURSE_COLORS = ['#2E5B88', '#FF8C61', '#3F8F6B', '#7B5EA7', '#D9A21B', '#2A9BA8', '#C2577A', '#64748B'];
+
+export const DEFAULT_COURSE_COLOR = COURSE_COLORS[0];
+
+// Første farge som ingen emner bruker ennå
+export function suggestCourseColor(courses) {
+  const used = new Set(courses.map((course) => course.color.toUpperCase()));
+  return COURSE_COLORS.find((color) => !used.has(color)) ?? DEFAULT_COURSE_COLOR;
+}
 
 // Tall fra skjema: godtar både '4.5' og '4,5'. Tom verdi gir null.
 export function parseNumber(value) {
@@ -83,6 +93,36 @@ export function createTask(input, { id, now }) {
     completed_hours: 0,
     status: STATUS.NOT_STARTED,
     created_at: now.toISOString(),
+  };
+}
+
+// Skjemaverdier { title, course_id, date, start, end, weekly } → fast aktivitet.
+// Verdiene må være validert med validateFixedBlockInput først.
+export function fixedBlockFromInput(values, { id }) {
+  return createFixedBlock(
+    {
+      title: values.title,
+      course_id: values.course_id,
+      start_time: atMinutes(values.date, parseTime(values.start)),
+      end_time: atMinutes(values.date, parseTime(values.end)),
+      recurrence: values.weekly === 'on' ? RECURRENCE.WEEKLY : RECURRENCE.NONE,
+    },
+    { id },
+  );
+}
+
+// Fast aktivitet → skjemaverdier, for redigering
+export function fixedBlockToInput(block) {
+  const start = new Date(block.start_time);
+  const end = new Date(block.end_time);
+  return {
+    id: block.id,
+    title: block.title,
+    course_id: block.course_id ?? '',
+    date: toDateKey(start),
+    start: formatTime(minutesSinceMidnight(start)),
+    end: formatTime(minutesSinceMidnight(end)),
+    ...(block.recurrence === RECURRENCE.WEEKLY ? { weekly: 'on' } : {}),
   };
 }
 
