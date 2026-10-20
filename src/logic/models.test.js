@@ -67,10 +67,17 @@ describe('createInitialState', () => {
     expect(state.tasks).toEqual([]);
     expect(state.blocks).toEqual([]);
     expect(state.last_checked_date).toBeNull();
+    expect(state.onboarding_done).toBe(false);
   });
 });
 
 describe('normalizeState', () => {
+  it('regner veiviseren som vist for eldre data med innhold, men ikke for tomme data', () => {
+    expect(normalizeState({ user: { id: 'u1' }, tasks: [{ id: 't1' }] }).onboarding_done).toBe(true);
+    expect(normalizeState({ user: { id: 'u1' } }).onboarding_done).toBe(false);
+    expect(normalizeState({ user: { id: 'u1' }, onboarding_done: false, tasks: [{ id: 't1' }] }).onboarding_done).toBe(false);
+  });
+
   it('fyller inn manglende felt og beholder lagrede verdier', () => {
     const state = normalizeState({ user: { id: 'u1', daily_available_study_hours: 6 }, tasks: [{ id: 't1' }] });
     expect(state.user).toEqual({ id: 'u1', name: '', ...DEFAULT_SETTINGS, daily_available_study_hours: 6 });

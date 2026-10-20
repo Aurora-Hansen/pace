@@ -20,6 +20,12 @@ html {
   padding: var(--space-4);
 }
 
+.site-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .btn-large {
   min-height: 3.25rem;
   padding: var(--space-3) var(--space-6);
@@ -44,11 +50,22 @@ html {
   height: 100%;
   object-fit: cover;
   object-position: right center;
+  filter: var(--hero-image-filter);
+}
+
+/* Mørk modus: mørk overgang bak teksten, så den kan leses oppå det lyse bildet */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--hero-overlay);
+  pointer-events: none;
 }
 
 .hero-text {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   max-width: 72rem;
   width: 100%;
   margin: 0 auto;
@@ -90,6 +107,11 @@ html {
     object-position: 78% center;
   }
 
+  /* Teksten står over bildet her, så overgangen trengs ikke */
+  .hero::before {
+    display: none;
+  }
+
   .hero-text {
     padding-bottom: var(--space-4);
   }
@@ -127,6 +149,9 @@ html {
 .benefit img {
   width: 10rem;
   margin-bottom: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  background: var(--color-illustration-bg);
 }
 
 .benefit p {

@@ -6,6 +6,14 @@
   <title>{{landingsside.tittel}}</title>
   <meta name="description" content="{{landingsside.hero.underoverskrift}}">
   <meta name="theme-color" content="#2E5B88">
+  <meta name="color-scheme" content="light dark">
+  <!-- Lys/mørk modus settes før siden tegnes, så det ikke blinker hvitt. Samme nøkkel som THEME_KEY i src/data/storage.js. -->
+  <script>
+    try {
+      var tema = localStorage.getItem('pace:tema');
+      if (tema === 'light' || tema === 'dark') document.documentElement.dataset.theme = tema;
+    } catch (e) {}
+  </script>
 
   <!-- Deling i sosiale medier (OG-taggene må ha absolutte URL-er) -->
   <meta property="og:type" content="website">
@@ -36,7 +44,10 @@
       <img src="/src/images/logo-64.png" alt="" width="32" height="32">
       <span>Pace</span>
     </a>
-    <a class="btn btn-secondary btn-small" href="app.html">{{landingsside.tilAppen}}</a>
+    <div class="site-header-actions">
+      <span id="theme-toggle-slot"></span>
+      <a class="btn btn-secondary btn-small" href="app.html">{{landingsside.tilAppen}}</a>
+    </div>
   </header>
 
   <main id="innhold">
@@ -88,5 +99,6 @@
   <footer class="site-footer">
     <p>{{landingsside.bunntekst}}</p>
   </footer>
+  <script type="module" src="/src/landing.js"></script>
 </body>
 </html>

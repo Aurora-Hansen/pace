@@ -50,6 +50,14 @@ import {
   cancelExportForm,
   exportFailed,
   exportDone,
+  showWizardIfNew,
+  restartWizard,
+  closeWizard,
+  submitWizard,
+  refreshGreeting,
+  setTheme,
+  toggleTheme,
+  setSystemDark,
 } from './actions.js';
 import { createInitialState, RECURRENCE } from '../logic/models.js';
 import { load, save } from './storage.js';
@@ -574,6 +582,122 @@ describe('eksempeldata og sletting av alle data', () => {
 
   it('bekreftelsen kan lukkes', () => {
     expect(dismissNotice()(loadSampleData(now)(initial())).ui.notice).toBeNull();
+  });
+});
+
+describe('lys og mørk modus', () => {
+  it('følger systemet som standard', () => {
+    expect(initial().ui).toMatchObject({ theme: 'system', systemDark: false });
+  });
+
+  it('valg i Innstillinger setter modus, og ukjent verdi gir «system»', () => {
+    expect(setTheme({ theme: 'dark' })(initial()).ui.theme).toBe('dark');
+    const dark = setTheme({ theme: 'dark' })(initial());
+    expect(setTheme({ theme: 'tull' })(dark).ui.theme).toBe('system');
+    expect(setTheme({ theme: 'dark' })(dark)).toBe(dark);
+  });
+
+  it('knappen i headeren bytter til motsatt av det som vises', () => {
+    const systemDark = setSystemDark(true)(initial());
+    expect(toggleTheme()(systemDark).ui.theme).toBe('light');
+    expect(toggleTheme()(initial()).ui.theme).toBe('dark');
+    expect(toggleTheme()(toggleTheme()(initial())).ui.theme).toBe('light');
+  });
+
+  it('endrer ikke lagrede data', () => {
+    const state = initial();
+    expect(toggleTheme()(state).data).toBe(state.data);
+  });
+});
+
+describe('hilsen', () => {
+  it('oppdaterer tid på døgnet, og gjør ingenting når den er den samme', () => {
+    const state = initial();
+    expect(refreshGreeting(new Date(2026, 10, 4, 18, 0))(state).ui.greeting).toBe('kveld');
+    expect(refreshGreeting(new Date(2026, 10, 4, 12, 0))(state)).toBe(state);
+  });
+});
+
+describe('førstegangsveiviser', () => {
+  const now = new Date(2026, 10, 4, 9, 0);
+  const open = () => showWizardIfNew()(initial());
+  const step = (values, state) => submitWizard(values, 'ny-id', now)(state);
+  const activity = { title: 'Forelesning', date: '2026-11-02', start: '10:15', end: '12:00', weekly: 'on', intent: 'next' };
+  const firstTask = { title: 'Arbeidskrav 1', estimated_hours: '6', deadline_date: '2026-11-12', deadline_time: '', intent: 'next' };
+
+  it('vises første gang, men ikke når den er vist før', () => {
+    expect(open().ui.wizard).toEqual({ step: 1, values: {}, errors: [] });
+    const done = { ...initial(), data: { ...initial().data, onboarding_done: true } };
+    expect(showWizardIfNew()(done)).toBe(done);
+  });
+
+  it('steg 1 lagrer daglig kapasitet og går videre', () => {
+    const state = step({ daily_available_study_hours: '5,5', intent: 'next' }, open());
+    expect(state.data.user.daily_available_study_hours).toBe(5.5);
+    expect(state.ui.wizard.step).toBe(2);
+  });
+
+  it('steg 1 viser feil og blir stående ved ugyldig kapasitet', () => {
+    const state = step({ daily_available_study_hours: '', intent: 'next' }, open());
+    expect(state.ui.wizard).toMatchObject({ step: 1, errors: [{ code: 'MANGLER_FELT', field: 'daily_available_study_hours' }] });
+    expect(state.data.user.daily_available_study_hours).toBe(4);
+  });
+
+  it('steg 2 legger til en ukentlig fast aktivitet', () => {
+    const state = run(open(), (s) => step({ intent: 'skip' }, s), (s) => step(activity, s));
+    expect(state.data.blocks).toHaveLength(1);
+    expect(state.data.blocks[0]).toMatchObject({ id: 'ny-id', title: 'Forelesning', is_fixed: true, recurrence: 'weekly' });
+    expect(state.ui.wizard.step).toBe(3);
+  });
+
+  it('steg 2 gir enkeltstående aktivitet når «gjentas» ikke er krysset av, og feil for slutt før start', () => {
+    const atStep2 = run(open(), (s) => step({ intent: 'skip' }, s));
+    const { weekly: _weekly, ...once } = activity;
+    expect(step(once, atStep2).data.blocks[0].recurrence).toBe('none');
+    expect(step({ ...activity, end: '09:00' }, atStep2).ui.wizard.errors).toEqual([{ code: 'SLUTT_FOR_START', field: 'end' }]);
+  });
+
+  it('steg 3 legger til oppgave, lukker veiviseren og går til «I dag»', () => {
+    const state = run(open(), (s) => step({ intent: 'skip' }, s), (s) => step({ intent: 'skip' }, s), showView({ view: 'kalender' }), (s) => step(firstTask, s));
+    expect(state.data.tasks.map((t) => t.title)).toEqual(['Arbeidskrav 1']);
+    expect(state.ui.wizard).toBeNull();
+    expect(state.ui.view).toBe('idag');
+    expect(state.data.onboarding_done).toBe(true);
+  });
+
+  it('steg 3 viser «Fristen har allerede vært»', () => {
+    const atStep3 = run(open(), (s) => step({ intent: 'skip' }, s), (s) => step({ intent: 'skip' }, s));
+    expect(step({ ...firstTask, deadline_date: '2026-11-01' }, atStep3).ui.wizard.errors).toEqual([
+      { code: 'FRIST_I_FORTIDEN', field: 'deadline' },
+    ]);
+  });
+
+  it('alle stegene kan hoppes over uten å endre noe annet enn at veiviseren er vist', () => {
+    const before = open();
+    const state = run(before, (s) => step({ intent: 'skip' }, s), (s) => step({ intent: 'skip' }, s), (s) => step({ intent: 'skip' }, s));
+    expect(state.ui.wizard).toBeNull();
+    expect(state.data).toEqual({ ...before.data, onboarding_done: true });
+  });
+
+  it('kan lukkes når som helst og vises ikke igjen av seg selv', () => {
+    const closed = closeWizard()(step({ daily_available_study_hours: '6', intent: 'next' }, open()));
+    expect(closed.ui.wizard).toBeNull();
+    expect(closed.data.onboarding_done).toBe(true);
+    expect(closed.data.user.daily_available_study_hours).toBe(6);
+    expect(showWizardIfNew()(closed)).toBe(closed);
+  });
+
+  it('kan startes på nytt fra Innstillinger uten å slette noe', () => {
+    const closed = closeWizard()(run(open(), (s) => step({ intent: 'skip' }, s), (s) => step(activity, s)));
+    const restarted = restartWizard()(closed);
+    expect(restarted.ui.wizard.step).toBe(1);
+    expect(restarted.data).toBe(closed.data);
+  });
+
+  it('gjør ingenting når veiviseren ikke er åpen', () => {
+    const state = initial();
+    expect(step({ intent: 'next' }, state)).toBe(state);
+    expect(closeWizard()(state)).toBe(state);
   });
 });
 

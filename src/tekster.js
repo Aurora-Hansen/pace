@@ -187,6 +187,65 @@ export const bekreftelser = {
   EKSPORT_LASTET_NED: 'Kalenderfilen er lastet ned. Åpne den, eller importer den i kalenderen din.',
 };
 
+// Ikke fra innhold.md – lys og mørk modus
+export const utseende = {
+  overskrift: 'Utseende',
+  tekst: 'Velg lyst eller mørkt, eller la Pace følge innstillingen på enheten din.',
+  valg: { light: 'Lyst', dark: 'Mørkt', system: 'Følg systemet' },
+  tilMorkt: 'Bytt til mørk modus',
+  tilLyst: 'Bytt til lys modus',
+};
+
+// Ikke fra innhold.md – hilsen etter tid på døgnet øverst på «I dag»
+export const hilsen = {
+  morgen: 'God morgen',
+  dag: 'God dag',
+  kveld: 'God kveld',
+  natt: 'God natt',
+  tekst: (periode, navn) => {
+    const trimmet = (navn ?? '').trim();
+    return trimmet ? `${hilsen[periode]}, ${trimmet}!` : `${hilsen[periode]}!`;
+  },
+};
+
+// Ikke fra innhold.md – ukesoppsummering øverst på «I dag»
+// Timene er summer av kvarter, så to desimaler (23,25) i stedet for avrunding (23,3)
+const kvarter = new Intl.NumberFormat('nb-NO', { maximumFractionDigits: 2 });
+
+export const ukesoppsummering = {
+  tekst: (gjort, planlagt) =>
+    `Denne uken: ${kvarter.format(gjort)} av ${kvarter.format(planlagt)} ${planlagt === 1 ? 'time' : 'timer'}`,
+  ingenOkter: 'Denne uken: ingen arbeidsøkter planlagt ennå',
+  fremdrift: 'Gjennomført denne uken',
+};
+
+// Ikke fra innhold.md – førstegangsveiviser
+export const veiviser = {
+  tittel: 'Velkommen til Pace',
+  steg: (nummer, totalt) => `Steg ${nummer} av ${totalt}`,
+  lukk: 'Lukk veiviseren',
+  neste: 'Neste',
+  hoppOver: 'Hopp over',
+  ferdig: 'Kom i gang',
+  steg1: {
+    overskrift: 'Hvor mye vil du studere på en vanlig dag?',
+    tekst: 'Pace legger aldri inn mer arbeid enn du har sagt ja til. Du kan endre det når som helst.',
+  },
+  steg2: {
+    overskrift: 'Legg inn en fast aktivitet',
+    tekst: 'Start med en forelesning eller noe annet som skjer hver uke, så vet Pace når du er opptatt.',
+  },
+  steg3: {
+    overskrift: 'Legg inn ditt første arbeidskrav',
+    tekst: 'Fortell hva som skal gjøres og når fristen er, så lager Pace en plan i et jevnt og behagelig tempo.',
+  },
+  innstillinger: {
+    overskrift: 'Kom i gang-veiviser',
+    tekst: 'Gå gjennom de tre første stegene igjen. Ingenting av det du har lagt inn, blir slettet.',
+    knapp: 'Start veiviseren på nytt',
+  },
+};
+
 // Ikke fra innhold.md – eksport til kalenderfil (.ics)
 const fristFormat = new Intl.DateTimeFormat('nb-NO', {
   timeZone: 'Europe/Oslo',

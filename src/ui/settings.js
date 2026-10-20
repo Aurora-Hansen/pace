@@ -1,7 +1,8 @@
 // Visning: innstillinger (steg 1.4)
-import { innstillinger as t, hjelpetekster, knapper, bekreftelser, data as tData } from '../tekster.js';
+import { innstillinger as t, hjelpetekster, knapper, bekreftelser, data as tData, veiviser } from '../tekster.js';
 import { sampleDataButton } from './sample.js';
 import { exportButton, exportPanel } from './export.js';
+import { themeSettings } from './theme.js';
 import { escapeHtml, formErrorSummary, invalidAttrs } from './html.js';
 import { numberToInput } from '../logic/models.js';
 
@@ -31,8 +32,18 @@ function dataSection(state) {
     </section>`;
 }
 
+function wizardSection() {
+  const t = veiviser.innstillinger;
+  return `
+    <section class="card" aria-labelledby="wizard-settings-title">
+      <h2 id="wizard-settings-title">${t.overskrift}</h2>
+      <p class="muted">${t.tekst}</p>
+      <button class="btn btn-secondary" type="button" data-action="restart-wizard">${t.knapp}</button>
+    </section>`;
+}
+
 export function renderSettings(state) {
-  return `${settingsForm(state)}${dataSection(state)}${exportPanel(state)}`;
+  return `${settingsForm(state)}${themeSettings(state)}${dataSection(state)}${exportPanel(state)}${wizardSection()}`;
 }
 
 function settingsForm(state) {

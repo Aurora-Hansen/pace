@@ -29,22 +29,39 @@ import { detectOverload } from '../logic/overload.js';
 import { estimateHours } from '../logic/estimate.js';
 import { createSampleData } from '../logic/sample.js';
 import { DEFAULT_EXPORT_WEEKS } from '../logic/ics.js';
+import { greetingPeriod } from '../logic/greeting.js';
+import { parseTheme, toggledTheme } from '../logic/theme.js';
 
 export const VIEWS = ['idag', 'kalender', 'oppgaver', 'timeplan', 'innstillinger'];
 
 // `today` er dagens dato (datonøkkel) fra clock.js når appen starter.
 // `calendarMode` lar main.js starte med dagsvisning på smale skjermer.
 // `simulatedNow` er ISO-tidspunktet når datoen er simulert med ?dato=, ellers null.
-export function createInitialUi({ error = null, today, calendarMode = 'week', simulatedNow = null }) {
+// `greeting` er tid på døgnet for hilsenen ('morgen', 'dag', 'kveld' eller 'natt').
+// `theme` er lagret valg ('light', 'dark', 'system'), og `systemDark` er systeminnstillingen.
+export function createInitialUi({
+  error = null,
+  today,
+  calendarMode = 'week',
+  simulatedNow = null,
+  greeting = 'dag',
+  theme = 'system',
+  systemDark = false,
+}) {
   return {
     view: 'idag',
     today,
+    greeting,
+    theme,
+    systemDark,
     simulatedNow,
     calendar: { mode: calendarMode, date: today },
     // Regnes ut sammen med planen (withReplan og startDay), så render ikke trenger «nå»
     overload: { atRisk: [], overloadedDays: [] },
     // Oppgaver der brukeren har valgt «Behold planen» (bare til appen lastes på nytt)
     dismissedOverload: [],
+    // Førstegangsveiviseren: { step, values, errors } når den er åpen
+    wizard: null,
     error,
     notice: null,
     confirm: null,
@@ -96,6 +113,27 @@ export const newDay = (now) => (state) => {
   const checked = startDay(now)(state);
   const calendarDate = state.ui.calendar.date === state.ui.today ? today : state.ui.calendar.date;
   return withUi(checked, { today, calendar: { ...checked.ui.calendar, date: calendarDate } });
+};
+
+// --- Lys og mørk modus ---
+
+// Fra Innstillinger: 'light', 'dark' eller 'system'
+export const setTheme = ({ theme }) => (state) => {
+  const next = parseTheme(theme);
+  return next === state.ui.theme ? state : withUi(state, { theme: next });
+};
+
+// Knappen i headeren: bytter til motsatt av det som vises
+export const toggleTheme = () => (state) => withUi(state, { theme: toggledTheme(state.ui.theme, state.ui.systemDark) });
+
+// Når systeminnstillingen endres mens appen er åpen
+export const setSystemDark = (systemDark) => (state) =>
+  state.ui.systemDark === systemDark ? state : withUi(state, { systemDark });
+
+// Hilsenen oppdateres når appen blir synlig igjen, så den følger tiden på døgnet
+export const refreshGreeting = (now) => (state) => {
+  const greeting = greetingPeriod(now);
+  return greeting === state.ui.greeting ? state : withUi(state, { greeting });
 };
 
 // Huker av eller fjerner avhuking for en arbeidsøkt («I dag»-visningen)
@@ -390,6 +428,60 @@ export const clearAllData = () => (state) => ({
 });
 
 export const dismissNotice = () => (state) => withUi(state, { notice: null });
+
+// --- Førstegangsveiviser ---
+
+export const WIZARD_STEPS = 3;
+
+// Når appen åpnes: vis veiviseren hvis den ikke er vist før
+export const showWizardIfNew = () => (state) =>
+  state.data.onboarding_done || state.ui.wizard ? state : withUi(state, { wizard: { step: 1, values: {}, errors: [] } });
+
+// Fra Innstillinger. Endrer ikke data.
+export const restartWizard = () => (state) => withUi(state, { wizard: { step: 1, values: {}, errors: [] }, confirm: null });
+
+// Lukker veiviseren (krysset, Esc eller etter siste steg). Den vises ikke igjen av seg selv.
+export const closeWizard = () => (state) => {
+  if (!state.ui.wizard) return state;
+  const data = state.data.onboarding_done ? state.data : { ...state.data, onboarding_done: true };
+  return { data, ui: { ...state.ui, wizard: null } };
+};
+
+const nextStep = (state) =>
+  state.ui.wizard.step >= WIZARD_STEPS
+    ? closeWizard()({ ...state, ui: { ...state.ui, view: 'idag' } })
+    : withUi(state, { wizard: { step: state.ui.wizard.step + 1, values: {}, errors: [] } });
+
+const wizardError = (state, values, errors) => withUi(state, { wizard: { ...state.ui.wizard, values, errors } });
+
+// Ett steg i veiviseren. `values.intent` er 'next' eller 'skip'.
+// Steg 1: daglig kapasitet. Steg 2: første faste aktivitet. Steg 3: første oppgave.
+export const submitWizard = (rawValues, newId, now) => (state) => {
+  const wizard = state.ui.wizard;
+  if (!wizard) return state;
+  const values = formValues(rawValues);
+  if (rawValues.intent === 'skip') return nextStep(state);
+
+  if (wizard.step === 1) {
+    const user = { ...state.data.user, daily_available_study_hours: parseNumber(values.daily_available_study_hours) };
+    const errors = validateSettings(user);
+    if (errors.length > 0) return wizardError(state, values, errors);
+    return nextStep({ ...state, data: { ...state.data, user } });
+  }
+
+  if (wizard.step === 2) {
+    const input = { ...values, weekly: values.weekly ?? '' };
+    const errors = validateFixedBlockInput(input);
+    if (errors.length > 0) return wizardError(state, values, errors);
+    const block = fixedBlockFromInput(input, { id: newId });
+    return nextStep({ ...state, data: { ...state.data, blocks: [...state.data.blocks, block] } });
+  }
+
+  const task = taskFromInput(values, { id: newId, now });
+  const errors = validateTask(task, now);
+  if (errors.length > 0) return wizardError(state, values, errors);
+  return nextStep({ ...state, data: { ...state.data, tasks: [...state.data.tasks, task] } });
+};
 
 // --- Eksport til kalenderfil ---
 

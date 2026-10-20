@@ -121,5 +121,7 @@ export function createSampleData(user, now) {
       session('eksempel-okt-droppet', mathTask, yesterday, 13, 15, false),
     ],
     last_checked_date: yesterday,
+    // Den som laster eksempeldata, trenger ikke førstegangsveiviseren
+    onboarding_done: true,
   };
 }

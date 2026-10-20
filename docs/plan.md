@@ -119,6 +119,21 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
     - UID er `id@pace`, stabil mellom eksporter.
     - Selve nedlastingen (Blob og lenke) er en sideeffekt i `main.js`. Tom periode gir feilmeldingen «Ingenting å eksportere» i stedet for en tom fil.
     - Filen er kontrollert med Python-biblioteket `icalendar`, også en ukentlig aktivitet over sommertidsskiftet: alle forekomster ble 10:15 norsk tid.
+57. **Førstegangsveiviser:**
+    - Tre steg: daglig kapasitet, første faste aktivitet og første oppgave. Alle kan hoppes over, og veiviseren kan lukkes med krysset eller Esc.
+    - `onboarding_done` i data (utvidelse av datamodellen) gjør at den bare vises én gang. Data lagret før veiviseren fantes, regnes som ferdig hvis det finnes emner, oppgaver eller aktiviteter. Eksempeldata setter den også. «Slett alle data» nullstiller den.
+    - Dialogen har `role="dialog"` og `aria-modal`, og resten av siden er `inert`. Tab går i ring inne i dialogen. Fokus flyttes til steg-overskriften, til feilmeldingen ved feil, og til hovedinnholdet når veiviseren lukkes.
+    - Kan startes på nytt fra Innstillinger uten at noe slettes.
+58. **Ukesoppsummering:** `weekSummary(data, iDag)` i `logic/summary.js`. Planlagt = alle arbeidsøkter mandag–søndag, gjennomført = økter som er huket av. Fremgang registrert direkte på en oppgave (uten avhuking) telles ikke. Dagens dato kommer fra `clock.js` via `ui.today`, så `?dato=` virker. Timer vises med to desimaler (23,25).
+59. **Hilsen:** `greetingPeriod(dato)` i `logic/greeting.js`. Perioden regnes ut når appen åpnes og når fanen blir synlig igjen, og ligger i `ui.greeting`, så render ikke trenger «nå».
+60. **Mørk modus:**
+    - Paletten står i design.md under «Mørk modus» og er kontrastmålt (alle tekstkombinasjoner minst 4,5:1).
+    - Valget (`light`, `dark` eller `system`) lagres under `pace:tema`, egen nøkkel utenfor appdataene. Et lite skript i `<head>` i begge HTML-filene leser den og setter `data-theme` før siden tegnes, så det ikke blinker hvitt. Det er det eneste unntaket fra at `localStorage` bare brukes i `storage.js`.
+    - Knapp med sol eller måne i headeren (også på landingssiden). Valget gjelder begge sidene.
+    - Under Innstillinger: «Lyst», «Mørkt» og «Følg systemet» som radioknapper (fungerer med piltaster).
+    - Bilder: illustrasjonene står på en lys, avrundet flate i mørk modus, logoen lysnes med et filter, og hero-bildet dempes og får en mørk overgang bak teksten.
+    - Fremdriftslinjen i korall har 2,3:1 mot hvitt i lys modus (WCAG krever 3:1 for grafikk). Det er godtatt, fordi fremgangen alltid står som tekst ved siden av, og korall er fargen design.md bruker for fremgang.
+61. **Fokus beholdes ved ny tegning:** Render husker elementet med fokus (`id` eller `data-*`-attributter) og gir det fokus igjen etter tegning. Et nytt `data-autofocus`-mål (skjema som åpnes, feilmelding, nytt steg) går foran.
 
 ---
 

@@ -18,6 +18,33 @@
   font-weight: 500;
 }
 
+.greeting {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* Ukesoppsummering */
+.week-summary {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.week-summary-text {
+  margin: 0;
+  font-weight: 500;
+}
+
+.week-summary .progress-bar {
+  flex: none;
+  height: 0.625rem;
+}
+
 .agenda {
   display: grid;
   gap: var(--space-2);

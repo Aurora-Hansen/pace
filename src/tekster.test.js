@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatHours, hoperSegOpp, feilmeldinger, estimat } from './tekster.js';
+import { formatHours, hoperSegOpp, feilmeldinger, estimat, ukesoppsummering, hilsen } from './tekster.js';
 import { estimateHours, TASK_TYPES } from './logic/estimate.js';
 
 describe('hoperSegOpp.tekst', () => {
@@ -17,6 +17,28 @@ describe('hoperSegOpp.tekst', () => {
     const deler = hoperSegOpp.tekstDeler({ antall: 3, dag: 'i dag' });
     expect(deler.uthevet).toBe('3 timer');
     expect(deler.for + deler.uthevet + deler.etter).toBe(hoperSegOpp.tekst({ antall: 3, dag: 'i dag' }));
+  });
+});
+
+describe('hilsen', () => {
+  it('tar med navnet når det er satt', () => {
+    expect(hilsen.tekst('morgen', 'Kari')).toBe('God morgen, Kari!');
+    expect(hilsen.tekst('kveld', '  Ola  ')).toBe('God kveld, Ola!');
+  });
+
+  it('klarer seg uten navn', () => {
+    expect(hilsen.tekst('dag', '')).toBe('God dag!');
+    expect(hilsen.tekst('natt', undefined)).toBe('God natt!');
+    expect(hilsen.tekst('natt', '   ')).toBe('God natt!');
+  });
+});
+
+describe('ukesoppsummering', () => {
+  it('skriver «Denne uken: 6 av 14 timer» med desimalkomma og entall', () => {
+    expect(ukesoppsummering.tekst(6, 14)).toBe('Denne uken: 6 av 14 timer');
+    expect(ukesoppsummering.tekst(1.5, 2.5)).toBe('Denne uken: 1,5 av 2,5 timer');
+    expect(ukesoppsummering.tekst(0, 1)).toBe('Denne uken: 0 av 1 time');
+    expect(ukesoppsummering.tekst(2.25, 23.25)).toBe('Denne uken: 2,25 av 23,25 timer');
   });
 });
 

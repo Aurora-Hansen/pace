@@ -64,18 +64,25 @@ export function createInitialState({ userId }) {
     tasks: [],
     blocks: [],
     last_checked_date: null,
+    // Utvidelse av datamodellen: førstegangsveiviseren er vist (lukket eller fullført)
+    onboarding_done: false,
   };
 }
 
 // Fyller inn manglende felt i lagrede data, f.eks. etter at nye innstillinger er lagt til
 export function normalizeState(raw) {
   const list = (value) => (Array.isArray(value) ? value : []);
+  const courses = list(raw.courses);
+  const tasks = list(raw.tasks);
+  const blocks = list(raw.blocks);
   return {
     user: { name: '', ...DEFAULT_SETTINGS, ...raw.user },
-    courses: list(raw.courses),
-    tasks: list(raw.tasks),
-    blocks: list(raw.blocks),
+    courses,
+    tasks,
+    blocks,
     last_checked_date: raw.last_checked_date ?? null,
+    // Data lagret før veiviseren fantes: den som allerede har lagt inn noe, trenger den ikke
+    onboarding_done: raw.onboarding_done ?? courses.length + tasks.length + blocks.length > 0,
   };
 }
 

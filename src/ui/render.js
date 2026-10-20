@@ -9,6 +9,9 @@ import { renderTimeplan } from './timeplan.js';
 import { renderCalendar } from './calendar.js';
 import { renderTasks } from './tasks.js';
 import { renderToday } from './today.js';
+import { renderWizard } from './wizard.js';
+import { themeToggle } from './theme.js';
+import { effectiveTheme } from '../logic/theme.js';
 import logoUrl from '../images/logo-64.png';
 
 // Rekkefølgen her er rekkefølgen i menyen
@@ -48,6 +51,7 @@ function header(state) {
         <span>Pace</span>
       </a>
       <nav class="app-nav" aria-label="${navigasjon.meny}">${tabs}</nav>
+      ${themeToggle(effectiveTheme(state.ui.theme, state.ui.systemDark))}
     </header>`;
 }
 
@@ -83,16 +87,50 @@ function noticeBanner(code) {
     </div>`;
 }
 
-export function render(state, root) {
-  root.innerHTML = `
-    ${testBanner(state.ui.simulatedNow)}
-    ${header(state)}
-    <main id="innhold" class="app-main app-main-${state.ui.view}" tabindex="-1">
-      <h1 class="visually-hidden">Pace – ${navigasjon[state.ui.view]}</h1>
-      ${errorBanner(state.ui.error)}
-      ${noticeBanner(state.ui.notice)}
-      ${views[state.ui.view](state)}
-    </main>`;
+// --- Fokus ---
+// Hele appen tegnes på nytt ved hver endring, så elementet med fokus erstattes. For at tastatur- og
+// skjermleserbrukere ikke skal miste plassen, gjenkjennes elementet på id eller data-attributter og får fokus igjen.
+const FOCUS_ATTRIBUTES = ['data-action', 'data-id', 'data-view', 'data-mode', 'data-direction', 'data-theme', 'data-kind', 'data-date', 'name', 'value'];
 
-  root.querySelector('[data-autofocus]')?.focus();
+function focusSelector(element) {
+  if (!element || element === element.ownerDocument.body) return null;
+  if (element.id) return `#${CSS.escape(element.id)}`;
+  const attributes = FOCUS_ATTRIBUTES.filter((name) => element.hasAttribute(name))
+    .map((name) => `[${name}="${CSS.escape(element.getAttribute(name))}"]`)
+    .join('');
+  return attributes ? `${element.tagName.toLowerCase()}${attributes}` : null;
+}
+
+// Et autofokus-mål regnes som nytt hvis det ikke fantes før, eller teksten er endret (f.eks. neste steg i veiviseren)
+const autofocusKey = (element) =>
+  element ? `${focusSelector(element) ?? element.className}|${element.textContent.trim().slice(0, 60)}` : null;
+
+export function render(state, root) {
+  const previousFocus = focusSelector(root.contains(document.activeElement) ? document.activeElement : null);
+  const previousAutofocus = autofocusKey(root.querySelector('[data-autofocus]'));
+
+  // Når veiviseren er åpen, er resten av siden `inert`: den kan ikke nås med tastatur eller skjermleser
+  const wizardOpen = Boolean(state.ui.wizard);
+  const inert = wizardOpen ? ' inert' : '';
+
+  root.innerHTML = `
+    ${renderWizard(state)}
+    <div class="app-shell"${inert}>
+      ${testBanner(state.ui.simulatedNow)}
+      ${header(state)}
+      <main id="innhold" class="app-main app-main-${state.ui.view}" tabindex="-1">
+        <h1 class="visually-hidden">Pace – ${navigasjon[state.ui.view]}</h1>
+        ${errorBanner(state.ui.error)}
+        ${noticeBanner(state.ui.notice)}
+        ${views[state.ui.view](state)}
+      </main>
+    </div>`;
+  root.ownerDocument.querySelector('.skip-link')?.toggleAttribute('inert', wizardOpen);
+
+  // Nytt autofokus-mål (skjema som åpnes, feilmelding, nytt steg) går først. Ellers får samme element fokus igjen.
+  const autofocus = root.querySelector('[data-autofocus]');
+  const restore = previousFocus && root.querySelector(previousFocus);
+  if (autofocus && autofocusKey(autofocus) !== previousAutofocus) autofocus.focus();
+  else if (restore && !restore.closest('[inert]')) restore.focus();
+  else autofocus?.focus();
 }

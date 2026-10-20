@@ -1,6 +1,7 @@
 // All tilgang til localStorage går gjennom denne filen.
 // `backend` kan byttes ut med en falsk lagring i tester.
 import { normalizeState } from '../logic/models.js';
+import { parseTheme } from '../logic/theme.js';
 
 export const STORAGE_KEY = 'pace:v1';
 export const BACKUP_KEY = 'pace:v1:backup';
@@ -39,6 +40,28 @@ export function load(backend = defaultBackend()) {
       // Ingenting mer å gjøre
     }
     return { state: null, error: 'LESING_FEILET' };
+  }
+}
+
+// Valg av lys/mørk modus lagres under egen nøkkel, fordi det må leses før appen starter
+// (et lite skript i <head> i index.html og app.html leser samme nøkkel for å unngå hvit blink).
+export const THEME_KEY = 'pace:tema';
+
+export function loadTheme(backend = defaultBackend()) {
+  try {
+    return parseTheme(backend?.getItem(THEME_KEY));
+  } catch {
+    return 'system';
+  }
+}
+
+export function saveTheme(theme, backend = defaultBackend()) {
+  try {
+    if (theme === 'system') backend.removeItem(THEME_KEY);
+    else backend.setItem(THEME_KEY, theme);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'LAGRING_FEILET' };
   }
 }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { load, save, STORAGE_KEY, BACKUP_KEY } from './storage.js';
+import { load, save, loadTheme, saveTheme, STORAGE_KEY, BACKUP_KEY, THEME_KEY } from './storage.js';
 import { createInitialState, DEFAULT_SETTINGS } from '../logic/models.js';
 
 // Falsk localStorage i minnet
@@ -60,6 +60,35 @@ describe('load', () => {
     };
     expect(load(backend)).toEqual({ state: null, error: null });
     expect(load(null)).toEqual({ state: null, error: null });
+  });
+});
+
+describe('loadTheme og saveTheme', () => {
+  const backend = () => {
+    const storage = fakeStorage();
+    storage.removeItem = (key) => storage.items.delete(key);
+    return storage;
+  };
+
+  it('lagrer og henter lyst og mørkt valg', () => {
+    const storage = backend();
+    expect(saveTheme('dark', storage)).toEqual({ ok: true });
+    expect(storage.items.get(THEME_KEY)).toBe('dark');
+    expect(loadTheme(storage)).toBe('dark');
+  });
+
+  it('«Følg systemet» fjerner valget', () => {
+    const storage = backend();
+    saveTheme('light', storage);
+    saveTheme('system', storage);
+    expect(storage.items.has(THEME_KEY)).toBe(false);
+    expect(loadTheme(storage)).toBe('system');
+  });
+
+  it('gir «system» for ukjent verdi eller uten lagring', () => {
+    expect(loadTheme(fakeStorage({ [THEME_KEY]: 'lilla' }))).toBe('system');
+    expect(loadTheme(null)).toBe('system');
+    expect(saveTheme('dark', null)).toEqual({ ok: false, error: 'LAGRING_FEILET' });
   });
 });
 

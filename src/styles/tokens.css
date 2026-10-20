@@ -1,5 +1,7 @@
 /* Designtokens fra docs/design.md. Bruk alltid disse variablene, ikke hex-koder direkte. */
 :root {
+  color-scheme: light;
+
   /* Farger fra design.md */
   --color-primary: #2E5B88;   /* Dyp Harmoniblå */
   --color-accent: #FF8C61;    /* Varmerød / Korall */
@@ -20,6 +22,13 @@
   --color-on-primary: var(--color-surface);
   --color-on-accent: var(--color-text);
 
+  /* Bilder og overlegg */
+  --color-illustration-bg: transparent;
+  --color-backdrop: rgb(15 23 42 / 0.45);
+  --logo-filter: none;
+  --hero-overlay: none;
+  --hero-image-filter: none;
+
   /* Fonter */
   --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -34,4 +43,52 @@
   --space-6: 1.5rem;
   --space-8: 2rem;
   --shadow-card: 0 1px 2px rgb(30 41 59 / 0.06), 0 2px 8px rgb(30 41 59 / 0.06);
+}
+
+/*
+ * Mørk modus (design.md, «Mørk modus»). Brukes når brukeren har valgt mørkt (data-theme="dark"),
+ * eller når systemet er mørkt og brukeren ikke har valgt lyst. De to blokkene under er like.
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-primary: #7BA7D4;
+  --color-bg: #0F172A;
+  --color-surface: #1E293B;
+  --color-text: #E2E8F0;
+  --color-warning: #F87171;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 85%, white);
+  --color-accent-hover: color-mix(in srgb, var(--color-accent) 88%, white);
+  --color-primary-soft: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+  --color-warning-soft: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+  --color-on-primary: var(--color-bg);
+  --color-on-accent: var(--color-bg);
+  --color-illustration-bg: color-mix(in srgb, var(--color-text) 92%, var(--color-surface));
+  --color-backdrop: rgb(2 6 23 / 0.7);
+  --logo-filter: brightness(1.7) saturate(0.85);
+  --hero-overlay: linear-gradient(90deg, var(--color-bg) 0%, color-mix(in srgb, var(--color-bg) 88%, transparent) 42%, transparent 72%);
+  --hero-image-filter: brightness(0.72) saturate(0.9);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 8px rgb(0 0 0 / 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --color-primary: #7BA7D4;
+    --color-bg: #0F172A;
+    --color-surface: #1E293B;
+    --color-text: #E2E8F0;
+    --color-warning: #F87171;
+    --color-primary-hover: color-mix(in srgb, var(--color-primary) 85%, white);
+    --color-accent-hover: color-mix(in srgb, var(--color-accent) 88%, white);
+    --color-primary-soft: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+    --color-warning-soft: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+    --color-on-primary: var(--color-bg);
+    --color-on-accent: var(--color-bg);
+    --color-illustration-bg: color-mix(in srgb, var(--color-text) 92%, var(--color-surface));
+    --color-backdrop: rgb(2 6 23 / 0.7);
+    --logo-filter: brightness(1.7) saturate(0.85);
+    --hero-overlay: linear-gradient(90deg, var(--color-bg) 0%, color-mix(in srgb, var(--color-bg) 88%, transparent) 42%, transparent 72%);
+    --hero-image-filter: brightness(0.72) saturate(0.9);
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 8px rgb(0 0 0 / 0.25);
+  }
 }

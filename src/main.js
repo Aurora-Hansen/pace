@@ -1,5 +1,5 @@
 // Starter appen: henter lagrede data, lager store og kobler hendelser til endringer.
-import { load, save } from './data/storage.js';
+import { load, save, loadTheme, saveTheme } from './data/storage.js';
 import { createStore } from './data/store.js';
 import * as actions from './data/actions.js';
 import { createInitialState } from './logic/models.js';
@@ -8,6 +8,7 @@ import { now, isSimulated } from './data/clock.js';
 import { render } from './ui/render.js';
 import { prepareExport } from './logic/ics.js';
 import { eksport } from './tekster.js';
+import { greetingPeriod } from './logic/greeting.js';
 
 const root = document.querySelector('#app');
 const newId = () => crypto.randomUUID();
@@ -20,6 +21,13 @@ const calendarMode = window.matchMedia('(max-width: 40rem)').matches ? 'day' : '
 
 const startNow = now();
 
+// Lys/mørk modus: lagret valg og systeminnstilling. data-theme er allerede satt av skriptet i <head>.
+const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(theme) {
+  if (theme === 'system') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = theme;
+}
+
 const store = createStore({
   state: {
     data,
@@ -28,6 +36,9 @@ const store = createStore({
       today: toDateKey(startNow),
       calendarMode,
       simulatedNow: isSimulated() ? startNow.toISOString() : null,
+      greeting: greetingPeriod(startNow),
+      theme: loadTheme(),
+      systemDark: darkQuery.matches,
     }),
   },
   save,
@@ -47,6 +58,7 @@ const formActions = {
   },
   progress: (values) => actions.submitProgress(values),
   adjust: (values) => actions.submitAdjust(values, now()),
+  wizard: (values) => actions.submitWizard(values, newId(), now()),
 };
 
 // Knapper: data-action="navn" → endring som får knappens data-attributter
@@ -84,6 +96,10 @@ const clickActions = {
   'dismiss-notice': actions.dismissNotice,
   'open-export': actions.openExportForm,
   'cancel-export': actions.cancelExportForm,
+  'close-wizard': actions.closeWizard,
+  'restart-wizard': actions.restartWizard,
+  'toggle-theme': actions.toggleTheme,
+  'set-theme': actions.setTheme,
   'ask-delete': actions.askDelete,
   'cancel-delete': actions.cancelDelete,
   'confirm-delete': actions.confirmDelete,
@@ -113,7 +129,20 @@ function exportCalendar(values) {
   store.update(actions.exportDone());
 }
 
-// Alle endringer går via withReplan, så planen bygges på nytt når lagrede data endres
+// Alle endringer går via withReplan, så planen bygges på nytt når lagrede data endres.
+// Når veiviseren lukkes, flyttes fokus til hovedinnholdet, så tastatur- og skjermleserbrukere ikke mister plassen.
+// Valg av lys/mørk modus brukes på <html> og lagres med en gang.
+function update(change) {
+  const before = store.getState().ui;
+  store.update(actions.withReplan(change, now()));
+  const after = store.getState().ui;
+  if (before.wizard && !after.wizard) root.querySelector('#innhold')?.focus();
+  if (before.theme !== after.theme) {
+    applyTheme(after.theme);
+    saveTheme(after.theme);
+  }
+}
+
 root.addEventListener('submit', (event) => {
   if (event.target.dataset.form === 'export') {
     event.preventDefault();
@@ -125,18 +154,57 @@ root.addEventListener('submit', (event) => {
   event.preventDefault();
   // `submitter` tar med navnet på knappen som ble trykket (f.eks. intent=estimate)
   const values = Object.fromEntries(new FormData(event.target, event.submitter));
-  store.update(actions.withReplan(action(values), now()));
+  update(action(values));
 });
 
 root.addEventListener('click', (event) => {
   const button = event.target.closest('[data-action]');
   const action = clickActions[button?.dataset.action];
-  if (action) store.update(actions.withReplan(action({ ...button.dataset }), now()));
+  if (action) update(action({ ...button.dataset }));
 });
 
-// Daglig sjekk når appen åpnes, og når den vises igjen etter å ha stått åpen over midnatt
+// Radioknapper (lys/mørk modus) kan også endres med piltaster
+root.addEventListener('change', (event) => {
+  const input = event.target;
+  if (input.type !== 'radio' || !input.dataset.action) return;
+  const action = clickActions[input.dataset.action];
+  if (action) update(action({ ...input.dataset }));
+});
+
+// Systeminnstillingen kan endres mens appen er åpen
+darkQuery.addEventListener('change', (event) => store.update(actions.setSystemDark(event.matches)));
+
+// Veiviseren: Esc lukker, og Tab går i ring inne i dialogen (WAI-ARIA-mønster for modale dialoger)
+document.addEventListener('keydown', (event) => {
+  if (!store.getState().ui.wizard) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    update(actions.closeWizard());
+    return;
+  }
+  if (event.key !== 'Tab') return;
+  const focusable = [...root.querySelectorAll('.wizard :is(button, input, select, textarea, [href])')].filter(
+    (element) => !element.disabled,
+  );
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const active = document.activeElement;
+  if (event.shiftKey && (active === first || !root.querySelector('.wizard').contains(active))) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && (active === last || !root.querySelector('.wizard').contains(active))) {
+    event.preventDefault();
+    first.focus();
+  }
+});
+
+// Daglig sjekk når appen åpnes, og når den vises igjen etter å ha stått åpen over midnatt.
+// Veiviseren vises første gang appen åpnes.
 store.start();
 store.update(actions.startDay(startNow));
+store.update(actions.showWizardIfNew());
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) store.update(actions.newDay(now()));
+  if (document.hidden) return;
+  store.update(actions.newDay(now()));
+  store.update(actions.refreshGreeting(now()));
 });

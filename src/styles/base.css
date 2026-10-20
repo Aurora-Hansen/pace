@@ -5,6 +5,11 @@
   box-sizing: border-box;
 }
 
+/* Bakgrunnen settes også på html, så det ikke blinker hvitt ved innlasting i mørk modus */
+html {
+  background: var(--color-bg);
+}
+
 body {
   margin: 0;
   background: var(--color-bg);

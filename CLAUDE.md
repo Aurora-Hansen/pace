@@ -51,7 +51,7 @@ Prosjektet bruker vanilla JavaScript (ES-moduler), Vite og Vitest. Det publisere
 ### Tilstand og rendering
 - All tilstand endres **bare** via `store.update(endring)` i `src/data/store.js`, der `endring` er en ren funksjon `state → nyState`.
 - UI tegnes **bare** via den felles `render(state)` i `src/ui/render.js`. Hendelser kaller `store.update` og endrer aldri DOM direkte.
-- All tilgang til `localStorage` går gjennom `src/data/storage.js`.
+- All tilgang til `localStorage` går gjennom `src/data/storage.js`. Eneste unntak er skriptet i `<head>` i `index.html` og `app.html`, som leser `pace:tema` før siden tegnes (se punkt 60 i plan.md).
 
 ### Kode
 - Feltnavn følger datamodellen i krav.md del 4 (engelsk snake_case).
