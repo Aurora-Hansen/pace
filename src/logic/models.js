@@ -1,6 +1,6 @@
 // Oppretter objekter etter datamodellen i docs/krav.md del 4.
 // Funksjonene er rene: id og «nå» sendes inn, de lages ikke her.
-import { atMinutes, parseTime, toDateKey, formatTime, minutesSinceMidnight } from './dates.js';
+import { atMinutes, parseTime, toDateKey, formatTime, minutesSinceMidnight, isValidDateKey } from './dates.js';
 
 export const STATUS = {
   NOT_STARTED: 'not_started',
@@ -37,6 +37,11 @@ export function parseNumber(value) {
   if (typeof value !== 'string' || value.trim() === '') return null;
   const number = Number(value.trim().replace(',', '.'));
   return Number.isFinite(number) ? number : null;
+}
+
+// Tall → tekst for skjemafelt, med desimalkomma: 6.5 → '6,5'
+export function numberToInput(value) {
+  return value === null || value === undefined ? '' : String(value).replace('.', ',');
 }
 
 // Date eller datostreng → ISO-streng, eller null hvis ugyldig
@@ -93,6 +98,49 @@ export function createTask(input, { id, now }) {
     completed_hours: 0,
     status: STATUS.NOT_STARTED,
     created_at: now.toISOString(),
+  };
+}
+
+// Frist fra skjema: dato og valgfritt klokkeslett (standard 23:59). Ugyldig gir null.
+export const DEFAULT_DEADLINE_TIME = '23:59';
+
+export function deadlineFromInput(date, time) {
+  if (!isValidDateKey(date)) return null;
+  const minutes = parseTime(time || DEFAULT_DEADLINE_TIME);
+  return minutes === null ? null : atMinutes(date, minutes).toISOString();
+}
+
+// Skjemaverdier → felt i oppgaven som brukeren kan endre
+function taskFieldsFromInput(values) {
+  return {
+    course_id: values.course_id || null,
+    title: trimmed(values.title),
+    description: trimmed(values.description),
+    deadline: deadlineFromInput(values.deadline_date, values.deadline_time),
+    estimated_hours: parseNumber(values.estimated_hours),
+  };
+}
+
+export function taskFromInput(values, { id, now }) {
+  return { ...createTask({}, { id, now }), ...taskFieldsFromInput(values) };
+}
+
+// Endring av eksisterende oppgave. Fremgang, status og opprettet-tid beholdes.
+export function updateTaskFromInput(task, values) {
+  return { ...task, ...taskFieldsFromInput(values) };
+}
+
+// Oppgave → skjemaverdier, for redigering
+export function taskToInput(task) {
+  const deadline = new Date(task.deadline);
+  return {
+    id: task.id,
+    title: task.title,
+    course_id: task.course_id ?? '',
+    description: task.description,
+    estimated_hours: numberToInput(task.estimated_hours),
+    deadline_date: toDateKey(deadline),
+    deadline_time: formatTime(minutesSinceMidnight(deadline)),
   };
 }
 

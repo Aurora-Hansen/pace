@@ -5,6 +5,7 @@ import {
   validateTask,
   validateFixedBlock,
   validateFixedBlockInput,
+  validateProgressInput,
   validateSettings,
   primaryError,
 } from './validation.js';
@@ -99,6 +100,19 @@ describe('validateFixedBlockInput', () => {
       { code: ERRORS.SLUTT_FOR_START, field: 'end' },
     ]);
     expect(validateFixedBlockInput({ ...valid, end: '10:15' })).toHaveLength(1);
+  });
+});
+
+describe('validateProgressInput', () => {
+  it('godtar 0 og positive tall, også med komma', () => {
+    expect(validateProgressInput({ amount: '0' })).toEqual([]);
+    expect(validateProgressInput({ amount: '2,5' })).toEqual([]);
+  });
+
+  it('avviser tomt, negativt og ugyldig', () => {
+    for (const amount of ['', '-1', 'mye']) {
+      expect(validateProgressInput({ amount })).toEqual([{ code: ERRORS.MANGLER_FELT, field: 'amount' }]);
+    }
   });
 });
 

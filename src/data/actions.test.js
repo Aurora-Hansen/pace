@@ -20,6 +20,15 @@ import {
   askDelete,
   cancelDelete,
   confirmDelete,
+  openTaskForm,
+  editTask,
+  cancelTaskForm,
+  submitTask,
+  openProgressForm,
+  cancelProgressForm,
+  submitProgress,
+  markTaskDone,
+  reopenTaskAction,
 } from './actions.js';
 import { createInitialState, RECURRENCE } from '../logic/models.js';
 import { load, save } from './storage.js';
@@ -213,6 +222,102 @@ describe('faste aktiviteter', () => {
 
   it('avbryt lukker skjemaet', () => {
     expect(run(initial(), openFixedBlockForm(), cancelFixedBlockForm()).ui.forms.fixedBlock).toBeUndefined();
+  });
+});
+
+describe('oppgaver', () => {
+  // Onsdag 4.11.2026 kl. 12
+  const now = new Date(2026, 10, 4, 12, 0);
+  const values = {
+    title: 'Arbeidskrav 2',
+    course_id: '',
+    description: '',
+    estimated_hours: '8',
+    deadline_date: '2026-11-10',
+    deadline_time: '',
+  };
+  const withTask = () => run(initial(), openTaskForm(), submitTask(values, 't1', now));
+
+  it('legger til oppgave og lukker skjemaet', () => {
+    const state = withTask();
+    expect(state.data.tasks).toHaveLength(1);
+    expect(state.data.tasks[0]).toMatchObject({ id: 't1', title: 'Arbeidskrav 2', estimated_hours: 8 });
+    expect(state.ui.forms.task).toBeUndefined();
+  });
+
+  it('viser «Noe mangler» med markerte felt', () => {
+    const state = submitTask({ ...values, title: '', estimated_hours: '' }, 't1', now)(initial());
+    expect(state.data.tasks).toEqual([]);
+    expect(state.ui.forms.task.errors.map((e) => e.field)).toEqual(['title', 'estimated_hours']);
+  });
+
+  it('viser «Fristen har allerede vært» for frist i fortiden', () => {
+    const state = submitTask({ ...values, deadline_date: '2026-11-03' }, 't1', now)(initial());
+    expect(state.ui.forms.task.errors).toEqual([{ code: 'FRIST_I_FORTIDEN', field: 'deadline' }]);
+  });
+
+  it('lar en oppgave med passert frist redigeres når fristen ikke endres', () => {
+    const later = new Date(2026, 10, 12, 12, 0);
+    const state = run(withTask(), editTask({ id: 't1' }), (s) =>
+      submitTask({ ...s.ui.forms.task.values, title: 'Nytt navn' }, 'ny-id', later)(s),
+    );
+    expect(state.data.tasks.map((t) => [t.id, t.title])).toEqual([['t1', 'Nytt navn']]);
+  });
+
+  it('registrerer fremgang i timer og prosent', () => {
+    const hours = run(withTask(), openProgressForm({ id: 't1' }), submitProgress({ task_id: 't1', unit: 'hours', amount: '2' }));
+    expect(hours.data.tasks[0]).toMatchObject({ completed_hours: 2, status: 'in_progress' });
+    expect(hours.ui.forms.progress).toBeUndefined();
+
+    const percent = submitProgress({ task_id: 't1', unit: 'percent', amount: '75' })(withTask());
+    expect(percent.data.tasks[0].completed_hours).toBe(6);
+  });
+
+  it('åpner fremgangsskjemaet med registrert tid', () => {
+    const state = run(withTask(), submitProgress({ task_id: 't1', unit: 'hours', amount: '2,5' }), openProgressForm({ id: 't1' }));
+    expect(state.ui.forms.progress.values).toEqual({ task_id: 't1', unit: 'hours', amount: '2,5' });
+  });
+
+  it('viser feil for ugyldig fremgang', () => {
+    const state = submitProgress({ task_id: 't1', unit: 'hours', amount: '' })(withTask());
+    expect(state.ui.forms.progress.errors).toEqual([{ code: 'MANGLER_FELT', field: 'amount' }]);
+    expect(state.data.tasks[0].completed_hours).toBe(0);
+  });
+
+  it('markerer som ferdig og gjenåpner', () => {
+    const done = markTaskDone({ id: 't1' })(withTask());
+    expect(done.data.tasks[0].status).toBe('completed');
+    expect(reopenTaskAction({ id: 't1' })(done).data.tasks[0].status).toBe('not_started');
+  });
+
+  it('lukker fremgangsskjemaet når oppgaven markeres som ferdig', () => {
+    const state = run(withTask(), openProgressForm({ id: 't1' }), markTaskDone({ id: 't1' }));
+    expect(state.ui.forms.progress).toBeUndefined();
+  });
+
+  it('sletter oppgave sammen med arbeidsøktene, men ikke faste aktiviteter', () => {
+    const state = run(
+      withTask(),
+      (s) => ({
+        ...s,
+        data: {
+          ...s.data,
+          blocks: [
+            { id: 'økt', task_id: 't1', is_fixed: false },
+            { id: 'fast', task_id: null, is_fixed: true },
+          ],
+        },
+      }),
+      askDelete({ kind: 'task', id: 't1' }),
+      confirmDelete(),
+    );
+    expect(state.data.tasks).toEqual([]);
+    expect(state.data.blocks.map((b) => b.id)).toEqual(['fast']);
+  });
+
+  it('avbryt lukker skjemaene', () => {
+    expect(run(initial(), openTaskForm(), cancelTaskForm()).ui.forms.task).toBeUndefined();
+    expect(run(withTask(), openProgressForm({ id: 't1' }), cancelProgressForm()).ui.forms.progress).toBeUndefined();
   });
 });
 

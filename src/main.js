@@ -30,6 +30,8 @@ const formActions = {
   settings: (values) => actions.submitSettings(values),
   course: (values) => actions.submitCourse(values, newId()),
   fixedBlock: (values) => actions.submitFixedBlock(values, newId()),
+  task: (values) => actions.submitTask(values, newId(), now()),
+  progress: (values) => actions.submitProgress(values),
 };
 
 // Knapper: data-action="navn" → endring som får knappens data-attributter
@@ -47,6 +49,13 @@ const clickActions = {
   'open-fixed-block': actions.openFixedBlockForm,
   'edit-fixed-block': actions.editFixedBlock,
   'cancel-fixed-block': actions.cancelFixedBlockForm,
+  'open-task': actions.openTaskForm,
+  'edit-task': actions.editTask,
+  'cancel-task': actions.cancelTaskForm,
+  'open-progress': actions.openProgressForm,
+  'cancel-progress': actions.cancelProgressForm,
+  'complete-task': actions.markTaskDone,
+  'reopen-task': actions.reopenTaskAction,
   'ask-delete': actions.askDelete,
   'cancel-delete': actions.cancelDelete,
   'confirm-delete': actions.confirmDelete,

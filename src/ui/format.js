@@ -29,6 +29,18 @@ export function formatFixedBlockWhen(block) {
   return `${day} ${formatTimeRange(block.start_time, block.end_time)}`;
 }
 
+const deadlineFormat = new Intl.DateTimeFormat('nb-NO', { weekday: 'short', day: 'numeric', month: 'short' });
+
+// «tor. 10. nov. kl. 23:59»
+export const formatDeadline = (iso) => {
+  const date = new Date(iso);
+  return `${deadlineFormat.format(date)} kl. ${formatClock(date)}`;
+};
+
+// «2,5 t»
+const hoursFormat = new Intl.NumberFormat('nb-NO', { maximumFractionDigits: 2 });
+export const formatHoursShort = (hours) => `${hoursFormat.format(hours)} t`;
+
 // «man.» for kolonneoverskrifter
 export const formatShortWeekday = (dateKey) => shortWeekdayFormat.format(fromDateKey(dateKey));
 

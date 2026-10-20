@@ -7,6 +7,11 @@ import {
   suggestCourseColor,
   fixedBlockFromInput,
   fixedBlockToInput,
+  deadlineFromInput,
+  taskFromInput,
+  updateTaskFromInput,
+  taskToInput,
+  numberToInput,
   parseNumber,
   toIsoString,
   createInitialState,
@@ -31,6 +36,14 @@ describe('parseNumber', () => {
     expect(parseNumber('abc')).toBeNull();
     expect(parseNumber(undefined)).toBeNull();
     expect(parseNumber(Number.NaN)).toBeNull();
+  });
+});
+
+describe('numberToInput', () => {
+  it('bruker desimalkomma og gir tom tekst for manglende verdi', () => {
+    expect(numberToInput(6.5)).toBe('6,5');
+    expect(numberToInput(4)).toBe('4');
+    expect(numberToInput(null)).toBe('');
   });
 });
 
@@ -135,6 +148,54 @@ describe('fixedBlockFromInput og fixedBlockToInput', () => {
 
   it('gir tilbake de samme skjemaverdiene', () => {
     expect(fixedBlockToInput(fixedBlockFromInput(values, { id: 'b1' }))).toEqual({ id: 'b1', ...values });
+  });
+});
+
+describe('deadlineFromInput', () => {
+  it('bruker 23:59 når klokkeslett mangler', () => {
+    expect(deadlineFromInput('2026-11-10', '')).toBe(new Date(2026, 10, 10, 23, 59).toISOString());
+    expect(deadlineFromInput('2026-11-10', '12:00')).toBe(new Date(2026, 10, 10, 12, 0).toISOString());
+  });
+
+  it('gir null for ugyldig dato eller klokkeslett', () => {
+    expect(deadlineFromInput('', '12:00')).toBeNull();
+    expect(deadlineFromInput('2026-11-10', '25:00')).toBeNull();
+  });
+});
+
+describe('taskFromInput, updateTaskFromInput og taskToInput', () => {
+  const values = {
+    title: ' Arbeidskrav 2 ',
+    course_id: 'c1',
+    description: 'Rapport på 2000 ord',
+    estimated_hours: '6,5',
+    deadline_date: '2026-11-10',
+    deadline_time: '14:00',
+  };
+
+  it('lager ny oppgave fra skjemaet', () => {
+    const task = taskFromInput(values, { id: 't1', now });
+    expect(task).toMatchObject({
+      id: 't1',
+      title: 'Arbeidskrav 2',
+      course_id: 'c1',
+      estimated_hours: 6.5,
+      completed_hours: 0,
+      status: STATUS.NOT_STARTED,
+      deadline: new Date(2026, 10, 10, 14, 0).toISOString(),
+      created_at: now.toISOString(),
+    });
+  });
+
+  it('beholder fremgang og status ved endring', () => {
+    const existing = { ...taskFromInput(values, { id: 't1', now }), completed_hours: 2, status: STATUS.IN_PROGRESS };
+    const updated = updateTaskFromInput(existing, { ...values, title: 'Nytt navn' });
+    expect(updated).toMatchObject({ id: 't1', title: 'Nytt navn', completed_hours: 2, status: STATUS.IN_PROGRESS });
+  });
+
+  it('gir tilbake skjemaverdiene', () => {
+    const task = taskFromInput(values, { id: 't1', now });
+    expect(taskToInput(task)).toEqual({ id: 't1', ...values, title: 'Arbeidskrav 2' });
   });
 });
 

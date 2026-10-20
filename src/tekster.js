@@ -53,6 +53,7 @@ export const knapper = {
 export const navigasjon = {
   meny: 'Hovedmeny',
   kalender: 'Kalender',
+  oppgaver: 'Oppgaver',
   timeplan: 'Timeplan',
   innstillinger: 'Innstillinger',
 };
@@ -70,6 +71,34 @@ export const kalender = {
   nesteDag: 'Neste dag',
   ukenummer: (nummer) => `Uke ${nummer}`,
   apneDag: (dag) => `Vis ${dag}`,
+};
+
+// Ikke fra innhold.md – lagt til i fase 4
+export const oppgaver = {
+  overskrift: 'Oppgaver',
+  aktive: 'Aktive',
+  kommende: 'Kommende',
+  fullforte: 'Fullførte',
+  ny: 'Ny oppgave',
+  rediger: 'Rediger oppgave',
+  tittel: 'Tittel',
+  tittelEksempel: 'F.eks. Arbeidskrav 2',
+  emne: 'Emne',
+  beskrivelse: 'Beskrivelse (valgfri)',
+  estimat: 'Estimert tidsbruk (timer)',
+  fristDato: 'Frist',
+  fristTid: 'Klokkeslett (valgfritt)',
+  fristTidHjelp: 'Uten klokkeslett settes fristen til 23:59.',
+  frist: (tekst) => `Frist ${tekst}`,
+  fristPassert: 'Fristen har gått ut',
+  relativ: (dager) => (dager === 0 ? 'i dag' : dager === 1 ? 'i morgen' : `om ${dager} dager`),
+  fremdrift: (gjort, totalt) => `${gjort} av ${totalt}`,
+  ingenKommende: 'Ingen oppgaver med frist lenger frem.',
+  utfort: 'Utført så langt',
+  enhet: 'Enhet',
+  enheter: { hours: 'timer', percent: 'prosent' },
+  gjenapne: 'Gjenåpne',
+  slettSporsmal: (tittel) => `Vil du slette «${tittel}»? Planlagte arbeidsøkter for oppgaven slettes også.`,
 };
 
 // Ikke fra innhold.md – lagt til i steg 2.1

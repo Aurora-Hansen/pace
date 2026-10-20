@@ -1,11 +1,28 @@
 // Endringer som sendes til store.update. Hver funksjon tar inn det den trenger
 // og returnerer en ren funksjon state → nyState.
 // Nye id-er sendes inn fra main.js, så endringene forblir rene.
-import { parseNumber, createCourse, fixedBlockFromInput, fixedBlockToInput } from '../logic/models.js';
-import { validateSettings, validateCourse, validateFixedBlockInput } from '../logic/validation.js';
+import {
+  parseNumber,
+  numberToInput,
+  createCourse,
+  fixedBlockFromInput,
+  fixedBlockToInput,
+  taskFromInput,
+  updateTaskFromInput,
+  taskToInput,
+} from '../logic/models.js';
+import {
+  ERRORS,
+  validateSettings,
+  validateCourse,
+  validateFixedBlockInput,
+  validateTask,
+  validateProgressInput,
+} from '../logic/validation.js';
+import { registerProgress, completeTask, reopenTask } from '../logic/progress.js';
 import { addDays, isValidDateKey } from '../logic/dates.js';
 
-export const VIEWS = ['kalender', 'timeplan', 'innstillinger'];
+export const VIEWS = ['kalender', 'oppgaver', 'timeplan', 'innstillinger'];
 
 // `today` er dagens dato (datonøkkel) fra clock.js når appen starter.
 // `calendarMode` lar main.js starte med dagsvisning på smale skjermer.
@@ -149,9 +166,72 @@ export const addFixedBlockFromCalendar = () => (state) =>
 export const editFixedBlockFromCalendar = ({ id }) => (state) =>
   editFixedBlock({ id })(showView({ view: 'timeplan' })(state));
 
+// --- Oppgaver ---
+
+const updateTask = (state, id, change) => ({
+  ...state,
+  data: { ...state.data, tasks: state.data.tasks.map((task) => (task.id === id ? change(task) : task)) },
+});
+
+export const openTaskForm = () => (state) =>
+  withForm(withUi(state, { confirm: null }), 'task', { values: {}, errors: [] });
+
+export const editTask = ({ id }) => (state) => {
+  const task = state.data.tasks.find((t) => t.id === id);
+  if (!task) return state;
+  return withForm(withUi(state, { confirm: null }), 'task', { values: taskToInput(task), errors: [] });
+};
+
+export const cancelTaskForm = () => (state) => ({ ...state, ui: withoutForm(state.ui, 'task') });
+
+// Ny oppgave når `values.id` er tom, ellers endring. `now` brukes for opprettet-tid og fristsjekk.
+export const submitTask = (values, newId, now) => (state) => {
+  const existing = values.id ? state.data.tasks.find((t) => t.id === values.id) : null;
+  const task = existing ? updateTaskFromInput(existing, values) : taskFromInput(values, { id: newId, now });
+
+  let errors = validateTask(task, now);
+  // En oppgave med passert frist kan fortsatt redigeres så lenge fristen ikke endres
+  if (existing && task.deadline === existing.deadline) {
+    errors = errors.filter((error) => error.code !== ERRORS.FRIST_I_FORTIDEN);
+  }
+  if (errors.length > 0) return withForm(state, 'task', { values, errors });
+
+  const tasks = existing ? replaceById(state.data.tasks, task) : [...state.data.tasks, task];
+  return saveAndCloseForm(state, { tasks }, 'task');
+};
+
+export const openProgressForm = ({ id }) => (state) => {
+  const task = state.data.tasks.find((t) => t.id === id);
+  if (!task) return state;
+  const values = { task_id: id, unit: 'hours', amount: numberToInput(task.completed_hours) };
+  return withForm(withUi(state, { confirm: null }), 'progress', { values, errors: [] });
+};
+
+export const cancelProgressForm = () => (state) => ({ ...state, ui: withoutForm(state.ui, 'progress') });
+
+// `values` = { task_id, unit: 'hours' | 'percent', amount }
+export const submitProgress = (values) => (state) => {
+  const errors = validateProgressInput(values);
+  if (errors.length > 0) return withForm(state, 'progress', { values, errors });
+
+  const amount = parseNumber(values.amount);
+  const progress = values.unit === 'percent' ? { percent: amount } : { hours: amount };
+  const updated = updateTask(state, values.task_id, (task) => registerProgress(task, progress));
+  return { ...updated, ui: withoutForm(state.ui, 'progress') };
+};
+
+export const markTaskDone = ({ id }) => (state) => {
+  const updated = updateTask(state, id, completeTask);
+  // Lukk fremgangsskjemaet hvis det var åpent for denne oppgaven
+  const ui = state.ui.forms.progress?.values.task_id === id ? withoutForm(state.ui, 'progress') : state.ui;
+  return { ...updated, ui };
+};
+
+export const reopenTaskAction = ({ id }) => (state) => updateTask(state, id, reopenTask);
+
 // --- Sletting med bekreftelse ---
 
-const DELETABLE = ['course', 'fixedBlock'];
+const DELETABLE = ['course', 'fixedBlock', 'task'];
 
 export const askDelete = ({ kind, id }) => (state) => {
   if (!DELETABLE.includes(kind)) return state;
@@ -177,6 +257,20 @@ export const confirmDelete = () => (state) => {
         blocks: state.data.blocks.map(detach),
       },
       ui: editing ? withoutForm(ui, 'course') : ui,
+    };
+  }
+
+  if (confirm.kind === 'task') {
+    // Arbeidsøktene til oppgaven slettes sammen med den
+    let taskUi = state.ui.forms.task?.values.id === confirm.id ? withoutForm(ui, 'task') : ui;
+    if (state.ui.forms.progress?.values.task_id === confirm.id) taskUi = withoutForm(taskUi, 'progress');
+    return {
+      data: {
+        ...state.data,
+        tasks: state.data.tasks.filter((t) => t.id !== confirm.id),
+        blocks: state.data.blocks.filter((b) => b.task_id !== confirm.id),
+      },
+      ui: taskUi,
     };
   }
 

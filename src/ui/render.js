@@ -5,11 +5,13 @@ import { escapeHtml } from './html.js';
 import { renderSettings } from './settings.js';
 import { renderTimeplan } from './timeplan.js';
 import { renderCalendar } from './calendar.js';
+import { renderTasks } from './tasks.js';
 import logoUrl from '../../assets/logo.png';
 
 // Rekkefølgen her er rekkefølgen i menyen
 const views = {
   kalender: renderCalendar,
+  oppgaver: renderTasks,
   timeplan: renderTimeplan,
   innstillinger: renderSettings,
 };

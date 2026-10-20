@@ -1,6 +1,7 @@
 // Validering. Hver funksjon returnerer en liste med feil { code, field }.
 // Tom liste betyr gyldig. Kodene er nøkler i `feilmeldinger` i src/tekster.js.
 import { parseTime, isValidDateKey } from './dates.js';
+import { parseNumber } from './models.js';
 
 export const ERRORS = {
   MANGLER_FELT: 'MANGLER_FELT',
@@ -55,6 +56,12 @@ export function validateFixedBlockInput(values) {
     errors.push({ code: ERRORS.SLUTT_FOR_START, field: 'end' });
   }
   return errors;
+}
+
+// Skjemaet for fremgang: { amount } som tekst, i timer eller prosent
+export function validateProgressInput(values) {
+  const amount = parseNumber(values.amount);
+  return amount === null || amount < 0 ? [missing('amount')] : [];
 }
 
 export function validateSettings(user) {

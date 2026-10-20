@@ -1,12 +1,17 @@
 // Visning: innstillinger (steg 1.4)
 import { innstillinger as t, hjelpetekster, knapper, bekreftelser } from '../tekster.js';
 import { escapeHtml, formErrorSummary, invalidAttrs } from './html.js';
+import { numberToInput } from '../logic/models.js';
 
 export function renderSettings(state) {
   const form = state.ui.forms.settings;
   const errors = form?.errors ?? [];
   // Viser det brukeren skrev hvis skjemaet hadde feil, ellers det som er lagret
-  const values = form?.values ?? state.data.user;
+  const { user } = state.data;
+  const values = form?.values ?? {
+    ...user,
+    daily_available_study_hours: numberToInput(user.daily_available_study_hours),
+  };
   const notice = state.ui.notice === 'INNSTILLINGER_LAGRET' ? bekreftelser.INNSTILLINGER_LAGRET : '';
 
   return `
@@ -23,8 +28,8 @@ export function renderSettings(state) {
 
         <div class="form-field">
           <label for="settings-hours">${t.dagligKapasitet}</label>
-          <input id="settings-hours" name="daily_available_study_hours" type="number"
-            inputmode="decimal" min="0.5" max="24" step="0.5" required
+          <input id="settings-hours" name="daily_available_study_hours" type="text"
+            inputmode="decimal" autocomplete="off" required
             aria-describedby="settings-hours-help"
             value="${escapeHtml(values.daily_available_study_hours)}"${invalidAttrs(errors, 'daily_available_study_hours')}>
           <p id="settings-hours-help" class="field-help">${hjelpetekster.dagligKapasitet}</p>

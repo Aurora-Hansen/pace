@@ -53,8 +53,8 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 12. **Tilstanden er `{ data, ui }`.** `data` er det som lagres (datamodellen). `ui` er midlertidig: åpne skjema med verdier og feil, bekreftelser og feil for hele appen. Endringer ligger i `data/actions.js` som funksjoner `(...) → state → nyState` og testes der.
 13. **Korrupte lagrede data** kopieres til `pace:v1:backup`, appen starter tom og viser `LESING_FEILET`.
 14. **Rød brukes også til skjemafeil** (kant og markering), i tillegg til overbelastning.
-15. **Tekster som ikke står i innhold.md** er merket med en kommentar i `tekster.js` (innstillinger, «Lukk», bekreftelser, `LESING_FEILET`, meny, emner, faste aktiviteter og kalender).
-16. **Meny:** Appen har faner i toppen: «Kalender» (fase 3), «Timeplan» (faste aktiviteter og emner) og «Innstillinger». «I dag» og «Oppgaver» kommer i senere faser. Gjeldende visning ligger i `ui.view`.
+15. **Tekster som ikke står i innhold.md** er merket med en kommentar i `tekster.js` (innstillinger, «Lukk», bekreftelser, `LESING_FEILET`, meny, emner, faste aktiviteter, kalender og oppgaver).
+16. **Meny:** Appen har faner i toppen: «Kalender» (fase 3), «Oppgaver» (fase 4), «Timeplan» (faste aktiviteter og emner) og «Innstillinger». «I dag» kommer i steg 5.7. Gjeldende visning ligger i `ui.view`.
 17. **Faste aktiviteter legges inn med dato for første gang**, ikke bare ukedag. Ukentlige aktiviteter gjentas fra den datoen. De har ingen sluttdato (f.eks. semesterslutt), og aktiviteter over midnatt støttes ikke.
 18. **Emnefarger** velges fra 8 faste farger (`COURSE_COLORS` i `models.js`, navn i `tekster.js`). Nytt emne får første ubrukte farge. Dette er brukerdata og ikke en del av designpaletten.
 19. **Sletting** skjer etter et ja/nei-spørsmål i raden. Når et emne slettes, beholdes oppgaver og aktiviteter i emnet, men `course_id` settes til `null`.
@@ -64,6 +64,13 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 23. **Timene i kalenderen** er studievinduet, utvidet til hele timer hvis aktiviteter ligger utenfor (`visibleHours`).
 24. **Klikk i kalenderen:** klikk på en dag i ukevisning åpner dagsvisning, og klikk på en fast aktivitet åpner redigering i Timeplan. Arbeidsøkter kan ikke klikkes ennå.
 25. **Ukenummer** følger ISO 8601 (`isoWeek` i `dates.js`).
+26. **`groupTasks(tasks, today)`** tar dagens dato (`ui.today`) i stedet for «nå», så render ikke trenger klokka. «Innen 7 dager» betyr at fristens dato er færre enn 7 dager unna. Passerte frister regnes som aktive. Fullførte sorteres med seneste frist først.
+27. **Fremgang registreres som totalt utført** («jeg har gjort 3 timer så langt»), ikke som tid lagt til. Verdien begrenses til 0–100 % av estimatet. 100 % gjør oppgaven ferdig. «Marker som ferdig» endrer bare status og kan angres med «Gjenåpne».
+28. **Frist** legges inn som dato og valgfritt klokkeslett (standard 23:59). En oppgave med passert frist kan redigeres så lenge fristen ikke endres.
+29. **Tallfelt er tekstfelt med `inputmode="decimal"`**, ikke `type="number"`, fordi nettleseren forkaster «2,5» i tallfelt. Tall vises med desimalkomma (`numberToInput`).
+30. **«Alt unnagjort for i dag!»** vises i «Aktive» når det finnes oppgaver, men ingen aktive. I steg 5.7 kan dette i stedet styres av dagens arbeidsøkter.
+31. **Sletting av oppgave** sletter også arbeidsøktene til oppgaven.
+32. **Menyen bryter over to linjer på mobil** med fire faner. Bør løses i steg 7.3 (f.eks. sidelengs scrolling eller meny nederst).
 
 ---
 
@@ -110,13 +117,13 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 
 ## Fase 4 – Oppgaver og to-do-liste (Må ha · F2)
 
-- [ ] **4.1 Kategorisering** (`logic/todo.js`). `groupTasks(tasks, nå)` deler oppgavene i aktive, kommende og fullførte, sortert etter frist.
+- [x] **4.1 Kategorisering** (`logic/todo.js`). `groupTasks(tasks, iDag)` deler oppgavene i aktive, kommende og fullførte, sortert etter frist.
   *Tester:* grensen på 7 dager, påbegynt oppgave med fjern frist, og fullførte oppgaver.
-- [ ] **4.2 Skjema «+ Ny oppgave».** Tittel, emne, beskrivelse, estimert tid og frist, med feilmeldingene «Noe mangler» og «Fristen har allerede vært».
-- [ ] **4.3 To-do-liste.** Kort med emnefarge, frist, fremdriftslinje og de tre gruppene. Tom liste viser `empty-tasks.png` og «Legg til første oppgave». Når alt for i dag er ferdig, vises `all-done.png` og «Alt unnagjort for i dag!».
-- [ ] **4.4 Fremgang** (`logic/progress.js`). `registerProgress(task, {timer | prosent})` og `completeTask(task)` oppdaterer `completed_hours` og `status`.
+- [x] **4.2 Skjema «+ Ny oppgave».** Tittel, emne, beskrivelse, estimert tid og frist, med feilmeldingene «Noe mangler» og «Fristen har allerede vært».
+- [x] **4.3 To-do-liste.** Kort med emnefarge, frist, fremdriftslinje og de tre gruppene. Tom liste viser `empty-tasks.png` og «Legg til første oppgave». Når alt for i dag er ferdig, vises `all-done.png` og «Alt unnagjort for i dag!».
+- [x] **4.4 Fremgang** (`logic/progress.js`). `registerProgress(task, {timer | prosent})` og `completeTask(task)` oppdaterer `completed_hours` og `status`.
   *Tester:* prosent til timer, verdier over 100 %, og at status går fra `not_started` til `in_progress` til `completed`.
-- [ ] **4.5 Knappene «Registrer fremgang» og «Marker som ferdig»** i to-do-listen.
+- [x] **4.5 Knappene «Registrer fremgang» og «Marker som ferdig»** i to-do-listen.
 
 ## Fase 5 – Planlegging og forskyvning (Må ha · F4, Bør ha · automatisk plan)
 
