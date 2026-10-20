@@ -28,6 +28,7 @@ import { completeSession, uncompleteSession } from '../logic/today.js';
 import { detectOverload } from '../logic/overload.js';
 import { estimateHours } from '../logic/estimate.js';
 import { createSampleData } from '../logic/sample.js';
+import { DEFAULT_EXPORT_WEEKS } from '../logic/ics.js';
 
 export const VIEWS = ['idag', 'kalender', 'oppgaver', 'timeplan', 'innstillinger'];
 
@@ -389,6 +390,25 @@ export const clearAllData = () => (state) => ({
 });
 
 export const dismissNotice = () => (state) => withUi(state, { notice: null });
+
+// --- Eksport til kalenderfil ---
+
+export const openExportForm = () => (state) =>
+  withForm(withUi(state, { confirm: null }), 'export', {
+    values: { include: 'both', weeks: String(DEFAULT_EXPORT_WEEKS) },
+    errors: [],
+  });
+
+export const cancelExportForm = () => (state) => ({ ...state, ui: withoutForm(state.ui, 'export') });
+
+// Selve nedlastingen er en sideeffekt og skjer i main.js. Disse oppdaterer bare tilstanden etterpå.
+export const exportFailed = (values, code) => (state) =>
+  withForm(state, 'export', { values, errors: [{ code, field: 'include' }] });
+
+export const exportDone = () => (state) => ({
+  ...state,
+  ui: { ...withoutForm(state.ui, 'export'), notice: 'EKSPORT_LASTET_NED' },
+});
 
 // --- Sletting med bekreftelse ---
 

@@ -387,6 +387,43 @@ legend {
   text-align: left;
 }
 
+/* Radioknapper (eksport til kalender) */
+.radio-group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.radio {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.radio input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+.export-panel form {
+  max-width: 40rem;
+}
+
+.export-panel .field-help {
+  margin: 0 0 var(--space-2);
+}
+
+.export-panel .form-actions {
+  margin-top: var(--space-4);
+}
+
+.export-panel select {
+  max-width: 16rem;
+}
+
 /* Bekreftelse for hele appen, f.eks. etter eksempeldata */
 .notice-banner {
   display: flex;

@@ -46,6 +46,10 @@ import {
   askClearAll,
   clearAllData,
   dismissNotice,
+  openExportForm,
+  cancelExportForm,
+  exportFailed,
+  exportDone,
 } from './actions.js';
 import { createInitialState, RECURRENCE } from '../logic/models.js';
 import { load, save } from './storage.js';
@@ -570,6 +574,30 @@ describe('eksempeldata og sletting av alle data', () => {
 
   it('bekreftelsen kan lukkes', () => {
     expect(dismissNotice()(loadSampleData(now)(initial())).ui.notice).toBeNull();
+  });
+});
+
+describe('eksport til kalender', () => {
+  it('åpner skjema med begge typer og 4 uker som standard', () => {
+    expect(openExportForm()(initial()).ui.forms.export).toEqual({ values: { include: 'both', weeks: '4' }, errors: [] });
+  });
+
+  it('viser feil og beholder valgene når perioden er tom', () => {
+    const values = { include: 'sessions', weeks: '1' };
+    const state = exportFailed(values, 'INGEN_HENDELSER')(openExportForm()(initial()));
+    expect(state.ui.forms.export).toEqual({ values, errors: [{ code: 'INGEN_HENDELSER', field: 'include' }] });
+  });
+
+  it('lukker skjemaet og viser bekreftelse etter nedlasting, uten å endre data', () => {
+    const before = openExportForm()(initial());
+    const state = exportDone()(before);
+    expect(state.ui.forms.export).toBeUndefined();
+    expect(state.ui.notice).toBe('EKSPORT_LASTET_NED');
+    expect(state.data).toBe(before.data);
+  });
+
+  it('avbryt lukker skjemaet', () => {
+    expect(cancelExportForm()(openExportForm()(initial())).ui.forms.export).toBeUndefined();
   });
 });
 

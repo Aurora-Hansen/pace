@@ -184,6 +184,43 @@ export const bekreftelser = {
   EKSEMPELDATA_LAGT_INN:
     'Eksempeldataene er lagt inn. En arbeidsøkt som ikke ble gjort i går, er flyttet til ledig tid, og én frist er i fare.',
   DATA_SLETTET: 'Alle data er slettet.',
+  EKSPORT_LASTET_NED: 'Kalenderfilen er lastet ned. Åpne den, eller importer den i kalenderen din.',
+};
+
+// Ikke fra innhold.md – eksport til kalenderfil (.ics)
+const fristFormat = new Intl.DateTimeFormat('nb-NO', {
+  timeZone: 'Europe/Oslo',
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
+export const eksport = {
+  knapp: 'Eksporter til kalender',
+  overskrift: 'Eksporter til kalender',
+  hvaMed: 'Hva skal med?',
+  valg: {
+    both: 'Arbeidsøkter og faste aktiviteter',
+    sessions: 'Bare arbeidsøkter',
+    fixed: 'Bare faste aktiviteter',
+  },
+  periode: 'Periode',
+  uker: (antall) => (antall === 1 ? 'Neste uke' : `Neste ${antall} uker`),
+  lastNed: 'Last ned kalenderfil (.ics)',
+  hjelp:
+    'Filen er et øyeblikksbilde av planen akkurat nå. Den oppdateres ikke automatisk når planen endres, så eksporter på nytt etter store endringer.',
+  importHjelp: 'Åpne filen, eller importer den i Google Calendar, Outlook eller Apple Kalender.',
+  // Tekst som havner i selve kalenderfilen
+  ics: {
+    calendarName: 'Pace – studieplan',
+    sessionDescription: ({ course, deadline }) =>
+      [course && `Emne: ${course}`, `Frist: ${fristFormat.format(deadline)}`, 'Arbeidsøkt planlagt av Pace']
+        .filter(Boolean)
+        .join('\n'),
+    fixedDescription: ({ course }) => (course ? `Emne: ${course}` : ''),
+  },
 };
 
 // Ikke fra innhold.md – eksempeldata og sletting av alle data
@@ -299,6 +336,11 @@ export const feilmeldinger = {
   SLUTT_FOR_START: {
     overskrift: 'Sjekk klokkeslettet',
     tekst: 'Sluttid må være etter starttid.',
+  },
+  // Ikke fra innhold.md – eksport uten hendelser i perioden
+  INGEN_HENDELSER: {
+    overskrift: 'Ingenting å eksportere',
+    tekst: 'Det finnes ingen hendelser i perioden du valgte. Prøv en lengre periode, eller ta med flere typer hendelser.',
   },
   // Ikke fra innhold.md – lagrede data som ikke kan leses (steg 1.3)
   LESING_FEILET: {

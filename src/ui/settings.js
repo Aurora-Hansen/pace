@@ -1,6 +1,7 @@
 // Visning: innstillinger (steg 1.4)
 import { innstillinger as t, hjelpetekster, knapper, bekreftelser, data as tData } from '../tekster.js';
 import { sampleDataButton } from './sample.js';
+import { exportButton, exportPanel } from './export.js';
 import { escapeHtml, formErrorSummary, invalidAttrs } from './html.js';
 import { numberToInput } from '../logic/models.js';
 
@@ -23,6 +24,7 @@ function dataSection(state) {
       <h2 id="data-title">${tData.overskrift}</h2>
       <p class="muted">${tData.tekst}</p>
       <div class="data-actions">
+        ${state.ui.forms.export || state.ui.confirm ? '' : exportButton()}
         ${confirmReset ? '' : sampleDataButton(state)}
         ${state.ui.confirm?.kind === 'sample' ? '' : reset}
       </div>
@@ -30,7 +32,7 @@ function dataSection(state) {
 }
 
 export function renderSettings(state) {
-  return `${settingsForm(state)}${dataSection(state)}`;
+  return `${settingsForm(state)}${dataSection(state)}${exportPanel(state)}`;
 }
 
 function settingsForm(state) {

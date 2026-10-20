@@ -110,6 +110,15 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
     - Eksempeldataene beholder navn og bruker-id, men setter kapasitet og studievindu til standard.
     - Knappen finnes i tomme tilstander («I dag», «Kalender», «Oppgaver») og under Innstillinger. Finnes det data fra før, spør den før de erstattes.
     - «Slett alle data» (under Innstillinger) spør først. Den beholder bare bruker-id-en, og innstillingene settes tilbake til standard.
+56. **Eksport til kalenderfil (lagt til etter planen):**
+    - `createIcs` og `prepareExport` i `logic/ics.js` lager en iCalendar-fil (RFC 5545). Brukeren velger arbeidsøkter, faste aktiviteter eller begge, og en periode på 1–16 uker fra i dag (standard 4).
+    - Tider skrives som norsk veggklokketid med `TZID=Europe/Oslo` og en `VTIMEZONE` med sommertidsreglene. Omregningen bruker `Intl` med `timeZone: 'Europe/Oslo'`, så filen blir riktig uansett tidssone på maskinen.
+    - Ukentlige aktiviteter blir én hendelse med `RRULE:FREQ=WEEKLY;UNTIL=…` (i UTC), fra første forekomst i perioden til slutten av perioden. Datamodellen har ingen egen sluttdato for faste aktiviteter (punkt 17).
+    - Arbeidsøkter får oppgavens tittel, og emne og frist i beskrivelsen. Fullførte økter og økter uten oppgave tas ikke med.
+    - Tekst escapes (`\`, `;`, `,`, linjeskift), og linjer over 75 byte brytes uten å dele æ, ø og å. Linjeskift er CRLF.
+    - UID er `id@pace`, stabil mellom eksporter.
+    - Selve nedlastingen (Blob og lenke) er en sideeffekt i `main.js`. Tom periode gir feilmeldingen «Ingenting å eksportere» i stedet for en tom fil.
+    - Filen er kontrollert med Python-biblioteket `icalendar`, også en ukentlig aktivitet over sommertidsskiftet: alle forekomster ble 10:15 norsk tid.
 
 ---
 

@@ -12,6 +12,7 @@ import {
 } from './format.js';
 import emptyCalendarUrl from '../images/empty-calendar.webp';
 import { sampleDataButton } from './sample.js';
+import { exportButton, exportPanel } from './export.js';
 
 function emptyState(state) {
   const empty = tommeTilstander.tomKalender;
@@ -53,6 +54,7 @@ function toolbar(state, days) {
         <div class="segmented" role="group" aria-label="${t.visning}">
           ${modeButton('day', t.dag)}${modeButton('week', t.uke)}
         </div>
+        ${state.ui.forms.export ? '' : exportButton('btn btn-secondary btn-small')}
       </div>
     </div>`;
 }
@@ -130,6 +132,7 @@ export function renderCalendar(state) {
     .join('');
 
   return `
+    ${exportPanel(state)}
     <section class="card cal-card" aria-labelledby="calendar-title">
       ${toolbar(state, days)}
       <div class="cal-scroll">

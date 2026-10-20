@@ -6,6 +6,8 @@ import { createInitialState } from './logic/models.js';
 import { toDateKey } from './logic/dates.js';
 import { now, isSimulated } from './data/clock.js';
 import { render } from './ui/render.js';
+import { prepareExport } from './logic/ics.js';
+import { eksport } from './tekster.js';
 
 const root = document.querySelector('#app');
 const newId = () => crypto.randomUUID();
@@ -80,13 +82,44 @@ const clickActions = {
   'clear-all': actions.askClearAll,
   'confirm-reset': actions.clearAllData,
   'dismiss-notice': actions.dismissNotice,
+  'open-export': actions.openExportForm,
+  'cancel-export': actions.cancelExportForm,
   'ask-delete': actions.askDelete,
   'cancel-delete': actions.cancelDelete,
   'confirm-delete': actions.confirmDelete,
 };
 
+// Laster ned en fil. Dette er en sideeffekt og hører ikke hjemme i render eller i endringene.
+function downloadFile(filename, content, type) {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+// Eksport til kalenderfil: filen lages av en ren funksjon, så lastes den ned, og tilstanden oppdateres
+function exportCalendar(values) {
+  const state = store.getState();
+  const result = prepareExport(state.data, values, { today: state.ui.today, now: now(), text: eksport.ics });
+  if (result.error) {
+    store.update(actions.exportFailed(values, result.error));
+    return;
+  }
+  downloadFile(result.filename, result.content, 'text/calendar;charset=utf-8');
+  store.update(actions.exportDone());
+}
+
 // Alle endringer går via withReplan, så planen bygges på nytt når lagrede data endres
 root.addEventListener('submit', (event) => {
+  if (event.target.dataset.form === 'export') {
+    event.preventDefault();
+    exportCalendar(Object.fromEntries(new FormData(event.target)));
+    return;
+  }
   const action = formActions[event.target.dataset.form];
   if (!action) return;
   event.preventDefault();
