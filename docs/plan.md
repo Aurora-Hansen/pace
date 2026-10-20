@@ -53,12 +53,17 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 12. **Tilstanden er `{ data, ui }`.** `data` er det som lagres (datamodellen). `ui` er midlertidig: åpne skjema med verdier og feil, bekreftelser og feil for hele appen. Endringer ligger i `data/actions.js` som funksjoner `(...) → state → nyState` og testes der.
 13. **Korrupte lagrede data** kopieres til `pace:v1:backup`, appen starter tom og viser `LESING_FEILET`.
 14. **Rød brukes også til skjemafeil** (kant og markering), i tillegg til overbelastning.
-15. **Tekster som ikke står i innhold.md** er merket med en kommentar i `tekster.js` (innstillinger, «Lukk», bekreftelser, `LESING_FEILET`, meny, emner og faste aktiviteter).
-16. **Meny:** Appen har faner i toppen. Fase 2 legger til «Timeplan» (faste aktiviteter og emner) og «Innstillinger». «I dag», «Kalender» og «Oppgaver» kommer i senere faser. Gjeldende visning ligger i `ui.view`.
+15. **Tekster som ikke står i innhold.md** er merket med en kommentar i `tekster.js` (innstillinger, «Lukk», bekreftelser, `LESING_FEILET`, meny, emner, faste aktiviteter og kalender).
+16. **Meny:** Appen har faner i toppen: «Kalender» (fase 3), «Timeplan» (faste aktiviteter og emner) og «Innstillinger». «I dag» og «Oppgaver» kommer i senere faser. Gjeldende visning ligger i `ui.view`.
 17. **Faste aktiviteter legges inn med dato for første gang**, ikke bare ukedag. Ukentlige aktiviteter gjentas fra den datoen. De har ingen sluttdato (f.eks. semesterslutt), og aktiviteter over midnatt støttes ikke.
 18. **Emnefarger** velges fra 8 faste farger (`COURSE_COLORS` i `models.js`, navn i `tekster.js`). Nytt emne får første ubrukte farge. Dette er brukerdata og ikke en del av designpaletten.
 19. **Sletting** skjer etter et ja/nei-spørsmål i raden. Når et emne slettes, beholdes oppgaver og aktiviteter i emnet, men `course_id` settes til `null`.
 20. **Bildene i `assets/`** har nesten hvit, ikke gjennomsiktig, bakgrunn og viser en svak firkant på hvite kort. Bør fikses i bildene (gjennomsiktig PNG) i steg 7.2.
+21. **`clock.js` ble laget i fase 3** (bare `now()`), fordi kalenderen trenger dagens dato. Simulert dato legges til i steg 5.5. Dagens dato lagres i `ui.today` når appen starter.
+22. **Kalenderen er startvisningen** frem til «I dag»-visningen kommer i steg 5.7. Smale skjermer (under 40rem) starter i dagsvisning. Ukevisningen scroller sidelengs inne i kortet på mobil.
+23. **Timene i kalenderen** er studievinduet, utvidet til hele timer hvis aktiviteter ligger utenfor (`visibleHours`).
+24. **Klikk i kalenderen:** klikk på en dag i ukevisning åpner dagsvisning, og klikk på en fast aktivitet åpner redigering i Timeplan. Arbeidsøkter kan ikke klikkes ennå.
+25. **Ukenummer** følger ISO 8601 (`isoWeek` i `dates.js`).
 
 ---
 
@@ -97,11 +102,11 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
 
 ## Fase 3 – Kalender (Må ha · F1)
 
-- [ ] **3.1 Kalenderlogikk** (`logic/calendar.js`). `blocksForRange` henter blokker for en periode. `layoutDay` gir overlappende blokker egne kolonner.
+- [x] **3.1 Kalenderlogikk** (`logic/calendar.js`). `blocksForRange` henter blokker for en periode. `layoutDay` gir overlappende blokker egne kolonner.
   *Tester:* blokker som ikke overlapper, delvis overlapp og tre samtidige blokker.
-- [ ] **3.2 Ukevisning.** Mandag til søndag, timer innenfor studievinduet, blokker i emnefarge og navigasjon forrige/neste uke/i dag.
+- [x] **3.2 Ukevisning.** Mandag til søndag, timer innenfor studievinduet, blokker i emnefarge og navigasjon forrige/neste uke/i dag.
   *Ferdig når:* Faste aktiviteter vises riktig over flere uker.
-- [ ] **3.3 Dagsvisning og tom tilstand.** Bytte mellom dag og uke. Tom kalender viser `empty-calendar.png`, teksten fra innhold.md og knappen «Legg til forelesning».
+- [x] **3.3 Dagsvisning og tom tilstand.** Bytte mellom dag og uke. Tom kalender viser `empty-calendar.png`, teksten fra innhold.md og knappen «Legg til forelesning».
 
 ## Fase 4 – Oppgaver og to-do-liste (Må ha · F2)
 

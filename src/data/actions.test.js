@@ -3,6 +3,12 @@ import {
   createInitialUi,
   showView,
   dismissError,
+  setCalendarMode,
+  stepCalendar,
+  calendarToday,
+  openCalendarDay,
+  addFixedBlockFromCalendar,
+  editFixedBlockFromCalendar,
   submitSettings,
   submitCourse,
   editCourse,
@@ -18,7 +24,9 @@ import {
 import { createInitialState, RECURRENCE } from '../logic/models.js';
 import { load, save } from './storage.js';
 
-const initial = () => ({ data: createInitialState({ userId: 'u1' }), ui: createInitialUi() });
+// Onsdag 4. november 2026
+const TODAY = '2026-11-04';
+const initial = () => ({ data: createInitialState({ userId: 'u1' }), ui: createInitialUi({ today: TODAY }) });
 
 // Kjører flere endringer etter hverandre
 const run = (state, ...changes) => changes.reduce((current, change) => change(current), state);
@@ -27,20 +35,71 @@ describe('showView', () => {
   it('bytter visning og fjerner bekreftelser', () => {
     const state = run(initial(), (s) => ({ ...s, ui: { ...s.ui, notice: 'X' } }), showView({ view: 'innstillinger' }));
     expect(state.ui.view).toBe('innstillinger');
+    expect(state.ui.view).toBe('innstillinger');
     expect(state.ui.notice).toBeNull();
+  });
+
+  it('starter på kalenderen', () => {
+    expect(initial().ui.view).toBe('kalender');
   });
 
   it('ignorerer ukjente visninger og samme visning', () => {
     const state = initial();
     expect(showView({ view: 'finnes-ikke' })(state)).toBe(state);
-    expect(showView({ view: 'timeplan' })(state)).toBe(state);
+    expect(showView({ view: 'kalender' })(state)).toBe(state);
   });
 });
 
 describe('dismissError', () => {
   it('fjerner feilmeldingen', () => {
-    const state = { ...initial(), ui: createInitialUi({ error: 'LAGRING_FEILET' }) };
+    const state = { ...initial(), ui: createInitialUi({ error: 'LAGRING_FEILET', today: TODAY }) };
     expect(dismissError()(state).ui.error).toBeNull();
+  });
+});
+
+describe('kalender', () => {
+  it('starter på ukevisning for i dag', () => {
+    expect(initial().ui.calendar).toEqual({ mode: 'week', date: TODAY });
+  });
+
+  it('går en uke fram og tilbake i ukevisning', () => {
+    expect(stepCalendar({ direction: '1' })(initial()).ui.calendar.date).toBe('2026-11-11');
+    expect(stepCalendar({ direction: '-1' })(initial()).ui.calendar.date).toBe('2026-10-28');
+  });
+
+  it('går en dag fram og tilbake i dagsvisning', () => {
+    const day = setCalendarMode({ mode: 'day' })(initial());
+    expect(stepCalendar({ direction: '1' })(day).ui.calendar.date).toBe('2026-11-05');
+    expect(stepCalendar({ direction: '-1' })(day).ui.calendar.date).toBe('2026-11-03');
+  });
+
+  it('ignorerer ugyldig retning og visning', () => {
+    const state = initial();
+    expect(stepCalendar({ direction: 'x' })(state)).toBe(state);
+    expect(setCalendarMode({ mode: 'måned' })(state)).toBe(state);
+  });
+
+  it('«I dag» går tilbake til dagens dato', () => {
+    const state = run(initial(), stepCalendar({ direction: '1' }), stepCalendar({ direction: '1' }), calendarToday());
+    expect(state.ui.calendar.date).toBe(TODAY);
+  });
+
+  it('åpner dagsvisning for en valgt dag', () => {
+    expect(openCalendarDay({ date: '2026-11-06' })(initial()).ui.calendar).toEqual({ mode: 'day', date: '2026-11-06' });
+    expect(openCalendarDay({ date: 'tull' })(initial()).ui.calendar.mode).toBe('week');
+  });
+
+  it('«Legg til forelesning» går til timeplanen med skjemaet åpent', () => {
+    const state = addFixedBlockFromCalendar()(initial());
+    expect(state.ui.view).toBe('timeplan');
+    expect(state.ui.forms.fixedBlock).toBeDefined();
+  });
+
+  it('klikk på en aktivitet åpner redigering i timeplanen', () => {
+    const values = { title: 'Forelesning', date: '2026-11-02', start: '10:15', end: '12:00', weekly: 'on' };
+    const state = run(initial(), submitFixedBlock(values, 'b1'), editFixedBlockFromCalendar({ id: 'b1' }));
+    expect(state.ui.view).toBe('timeplan');
+    expect(state.ui.forms.fixedBlock.values.id).toBe('b1');
   });
 });
 

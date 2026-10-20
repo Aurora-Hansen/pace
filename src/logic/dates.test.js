@@ -9,6 +9,8 @@ import {
   daysBetween,
   weekday,
   startOfWeek,
+  weekDays,
+  isoWeek,
   parseTime,
   formatTime,
   overlaps,
@@ -104,6 +106,36 @@ describe('weekday og startOfWeek', () => {
 
   it('finner mandagen over årsskifte', () => {
     expect(startOfWeek('2027-01-01')).toBe('2026-12-28');
+  });
+});
+
+describe('weekDays', () => {
+  it('gir mandag til søndag, også over månedsskifte', () => {
+    expect(weekDays('2026-10-29')).toEqual([
+      '2026-10-26',
+      '2026-10-27',
+      '2026-10-28',
+      '2026-10-29',
+      '2026-10-30',
+      '2026-10-31',
+      '2026-11-01',
+    ]);
+  });
+});
+
+describe('isoWeek', () => {
+  it('gir riktig ukenummer', () => {
+    expect(isoWeek('2026-11-02')).toBe(45);
+    expect(isoWeek('2026-11-08')).toBe(45);
+    expect(isoWeek('2026-01-01')).toBe(1);
+  });
+
+  it('håndterer uker som krysser årsskiftet', () => {
+    // 2026 har 53 uker, og 1.1.2027 er en fredag i uke 53
+    expect(isoWeek('2027-01-01')).toBe(53);
+    expect(isoWeek('2027-01-04')).toBe(1);
+    // 30.12.2024 er mandag i uke 1 av 2025
+    expect(isoWeek('2024-12-30')).toBe(1);
   });
 });
 

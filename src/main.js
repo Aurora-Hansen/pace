@@ -3,6 +3,8 @@ import { load, save } from './data/storage.js';
 import { createStore } from './data/store.js';
 import * as actions from './data/actions.js';
 import { createInitialState } from './logic/models.js';
+import { toDateKey } from './logic/dates.js';
+import { now } from './data/clock.js';
 import { render } from './ui/render.js';
 
 const root = document.querySelector('#app');
@@ -11,8 +13,14 @@ const newId = () => crypto.randomUUID();
 const loaded = load();
 const data = loaded.state ?? createInitialState({ userId: newId() });
 
+// Ukevisningen er for trang på mobil, så smale skjermer starter i dagsvisning
+const calendarMode = window.matchMedia('(max-width: 40rem)').matches ? 'day' : 'week';
+
 const store = createStore({
-  state: { data, ui: actions.createInitialUi({ error: loaded.error }) },
+  state: {
+    data,
+    ui: actions.createInitialUi({ error: loaded.error, today: toDateKey(now()), calendarMode }),
+  },
   save,
   render: (state) => render(state, root),
 });
@@ -28,6 +36,12 @@ const formActions = {
 const clickActions = {
   'show-view': actions.showView,
   'dismiss-error': actions.dismissError,
+  'calendar-mode': actions.setCalendarMode,
+  'calendar-step': actions.stepCalendar,
+  'calendar-today': actions.calendarToday,
+  'calendar-open-day': actions.openCalendarDay,
+  'add-fixed-from-calendar': actions.addFixedBlockFromCalendar,
+  'edit-fixed-from-calendar': actions.editFixedBlockFromCalendar,
   'edit-course': actions.editCourse,
   'cancel-course': actions.cancelCourseForm,
   'open-fixed-block': actions.openFixedBlockForm,

@@ -55,6 +55,16 @@
   gap: var(--space-4);
 }
 
+/* Uten dette kan brede barn (som kalenderen) gjøre hele siden bredere enn skjermen */
+.app-main > * {
+  min-width: 0;
+}
+
+/* Kalenderen trenger mer bredde enn skjemaene */
+.app-main-kalender {
+  max-width: 72rem;
+}
+
 /* Skjema */
 .form-field {
   margin: 0 0 var(--space-4);

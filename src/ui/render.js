@@ -4,9 +4,12 @@ import { feilmeldinger, knapper, navigasjon } from '../tekster.js';
 import { escapeHtml } from './html.js';
 import { renderSettings } from './settings.js';
 import { renderTimeplan } from './timeplan.js';
+import { renderCalendar } from './calendar.js';
 import logoUrl from '../../assets/logo.png';
 
+// Rekkefølgen her er rekkefølgen i menyen
 const views = {
+  kalender: renderCalendar,
   timeplan: renderTimeplan,
   innstillinger: renderSettings,
 };
@@ -46,7 +49,7 @@ function errorBanner(code) {
 export function render(state, root) {
   root.innerHTML = `
     ${header(state)}
-    <main class="app-main">
+    <main class="app-main app-main-${state.ui.view}">
       ${errorBanner(state.ui.error)}
       ${views[state.ui.view](state)}
     </main>`;

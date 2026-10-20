@@ -54,6 +54,20 @@ export function startOfWeek(dateKey) {
   return addDays(dateKey, 1 - weekday(dateKey));
 }
 
+// De sju datoene i uken, fra mandag til søndag
+export function weekDays(dateKey) {
+  const monday = startOfWeek(dateKey);
+  return Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+}
+
+// Ukenummer etter ISO 8601 (som i norske kalendere)
+export function isoWeek(dateKey) {
+  // Uken hører til året som torsdagen i uken ligger i
+  const thursday = addDays(startOfWeek(dateKey), 3);
+  const firstMonday = startOfWeek(`${thursday.slice(0, 4)}-01-04`);
+  return daysBetween(firstMonday, startOfWeek(dateKey)) / 7 + 1;
+}
+
 // 'HH:MM' → minutter siden midnatt, eller null hvis ugyldig
 export function parseTime(value) {
   const match = /^(\d{1,2}):(\d{2})$/.exec(value ?? '');

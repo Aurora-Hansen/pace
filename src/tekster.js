@@ -52,8 +52,24 @@ export const knapper = {
 // Ikke fra innhold.md – lagt til i fase 2
 export const navigasjon = {
   meny: 'Hovedmeny',
+  kalender: 'Kalender',
   timeplan: 'Timeplan',
   innstillinger: 'Innstillinger',
+};
+
+// Ikke fra innhold.md – lagt til i fase 3
+export const kalender = {
+  overskrift: 'Kalender',
+  visning: 'Visning',
+  uke: 'Uke',
+  dag: 'Dag',
+  iDag: 'I dag',
+  forrigeUke: 'Forrige uke',
+  nesteUke: 'Neste uke',
+  forrigeDag: 'Forrige dag',
+  nesteDag: 'Neste dag',
+  ukenummer: (nummer) => `Uke ${nummer}`,
+  apneDag: (dag) => `Vis ${dag}`,
 };
 
 // Ikke fra innhold.md – lagt til i steg 2.1

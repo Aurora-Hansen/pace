@@ -3,12 +3,17 @@
 // Nye id-er sendes inn fra main.js, så endringene forblir rene.
 import { parseNumber, createCourse, fixedBlockFromInput, fixedBlockToInput } from '../logic/models.js';
 import { validateSettings, validateCourse, validateFixedBlockInput } from '../logic/validation.js';
+import { addDays, isValidDateKey } from '../logic/dates.js';
 
-export const VIEWS = ['timeplan', 'innstillinger'];
+export const VIEWS = ['kalender', 'timeplan', 'innstillinger'];
 
-export function createInitialUi({ error = null } = {}) {
+// `today` er dagens dato (datonøkkel) fra clock.js når appen starter.
+// `calendarMode` lar main.js starte med dagsvisning på smale skjermer.
+export function createInitialUi({ error = null, today, calendarMode = 'week' }) {
   return {
-    view: 'timeplan',
+    view: 'kalender',
+    today,
+    calendar: { mode: calendarMode, date: today },
     error,
     notice: null,
     confirm: null,
@@ -44,6 +49,31 @@ export const showView = ({ view }) => (state) => {
 };
 
 export const dismissError = () => (state) => withUi(state, { error: null });
+
+// --- Kalender ---
+
+const withCalendar = (state, changes) => withUi(state, { calendar: { ...state.ui.calendar, ...changes } });
+
+export const setCalendarMode = ({ mode }) => (state) => {
+  if (!['week', 'day'].includes(mode) || state.ui.calendar.mode === mode) return state;
+  return withCalendar(state, { mode });
+};
+
+// `direction` er '1' (fram) eller '-1' (tilbake), som tekst fra data-attributtet
+export const stepCalendar = ({ direction }) => (state) => {
+  const { mode, date } = state.ui.calendar;
+  const step = (mode === 'week' ? 7 : 1) * Math.sign(Number(direction));
+  if (!step) return state;
+  return withCalendar(state, { date: addDays(date, step) });
+};
+
+export const calendarToday = () => (state) => withCalendar(state, { date: state.ui.today });
+
+// Klikk på en dag i ukevisningen åpner dagsvisning for den dagen
+export const openCalendarDay = ({ date }) => (state) => {
+  if (!isValidDateKey(date)) return state;
+  return withCalendar(state, { mode: 'day', date });
+};
 
 // --- Innstillinger ---
 
@@ -111,6 +141,13 @@ export const submitFixedBlock = (values, newId) => (state) => {
   const blocks = values.id ? replaceById(state.data.blocks, block) : [...state.data.blocks, block];
   return saveAndCloseForm(state, { blocks }, 'fixedBlock');
 };
+
+// Fra kalenderen: gå til timeplanen med skjemaet åpent
+export const addFixedBlockFromCalendar = () => (state) =>
+  openFixedBlockForm()(showView({ view: 'timeplan' })(state));
+
+export const editFixedBlockFromCalendar = ({ id }) => (state) =>
+  editFixedBlock({ id })(showView({ view: 'timeplan' })(state));
 
 // --- Sletting med bekreftelse ---
 
