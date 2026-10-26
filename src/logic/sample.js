@@ -5,7 +5,7 @@
 // - Eksamensforberedelsen trenger mer tid enn det er plass til før fristen, så varselet vises.
 // Funksjonen er ren: id-ene er faste og «nå» sendes inn.
 import { toDateKey, addDays, startOfWeek, atMinutes } from './dates.js';
-import { STATUS, RECURRENCE, DEFAULT_SETTINGS } from './models.js';
+import { STATUS, RECURRENCE, PRIORITY, DEFAULT_SETTINGS } from './models.js';
 
 const h = (hours) => Math.round(hours * 60);
 
@@ -77,6 +77,7 @@ function session(id, task, date, from, to, completed) {
     is_fixed: false,
     recurrence: RECURRENCE.NONE,
     is_completed: completed,
+    is_locked: false,
   };
 }
 
@@ -103,6 +104,7 @@ export function createSampleData(user, now) {
       status: task.completedHours ? STATUS.IN_PROGRESS : STATUS.NOT_STARTED,
       created_at: atMinutes(addDays(today, -7), h(12)).toISOString(),
       allow_over_capacity: false,
+      priority: PRIORITY.NORMAL,
     })),
     blocks: [
       ...SAMPLE.timetable.map((item) => ({
@@ -115,6 +117,7 @@ export function createSampleData(user, now) {
         is_fixed: true,
         recurrence: RECURRENCE.WEEKLY,
         is_completed: false,
+        is_locked: false,
       })),
       // I går: én gjennomført økt (de 2 timene som er registrert på rapporten) og én som ble droppet
       session('eksempel-okt-gjennomfort', reportTask, yesterday, 8, 10, true),
@@ -123,5 +126,6 @@ export function createSampleData(user, now) {
     last_checked_date: yesterday,
     // Den som laster eksempeldata, trenger ikke førstegangsveiviseren
     onboarding_done: true,
+    days_off: [],
   };
 }

@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   STATUS,
   RECURRENCE,
+  PRIORITY,
+  DAY_OFF_KIND,
   DEFAULT_SETTINGS,
   COURSE_COLORS,
   suggestCourseColor,
@@ -68,6 +70,22 @@ describe('createInitialState', () => {
     expect(state.blocks).toEqual([]);
     expect(state.last_checked_date).toBeNull();
     expect(state.onboarding_done).toBe(false);
+    expect(state.days_off).toEqual([]);
+  });
+
+  it('har standardverdier for øktene som gir samme plan som før v2', () => {
+    expect(createInitialState({ userId: 'u1' }).user).toMatchObject({
+      preferred_session_minutes: 120,
+      min_session_minutes: 30,
+      break_minutes: 15,
+      preferred_times: [],
+    });
+  });
+
+  it('kan ikke endre den delte standardlisten for foretrukne tider', () => {
+    const { user } = createInitialState({ userId: 'u1' });
+    expect(() => user.preferred_times.push({})).toThrow();
+    expect(DEFAULT_SETTINGS.preferred_times).toEqual([]);
   });
 });
 
@@ -81,9 +99,57 @@ describe('normalizeState', () => {
   it('fyller inn manglende felt og beholder lagrede verdier', () => {
     const state = normalizeState({ user: { id: 'u1', daily_available_study_hours: 6 }, tasks: [{ id: 't1' }] });
     expect(state.user).toEqual({ id: 'u1', name: '', ...DEFAULT_SETTINGS, daily_available_study_hours: 6 });
-    expect(state.tasks).toEqual([{ id: 't1' }]);
+    expect(state.tasks).toEqual([{ id: 't1', priority: 'normal' }]);
     expect(state.courses).toEqual([]);
     expect(state.blocks).toEqual([]);
+    expect(state.days_off).toEqual([]);
+  });
+
+  // Datamodell v2 (steg 9.2)
+  it('fyller inn v2-felt som mangler i eldre data', () => {
+    const state = normalizeState({
+      user: { id: 'u1', daily_available_study_hours: 3 },
+      tasks: [{ id: 't1' }],
+      blocks: [{ id: 'b1', is_fixed: false }],
+    });
+    expect(state.user).toMatchObject({
+      daily_available_study_hours: 3,
+      preferred_session_minutes: 120,
+      min_session_minutes: 30,
+      break_minutes: 15,
+      preferred_times: [],
+    });
+    expect(state.tasks[0].priority).toBe(PRIORITY.NORMAL);
+    expect(state.blocks[0].is_locked).toBe(false);
+    expect(state.days_off).toEqual([]);
+  });
+
+  it('endrer ikke v2-felt som finnes', () => {
+    const preferred = [{ id: 'p1', weekdays: [1, 2, 3, 4, 5], start: '09:00', end: '15:00' }];
+    const daysOff = [{ date: '2026-11-04', kind: DAY_OFF_KIND.SICK }];
+    const raw = {
+      user: { id: 'u1', preferred_session_minutes: 50, min_session_minutes: 45, break_minutes: 0, preferred_times: preferred },
+      tasks: [{ id: 't1', priority: PRIORITY.HIGH }],
+      blocks: [{ id: 'b1', is_fixed: false, is_locked: true }],
+      days_off: daysOff,
+    };
+    const state = normalizeState(raw);
+    expect(state.user).toMatchObject({ preferred_session_minutes: 50, min_session_minutes: 45, break_minutes: 0 });
+    expect(state.user.preferred_times).toBe(preferred);
+    expect(state.tasks[0].priority).toBe(PRIORITY.HIGH);
+    expect(state.blocks[0].is_locked).toBe(true);
+    expect(state.days_off).toBe(daysOff);
+  });
+
+  it('endrer ikke argumentet', () => {
+    const raw = { user: { id: 'u1' }, tasks: [{ id: 't1' }], blocks: [{ id: 'b1' }] };
+    const copy = structuredClone(raw);
+    normalizeState(raw);
+    expect(raw).toEqual(copy);
+  });
+
+  it('lar elementer som ikke er objekter være i fred, så valideringen kan finne dem', () => {
+    expect(normalizeState({ user: { id: 'u1' }, tasks: ['tull', null] }).tasks).toEqual(['tull', null]);
   });
 });
 
@@ -114,7 +180,14 @@ describe('createTask', () => {
       status: STATUS.NOT_STARTED,
       created_at: '2026-11-03T09:00:00.000Z',
       allow_over_capacity: false,
+      priority: PRIORITY.NORMAL,
     });
+  });
+
+  it('har normal prioritet som standard og godtar bare gyldige verdier', () => {
+    expect(createTask({ priority: PRIORITY.HIGH }, { id: 't1', now }).priority).toBe(PRIORITY.HIGH);
+    expect(createTask({ priority: PRIORITY.LOW }, { id: 't1', now }).priority).toBe(PRIORITY.LOW);
+    expect(createTask({ priority: 'viktig' }, { id: 't1', now }).priority).toBe(PRIORITY.NORMAL);
   });
 
   it('gir null for emne, frist og estimat som mangler', () => {
@@ -217,6 +290,7 @@ describe('createFixedBlock', () => {
     expect(block.task_id).toBeNull();
     expect(block.recurrence).toBe(RECURRENCE.WEEKLY);
     expect(block.is_completed).toBe(false);
+    expect(block.is_locked).toBe(false);
     expect(block.start_time).toBe(new Date(2026, 10, 3, 10, 15).toISOString());
   });
 

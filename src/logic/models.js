@@ -13,11 +13,31 @@ export const RECURRENCE = {
   WEEKLY: 'weekly',
 };
 
+// Prioritet på oppgaver (F5). Standard er normal.
+export const PRIORITY = {
+  LOW: 'low',
+  NORMAL: 'normal',
+  HIGH: 'high',
+};
+
+// Fri- og sykedager (F8)
+export const DAY_OFF_KIND = {
+  SICK: 'sick',
+  OFF: 'off',
+};
+
 // Standardinnstillinger. Studievinduet er en utvidelse av datamodellen (antakelse 1 i plan.md).
+// Øktinnstillingene og foretrukne tider er datamodell v2 (F6–F7). Standardverdiene gir samme plan
+// som før v2 (punkt 68 i plan.md). Ingen foretrukne tider betyr at hele studievinduet er foretrukket.
+// Listen er frosset, så den delte standardverdien ikke kan endres ved et uhell.
 export const DEFAULT_SETTINGS = {
   daily_available_study_hours: 4,
   study_window_start: '08:00',
   study_window_end: '21:00',
+  preferred_session_minutes: 120,
+  min_session_minutes: 30,
+  break_minutes: 15,
+  preferred_times: Object.freeze([]),
 };
 
 // Farger brukeren kan velge for emner. Navnene står i src/tekster.js.
@@ -66,15 +86,20 @@ export function createInitialState({ userId }) {
     last_checked_date: null,
     // Utvidelse av datamodellen: førstegangsveiviseren er vist (lukket eller fullført)
     onboarding_done: false,
+    // Datamodell v2: fri- og sykedager (F8)
+    days_off: [],
   };
 }
 
-// Fyller inn manglende felt i lagrede data, f.eks. etter at nye innstillinger er lagt til
+// Fyller inn manglende felt i lagrede data, f.eks. etter at nye innstillinger er lagt til.
+// Felt som finnes, endres ikke. Elementer som ikke er objekter, røres ikke (det fanges av valideringen).
 export function normalizeState(raw) {
   const list = (value) => (Array.isArray(value) ? value : []);
+  const withDefaults = (defaults) => (item) =>
+    item && typeof item === 'object' ? { ...defaults(item), ...item } : item;
   const courses = list(raw.courses);
-  const tasks = list(raw.tasks);
-  const blocks = list(raw.blocks);
+  const tasks = list(raw.tasks).map(withDefaults(() => ({ priority: PRIORITY.NORMAL })));
+  const blocks = list(raw.blocks).map(withDefaults(() => ({ is_locked: false })));
   return {
     user: { name: '', ...DEFAULT_SETTINGS, ...raw.user },
     courses,
@@ -83,6 +108,7 @@ export function normalizeState(raw) {
     last_checked_date: raw.last_checked_date ?? null,
     // Data lagret før veiviseren fantes: den som allerede har lagt inn noe, trenger den ikke
     onboarding_done: raw.onboarding_done ?? courses.length + tasks.length + blocks.length > 0,
+    days_off: list(raw.days_off),
   };
 }
 
@@ -107,6 +133,8 @@ export function createTask(input, { id, now }) {
     created_at: now.toISOString(),
     // Utvidelse av datamodellen: «Fordel på nytt» er valgt (antakelse 7 i plan.md)
     allow_over_capacity: false,
+    // Datamodell v2 (F5)
+    priority: Object.values(PRIORITY).includes(input.priority) ? input.priority : PRIORITY.NORMAL,
   };
 }
 
@@ -195,5 +223,7 @@ export function createFixedBlock(input, { id }) {
     is_fixed: true,
     recurrence: input.recurrence === RECURRENCE.NONE ? RECURRENCE.NONE : RECURRENCE.WEEKLY,
     is_completed: false,
+    // Datamodell v2 (F9): bare arbeidsøkter kan låses, så faste aktiviteter er alltid ulåst
+    is_locked: false,
   };
 }

@@ -15,7 +15,7 @@ function fakeStorage(initial = {}) {
 describe('save og load', () => {
   it('henter det som ble lagret', () => {
     const backend = fakeStorage();
-    const state = { ...createInitialState({ userId: 'u1' }), tasks: [{ id: 't1', title: 'Rapport' }] };
+    const state = { ...createInitialState({ userId: 'u1' }), tasks: [{ id: 't1', title: 'Rapport', priority: 'normal' }] };
     expect(save(state, backend)).toEqual({ ok: true });
     expect(load(backend)).toEqual({ state, error: null });
   });

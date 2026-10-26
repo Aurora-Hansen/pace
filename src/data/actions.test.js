@@ -66,7 +66,7 @@ import {
   expireUndo,
 } from './actions.js';
 import { parseBackup, serializeBackup } from '../logic/backup.js';
-import { createInitialState, RECURRENCE } from '../logic/models.js';
+import { createInitialState, RECURRENCE, DEFAULT_SETTINGS } from '../logic/models.js';
 import { load, save } from './storage.js';
 
 // Onsdag 4. november 2026
@@ -161,6 +161,7 @@ describe('submitSettings', () => {
     expect(state.data.user).toEqual({
       id: 'u1',
       name: 'Kari',
+      ...DEFAULT_SETTINGS,
       daily_available_study_hours: 5.5,
       study_window_start: '09:00',
       study_window_end: '20:00',

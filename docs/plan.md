@@ -457,7 +457,7 @@ Felles for alle måtene:
 
   Lagre øktene som dagens `replan` og `rollover` gir for dem.
   *Ferdig når:* fasiten er committet før datamodellen endres.
-- [ ] **9.2 Datamodell v2** (`logic/models.js`). Nye felt med standardverdier i `createUser`, `createTask`, `createFixedBlock`, `createInitialState` og `normalizeState`. Ingen endring i planleggeren ennå.
+- [x] **9.2 Datamodell v2** (`logic/models.js`). Nye felt med standardverdier i `createUser`, `createTask`, `createFixedBlock`, `createInitialState` og `normalizeState`. Ingen endring i planleggeren ennå.
   *Tester:* nye objekter får standardverdier, og `normalizeState` fyller inn manglende felt uten å endre de som finnes.
 - [ ] **9.3 Migrering** (`logic/migrate.js`). `migrate(stored)` kjører en kjede av rene funksjoner (`1 → 2`, senere `2 → 3`) og gir `{ data, from, to }` eller `{ error }`.
   *Tester:*
@@ -662,5 +662,9 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
 90. **Kalendereksport (.ics):** Låste økter eksporteres som andre økter, og fridager eksporteres ikke.
 91. **Nye tekster** (prioritet, økter og pauser, foretrukne tider, flytting, lås, fridager og syk) legges i `tekster.js` og merkes som ikke fra innhold.md, som før.
 92. **Endre lengde ved å dra (Kan ha)** er et eget valgfritt steg (11.7) og gjøres bare hvis du ønsker det.
-
-
+93. **Datamodell v2 i koden (9.2):**
+    - `PRIORITY` og `DAY_OFF_KIND` ligger i `models.js`.
+    - `DEFAULT_SETTINGS` har de tre øktinnstillingene og en frosset, tom `preferred_times`, så den delte standardlisten ikke kan endres ved et uhell.
+    - `normalizeState` fyller inn `priority`, `is_locked` og `days_off` bare der de mangler. Elementer som ikke er objekter, får være som de er, så valideringen ved import fortsatt finner dem.
+    - Eksempeldataene har alle v2-feltene.
+    - Øktene planleggeren lager, får ikke `is_locked` før steg 11.2, fordi planleggeren ikke endres i fase 9. Feltet fylles inn når dataene lastes, og en økt uten feltet regnes som ulåst.
