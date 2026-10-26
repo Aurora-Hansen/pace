@@ -239,7 +239,7 @@ Planleggeren trengs allerede i «Må ha», fordi forskyvning av økter forutsett
 
 ## Fase 8 – Videreutvikling
 
-- [ ] **8.1 robots.txt.** `public/robots.txt` som tillater alt.
+- [x] **8.1 robots.txt.** `public/robots.txt` som tillater alt.
   *Ferdig når:* filen ligger i `dist/`, og Netlify serverer den med `Content-Type: text/plain`.
 - [x] **8.2 Bildeoptimalisering.** WebP, riktig størrelse per visning (`srcset` og `sizes`) og `loading="lazy"` for bilder under bretten.
   *Ferdig når:* ingen bilder lastes i større oppløsning enn de vises i, og bilder under bretten lastes ikke før de trengs (målt i nettleseren).
