@@ -480,7 +480,7 @@ Felles for alle måtene:
 
 ## Fase 10 – Én boks per sammenhengende økt (F10) og minste øktlengde
 
-- [ ] **10.1 Sammenslåing** (`logic/sessions.js`). `mergeAdjacentSessions(blocks)` slår sammen økter etter reglene i punkt 71.
+- [x] **10.1 Sammenslåing** (`logic/sessions.js`). `mergeAdjacentSessions(blocks)` slår sammen økter etter reglene i punkt 71.
   *Tester:*
   - To og tre økter på rad blir én.
   - Økter blir ikke slått sammen når det ligger en pause, en fast aktivitet eller en annen oppgave imellom.
@@ -723,3 +723,8 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
       - Eksempeldata lagt inn på https://pacewa.netlify.app (v1), med `?dato=2026-11-04T10:00`.
       - Både lagrede data og sikkerhetskopien derfra ga nøyaktig samme tekst i «I dag», «Kalender», «Oppgaver» og «Timeplan» i den nye versjonen. Bare bekreftelsesmeldingen øverst var ulik, slik den skal være.
       - Ny eksport er versjon 2, og axe-core fant ingen feil.
+98. **Sammenslåing i koden (10.1):**
+    - `mergeAdjacentSessions` gir *samme* liste tilbake når ingenting slås sammen, så det er billig å se at ingenting er endret.
+    - Den sammenslåtte økten står der den første sto i listen.
+    - Økter som overlapper (samme oppgave), røres ikke, fordi de ikke ligger «rett etter hverandre». Slike økter lages ikke av planleggeren. Om de skal hindres ved flytting, avgjøres i 11.1.
+    - Økter på ulike dager slås aldri sammen, heller ikke over midnatt.
