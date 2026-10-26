@@ -6,8 +6,7 @@ import { escapeHtml } from './html.js';
 import { formatFullDate, formatTimeRange } from './format.js';
 import { renderOverloadWarnings } from './overload.js';
 import { sampleDataButton } from './sample.js';
-import allDoneUrl from '../images/all-done.webp';
-import emptyCalendarUrl from '../images/empty-calendar.webp';
+import { illustration } from './images.js';
 
 function itemHtml(item, taskById, courseById) {
   const task = taskById.get(item.task_id);
@@ -81,7 +80,7 @@ export function renderToday(state) {
       ${renderOverloadWarnings(state)}
       <section class="card">
         <div class="empty-state">
-          <img src="${emptyCalendarUrl}" alt="" width="160" height="160">
+          ${illustration('emptyCalendar')}
           <h3>${noTasks ? empty.overskrift : t.ingenting}</h3>
           <p>${noTasks ? empty.tekst : t.ingentingTekst}</p>
           ${noTasks ? `
@@ -98,7 +97,7 @@ export function renderToday(state) {
     ? `
       <section class="card">
         <div class="empty-state empty-state-compact">
-          <img src="${allDoneUrl}" alt="" width="120" height="120">
+          ${illustration('allDone', 7.5)}
           <h3>${done.overskrift}</h3>
           <p>${done.tekst}</p>
         </div>

@@ -426,6 +426,12 @@ legend {
   text-align: left;
 }
 
+/* Filvelgeren er skjult bak en knapp (label). Fokus vises på knappen. */
+.file-input:focus-visible + label {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 /* Radioknapper (eksport til kalender) */
 .radio-group {
   display: grid;
@@ -461,6 +467,36 @@ legend {
 
 .export-panel select {
   max-width: 16rem;
+}
+
+/* «Angre» etter sletting, nederst på skjermen (over bunnmenyen på mobil) */
+.undo-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: max-content;
+  max-width: calc(100vw - 2 * var(--space-4));
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-text);
+  color: var(--color-bg);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 0.3);
+  transform: translateX(-50%);
+}
+
+.undo-toast p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 40rem) {
+  .undo-toast {
+    bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* Bekreftelse for hele appen, f.eks. etter eksempeldata */

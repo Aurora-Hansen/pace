@@ -15,8 +15,7 @@ import { escapeHtml, formErrorSummary, invalidAttrs } from './html.js';
 import { formatDeadline, formatHoursShort } from './format.js';
 import { renderOverloadWarnings } from './overload.js';
 import { sampleDataButton } from './sample.js';
-import emptyTasksUrl from '../images/empty-tasks.webp';
-import allDoneUrl from '../images/all-done.webp';
+import { illustration } from './images.js';
 
 // --- Tidsestimat i oppgaveskjemaet (steg 6.4) ---
 
@@ -248,7 +247,7 @@ export function renderTasks(state) {
       ${formOpen ? '' : `
         <section class="card">
           <div class="empty-state">
-            <img src="${emptyTasksUrl}" alt="" width="160" height="160">
+            ${illustration('emptyTasks')}
             <h3>${empty.overskrift}</h3>
             <p>${empty.tekst}</p>
             <div class="empty-actions">
@@ -264,7 +263,7 @@ export function renderTasks(state) {
   const allDone = tommeTilstander.altFerdigIDag;
   const allDoneHtml = `
     <div class="empty-state empty-state-compact">
-      <img src="${allDoneUrl}" alt="" width="120" height="120">
+      ${illustration('allDone', 7.5)}
       <h4>${allDone.overskrift}</h4>
       <p>${allDone.tekst}</p>
     </div>`;

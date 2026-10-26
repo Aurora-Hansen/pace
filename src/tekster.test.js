@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatHours, hoperSegOpp, feilmeldinger, estimat, ukesoppsummering, hilsen } from './tekster.js';
+import { formatHours, hoperSegOpp, feilmeldinger, estimat, ukesoppsummering, hilsen, sikkerhetskopi } from './tekster.js';
 import { estimateHours, TASK_TYPES } from './logic/estimate.js';
 
 describe('hoperSegOpp.tekst', () => {
@@ -73,6 +73,15 @@ describe('estimat.begrunnelse', () => {
   });
 });
 
+describe('sikkerhetskopi', () => {
+  it('beskriver filen med entall og flertall', () => {
+    expect(sikkerhetskopi.sporsmal({ emner: 3, oppgaver: 1, aktiviteter: 1, dato: 'tirsdag 3. november' })).toBe(
+      'Filen fra tirsdag 3. november har 3 emner, 1 oppgave og 1 fast aktivitet. Den erstatter alt du har i Pace nå. Vil du fortsette?',
+    );
+    expect(sikkerhetskopi.sporsmal({ emner: 0, oppgaver: 2, aktiviteter: 5, dato: null })).toContain('Filen har 0 emner, 2 oppgaver og 5 faste aktiviteter.');
+  });
+});
+
 describe('feilmeldinger', () => {
   it('har overskrift og tekst for alle feilkoder', () => {
     const koder = [
@@ -82,6 +91,11 @@ describe('feilmeldinger', () => {
       'TOMT_ESTIMAT',
       'MANGLER_FELT',
       'SLUTT_FOR_START',
+      'UGYLDIG_JSON',
+      'IKKE_PACE_FIL',
+      'NYERE_VERSJON',
+      'UGYLDIG_INNHOLD',
+      'FILEN_ER_FOR_STOR',
     ];
     for (const kode of koder) {
       expect(feilmeldinger[kode].overskrift).toBeTruthy();

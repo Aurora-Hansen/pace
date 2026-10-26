@@ -11,7 +11,7 @@ import { COURSE_COLORS, suggestCourseColor } from '../logic/models.js';
 import { sortFixedBlocks } from '../logic/recurrence.js';
 import { escapeHtml, formErrorSummary, invalidAttrs } from './html.js';
 import { formatFixedBlockWhen } from './format.js';
-import emptyCalendarUrl from '../images/empty-calendar.webp';
+import { illustration } from './images.js';
 
 const isConfirming = (state, kind, id) => state.ui.confirm?.kind === kind && state.ui.confirm.id === id;
 
@@ -190,7 +190,7 @@ function fixedBlockSection(state) {
     const empty = tommeTilstander.tomKalender;
     content = `
       <div class="empty-state">
-        <img src="${emptyCalendarUrl}" alt="" width="160" height="160">
+        ${illustration('emptyCalendar')}
         <h3>${empty.overskrift}</h3>
         <p>${empty.tekst}</p>
         <button class="btn btn-accent" type="button" data-action="open-fixed-block">${empty.knapp}</button>

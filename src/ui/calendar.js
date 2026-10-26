@@ -10,7 +10,7 @@ import {
   formatFullDate,
   formatDateRange,
 } from './format.js';
-import emptyCalendarUrl from '../images/empty-calendar.webp';
+import { illustration } from './images.js';
 import { sampleDataButton } from './sample.js';
 import { exportButton, exportPanel } from './export.js';
 
@@ -20,7 +20,7 @@ function emptyState(state) {
     <section class="card" aria-labelledby="calendar-title">
       <h2 id="calendar-title" class="visually-hidden">${t.overskrift}</h2>
       <div class="empty-state">
-        <img src="${emptyCalendarUrl}" alt="" width="160" height="160">
+        ${illustration('emptyCalendar')}
         <h3>${empty.overskrift}</h3>
         <p>${empty.tekst}</p>
         <div class="empty-actions">

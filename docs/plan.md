@@ -134,6 +134,17 @@ Krav.md sier ikke noe om disse punktene. Her er forslag som kan endres:
     - Bilder: illustrasjonene står på en lys, avrundet flate i mørk modus, logoen lysnes med et filter, og hero-bildet dempes og får en mørk overgang bak teksten.
     - Fremdriftslinjen i korall har 2,3:1 mot hvitt i lys modus (WCAG krever 3:1 for grafikk). Det er godtatt, fordi fremgangen alltid står som tekst ved siden av, og korall er fargen design.md bruker for fremgang.
 61. **Fokus beholdes ved ny tegning:** Render husker elementet med fokus (`id` eller `data-*`-attributter) og gir det fokus igjen etter tegning. Et nytt `data-autofocus`-mål (skjema som åpnes, feilmelding, nytt steg) går foran.
+62. **Robots (8.1):** `public/robots.txt` tillater alt (`User-agent: *`, `Allow: /`). Den har ingen `Sitemap`, fordi siden bare har to sider.
+63. **Bilder (8.2):** Illustrasjonene finnes i 160 og 320 px (`src/images/*-160.webp` og `*-320.webp`) med `srcset` og `sizes`, så nettleseren velger etter visningsbredde og pikseltetthet. `ui/images.js` lager `<img>`-elementet i appen. Logoen er WebP. Favicon og apple-touch-icon er PNG, og OG-bildet er JPEG, fordi det er det disse formålene forventer. Landingssidens tre illustrasjoner har `loading="lazy"`. Bildene i appen står øverst i visningen og lastes vanlig. Chrome laster «lazy»-bilder som er innenfor ca. 1250 px av skjermen, så på den korte landingssiden lastes de likevel med en gang.
+64. **Sikkerhetskopi (8.3):**
+    - `logic/backup.js` lager filen (`{ format: 'pace-sikkerhetskopi', version: 1, exported_at, data }`) og validerer den ved import.
+    - Valideringen sjekker filtype, versjon, innstillinger, felt og verdier i emner, oppgaver og aktiviteter, dobbelt id og at alle koblinger peker på noe som finnes. Feilmeldingen sier hvor feilen er (f.eks. «oppgave nr. 3»), og ingenting endres. Filer over 5 MB avvises før de leses.
+    - Importen viser hva filen inneholder og spør før alt erstattes. Etter import kjører daglig sjekk, så gamle økter flyttes.
+    - Valget av lys/mørk modus er ikke med, fordi det er en innstilling for nettleseren og ikke en del av planen.
+65. **Angre sletting (8.4):**
+    - `confirmDelete` legger det som trengs for å angre i `ui.undo` (lagres ikke): oppgaven og dens gjennomførte økter, emnet og hvilke oppgaver og aktiviteter som pekte på det, eller den faste aktiviteten. Ikke en kopi av alle data, så endringer gjort etter slettingen beholdes ved angring. Øvrige arbeidsøkter for en oppgave planlegges på nytt.
+    - Hver sletting har et `token`, så tidtakeren for en eldre sletting ikke fjerner en nyere. Bare siste sletting kan angres.
+    - Meldingen forsvinner etter 5 sekunder (`setTimeout` i `main.js`). Tiden står stille så lenge musepekeren er over meldingen eller «Angre» har tastaturfokus (`:focus-visible`), og starter på nytt når den forlates (WCAG 2.2.1). «Angre» får fokus etter slettingen.
 
 ---
 
@@ -225,3 +236,15 @@ Planleggeren trengs allerede i «Må ha», fordi forskyvning av økter forutsett
 - [x] **7.2 Metadata og tilgjengelighet.** `lang="nb"`, OG-tagger med `og-image.png`, alt-tekster fra innhold.md, synlig tastaturfokus og fargekontrast.
 - [x] **7.3 Responsivitet.** To-do og dagsvisning fungerer på mobil (ca. 400 px), og ukevisning på nettbrett og PC.
 - [x] **7.4 Sluttsjekk.** `npm test` er grønn, `npm run build` gir ingen feil, og en gjennomgang av alle brukerhistoriene under «Må ha» og «Bør ha» på den publiserte siden er gjort.
+
+## Fase 8 – Videreutvikling
+
+- [ ] **8.1 robots.txt.** `public/robots.txt` som tillater alt.
+  *Ferdig når:* filen ligger i `dist/`, og Netlify serverer den med `Content-Type: text/plain`.
+- [x] **8.2 Bildeoptimalisering.** WebP, riktig størrelse per visning (`srcset` og `sizes`) og `loading="lazy"` for bilder under bretten.
+  *Ferdig når:* ingen bilder lastes i større oppløsning enn de vises i, og bilder under bretten lastes ikke før de trengs (målt i nettleseren).
+- [x] **8.3 Eksport og import av data (JSON)** under Innstillinger. Ren funksjon i `logic/backup.js` som lager og validerer filen.
+  *Tester:* gyldig fil gir data tilbake, og ugyldig JSON, feil filtype, nyere versjon, manglende felt, ugyldige verdier, dobbelt id og brutte koblinger gir feil.
+  *Ferdig når:* import spør før data erstattes, og avbryt beholder dataene.
+- [x] **8.4 Angre sletting.** «Angre» i 5 sekunder etter sletting av oppgave, emne eller fast aktivitet.
+  *Tester:* angre gjenoppretter det som ble slettet (også koblinger fra oppgaver og aktiviteter til emnet), og etter 5 sekunder kan det ikke angres.

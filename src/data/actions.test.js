@@ -58,7 +58,14 @@ import {
   setTheme,
   toggleTheme,
   setSystemDark,
+  backupExported,
+  importLoaded,
+  cancelImport,
+  confirmImport,
+  undoDelete,
+  expireUndo,
 } from './actions.js';
+import { parseBackup, serializeBackup } from '../logic/backup.js';
 import { createInitialState, RECURRENCE } from '../logic/models.js';
 import { load, save } from './storage.js';
 
@@ -698,6 +705,124 @@ describe('førstegangsveiviser', () => {
     const state = initial();
     expect(step({ intent: 'next' }, state)).toBe(state);
     expect(closeWizard()(state)).toBe(state);
+  });
+});
+
+describe('angre sletting', () => {
+  const now = new Date(2026, 10, 4, 7, 0);
+  const setup = () =>
+    run(
+      initial(),
+      submitCourse({ name: 'Matte', color: '#3F8F6B' }, 'c1'),
+      submitCourse({ name: 'Fysikk', color: '#7B5EA7' }, 'c2'),
+      submitFixedBlock({ title: 'Forelesning', course_id: 'c1', date: '2026-11-02', start: '10:15', end: '12:00', weekly: 'on' }, 'f1'),
+      submitFixedBlock({ title: 'Lab', course_id: 'c2', date: '2026-11-03', start: '08:00', end: '10:00', weekly: 'on' }, 'f2'),
+      (s) => withReplan(submitTask({ title: 'Rapport', course_id: 'c1', description: '', estimated_hours: '3', deadline_date: '2026-11-06', deadline_time: '' }, 't1', now), now)(s),
+    );
+  const remove = (kind, id, token = 'tok-1') => (s) => confirmDelete({ token })(askDelete({ kind, id })(s));
+
+  it('husker slettet oppgave og legger den tilbake på samme plass', () => {
+    const before = setup();
+    const deleted = remove('task', 't1')(before);
+    expect(deleted.ui.undo).toMatchObject({ token: 'tok-1', kind: 'task', title: 'Rapport' });
+    const restored = undoDelete()(deleted);
+    expect(restored.data.tasks).toEqual(before.data.tasks);
+    expect(restored.ui).toMatchObject({ undo: null, notice: 'SLETTING_ANGRET' });
+  });
+
+  it('legger tilbake gjennomførte økter, og planen lager resten på nytt', () => {
+    const planned = setup();
+    const first = planned.data.blocks.find((b) => !b.is_fixed);
+    const withDone = toggleSession({ id: first.id })(planned);
+    const restored = withReplan(undoDelete(), now)(remove('task', 't1')(withDone));
+    const sessions = restored.data.blocks.filter((b) => b.task_id === 't1');
+    expect(sessions.find((b) => b.id === first.id)?.is_completed).toBe(true);
+    const hours = sessions.reduce((sum, b) => sum + (new Date(b.end_time) - new Date(b.start_time)) / 3_600_000, 0);
+    expect(hours).toBe(3);
+  });
+
+  it('legger tilbake emne og koblingene fra oppgaver og aktiviteter', () => {
+    const before = setup();
+    const deleted = remove('course', 'c1')(before);
+    expect(deleted.data.tasks[0].course_id).toBeNull();
+    expect(deleted.data.blocks.find((b) => b.id === 'f1').course_id).toBeNull();
+    const restored = undoDelete()(deleted);
+    expect(restored.data.courses.map((c) => c.id)).toEqual(['c1', 'c2']);
+    expect(restored.data.tasks[0].course_id).toBe('c1');
+    expect(restored.data.blocks.find((b) => b.id === 'f1').course_id).toBe('c1');
+    // Aktiviteter i andre emner er urørt
+    expect(restored.data.blocks.find((b) => b.id === 'f2').course_id).toBe('c2');
+  });
+
+  it('beholder endringer gjort etter slettingen', () => {
+    const deleted = remove('course', 'c1')(setup());
+    // Oppgaven får et annet emne før slettingen angres – det valget beholdes
+    const changed = { ...deleted, data: { ...deleted.data, tasks: deleted.data.tasks.map((t) => ({ ...t, course_id: 'c2' })) } };
+    expect(undoDelete()(changed).data.tasks[0].course_id).toBe('c2');
+  });
+
+  it('legger tilbake fast aktivitet', () => {
+    const before = setup();
+    const restored = undoDelete()(remove('fixedBlock', 'f1')(before));
+    expect(restored.data.blocks.filter((b) => b.is_fixed)).toEqual(before.data.blocks.filter((b) => b.is_fixed));
+  });
+
+  it('kan ikke angres når tiden er ute', () => {
+    const deleted = remove('task', 't1')(setup());
+    const expired = expireUndo({ token: 'tok-1' })(deleted);
+    expect(expired.ui.undo).toBeNull();
+    expect(undoDelete()(expired)).toBe(expired);
+    expect(expired.data.tasks).toEqual([]);
+  });
+
+  it('en gammel tidtaker fjerner ikke en nyere sletting', () => {
+    const twice = run(setup(), remove('fixedBlock', 'f1', 'tok-1'), remove('fixedBlock', 'f2', 'tok-2'));
+    expect(twice.ui.undo.token).toBe('tok-2');
+    expect(expireUndo({ token: 'tok-1' })(twice)).toBe(twice);
+    // Bare den siste slettingen kan angres
+    expect(undoDelete()(twice).data.blocks.map((b) => b.id)).toContain('f2');
+    expect(undoDelete()(twice).data.blocks.map((b) => b.id)).not.toContain('f1');
+  });
+});
+
+describe('sikkerhetskopi', () => {
+  const now = new Date(2026, 10, 4, 9, 0);
+  const backupOf = (state) => parseBackup(serializeBackup(state.data, now));
+  const withCourse = () => submitCourse({ name: 'Mitt emne', color: '#3F8F6B' }, 'c1')(initial());
+
+  it('viser hva filen inneholder og venter på bekreftelse', () => {
+    const fromSample = backupOf(loadSampleData(now)(initial()));
+    const state = importLoaded(fromSample)(withCourse());
+    expect(state.ui.importState.counts).toEqual({ courses: 3, tasks: 4, fixed: 5 });
+    expect(state.data.courses.map((c) => c.id)).toEqual(['c1']);
+  });
+
+  it('avbryt beholder dataene', () => {
+    const before = withCourse();
+    const state = cancelImport()(importLoaded(backupOf(loadSampleData(now)(initial())))(before));
+    expect(state.ui.importState).toBeNull();
+    expect(state.data).toBe(before.data);
+  });
+
+  it('erstatter dataene når det er bekreftet, og planlegger på nytt', () => {
+    const fromSample = backupOf(loadSampleData(now)(initial()));
+    const state = confirmImport(now)(importLoaded(fromSample)(withCourse()));
+    expect(state.data.courses.map((c) => c.id)).not.toContain('c1');
+    expect(state.data.tasks).toHaveLength(4);
+    expect(state.data.last_checked_date).toBe('2026-11-04');
+    expect(state.ui).toMatchObject({ view: 'idag', notice: 'IMPORT_FULLFORT', importState: null });
+  });
+
+  it('en fil med feil endrer ingenting og kan ikke bekreftes', () => {
+    const before = withCourse();
+    const failed = importLoaded({ error: 'UGYLDIG_JSON' })(before);
+    expect(failed.ui.importState).toEqual({ error: 'UGYLDIG_JSON' });
+    expect(confirmImport(now)(failed)).toBe(failed);
+    expect(failed.data).toBe(before.data);
+  });
+
+  it('bekrefter nedlasting', () => {
+    expect(backupExported()(initial()).ui.notice).toBe('SIKKERHETSKOPI_LASTET_NED');
   });
 });
 

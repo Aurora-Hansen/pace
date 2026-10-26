@@ -1,6 +1,6 @@
 // Den felles render-funksjonen. Tegner hele appen ut fra tilstanden.
 // Kalles av store etter hver endring – aldri direkte fra hendelser.
-import { feilmeldinger, knapper, navigasjon, testmodus, bekreftelser } from '../tekster.js';
+import { feilmeldinger, knapper, navigasjon, testmodus, bekreftelser, angre } from '../tekster.js';
 import { toDateKey } from '../logic/dates.js';
 import { escapeHtml } from './html.js';
 import { formatFullDate, formatClock } from './format.js';
@@ -12,7 +12,7 @@ import { renderToday } from './today.js';
 import { renderWizard } from './wizard.js';
 import { themeToggle } from './theme.js';
 import { effectiveTheme } from '../logic/theme.js';
-import logoUrl from '../images/logo-64.png';
+import logoUrl from '../images/logo-64.webp';
 
 // Rekkefølgen her er rekkefølgen i menyen
 const views = {
@@ -77,6 +77,18 @@ function errorBanner(code) {
     </div>`;
 }
 
+// «Angre» etter sletting. Forsvinner etter 5 sekunder (tidtakeren er i main.js), men står så lenge
+// den har tastaturfokus eller musepekeren over seg, så alle rekker å bruke den.
+function undoToast(undo) {
+  if (!undo) return '';
+  return `
+    <div class="undo-toast" role="status">
+      <p>${escapeHtml(angre.slettet(undo.title))}</p>
+      <button class="btn btn-accent btn-small" type="button" data-action="undo-delete" data-autofocus
+        aria-label="${escapeHtml(angre.knappLabel(undo.title))}">${angre.knapp}</button>
+    </div>`;
+}
+
 // Bekreftelser som gjelder hele appen. «Innstillingene er lagret» vises i selve skjemaet.
 function noticeBanner(code) {
   if (!code || code === 'INNSTILLINGER_LAGRET') return '';
@@ -124,6 +136,7 @@ export function render(state, root) {
         ${noticeBanner(state.ui.notice)}
         ${views[state.ui.view](state)}
       </main>
+      ${undoToast(state.ui.undo)}
     </div>`;
   root.ownerDocument.querySelector('.skip-link')?.toggleAttribute('inert', wizardOpen);
 

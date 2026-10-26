@@ -62,6 +62,10 @@ export function createInitialUi({
     dismissedOverload: [],
     // Førstegangsveiviseren: { step, values, errors } når den er åpen
     wizard: null,
+    // Import av sikkerhetskopi: svaret fra parseBackup mens brukeren bekrefter eller ser feilen
+    importState: null,
+    // Siste sletting som kan angres: { token, kind, title, restore }
+    undo: null,
     error,
     notice: null,
     confirm: null,
@@ -483,6 +487,24 @@ export const submitWizard = (rawValues, newId, now) => (state) => {
   return nextStep({ ...state, data: { ...state.data, tasks: [...state.data.tasks, task] } });
 };
 
+// --- Sikkerhetskopi (JSON) ---
+// Nedlasting og lesing av fil er sideeffekter i main.js. Disse oppdaterer bare tilstanden.
+
+export const backupExported = () => (state) => withUi(state, { notice: 'SIKKERHETSKOPI_LASTET_NED', importState: null });
+
+// `result` er svaret fra parseBackup: { data, exportedAt, counts } eller { error, where, index }
+export const importLoaded = (result) => (state) => withUi(state, { importState: result, confirm: null, notice: null });
+
+export const cancelImport = () => (state) => withUi(state, { importState: null });
+
+// Erstatter alle data med innholdet i filen og kjører daglig sjekk, så gamle økter flyttes
+export const confirmImport = (now) => (state) => {
+  const imported = state.ui.importState?.data;
+  if (!imported) return state;
+  const data = rollover(imported, now);
+  return withOverload({ data, ui: { ...freshUi(state, 'IMPORT_FULLFORT'), importState: null } }, now);
+};
+
 // --- Eksport til kalenderfil ---
 
 export const openExportForm = () => (state) =>
@@ -513,14 +535,21 @@ export const askDelete = ({ kind, id }) => (state) => {
 
 export const cancelDelete = () => (state) => withUi(state, { confirm: null });
 
-export const confirmDelete = () => (state) => {
+// Sletter etter bekreftelse og husker det som trengs for «Angre» (steg 8.4).
+// `token` gjør hver sletting unik, så tidtakeren i main.js bare fjerner sin egen angre-mulighet.
+export const confirmDelete = ({ token } = {}) => (state) => {
   const { confirm } = state.ui;
   if (!confirm) return state;
   const ui = { ...state.ui, confirm: null };
+  const undo = (title, restore) => ({ token, kind: confirm.kind, title, restore });
 
   if (confirm.kind === 'course') {
+    const index = state.data.courses.findIndex((c) => c.id === confirm.id);
+    if (index < 0) return { ...state, ui };
+    const course = state.data.courses[index];
     // Oppgaver og aktiviteter i emnet beholdes, men mister koblingen til emnet
     const detach = (item) => (item.course_id === confirm.id ? { ...item, course_id: null } : item);
+    const linked = (list) => list.filter((item) => item.course_id === confirm.id).map((item) => item.id);
     const editing = state.ui.forms.course?.values.id === confirm.id;
     return {
       data: {
@@ -529,12 +558,19 @@ export const confirmDelete = () => (state) => {
         tasks: state.data.tasks.map(detach),
         blocks: state.data.blocks.map(detach),
       },
-      ui: editing ? withoutForm(ui, 'course') : ui,
+      ui: {
+        ...(editing ? withoutForm(ui, 'course') : ui),
+        undo: undo(course.name, { course, index, taskIds: linked(state.data.tasks), blockIds: linked(state.data.blocks) }),
+      },
     };
   }
 
   if (confirm.kind === 'task') {
-    // Arbeidsøktene til oppgaven slettes sammen med den
+    const index = state.data.tasks.findIndex((t) => t.id === confirm.id);
+    if (index < 0) return { ...state, ui };
+    const task = state.data.tasks[index];
+    // Arbeidsøktene til oppgaven slettes sammen med den. Gjennomførte økter huskes, resten planlegges på nytt ved angring.
+    const completedSessions = state.data.blocks.filter((b) => b.task_id === confirm.id && b.is_completed);
     let taskUi = state.ui.forms.task?.values.id === confirm.id ? withoutForm(ui, 'task') : ui;
     if (state.ui.forms.progress?.values.task_id === confirm.id) taskUi = withoutForm(taskUi, 'progress');
     return {
@@ -543,13 +579,49 @@ export const confirmDelete = () => (state) => {
         tasks: state.data.tasks.filter((t) => t.id !== confirm.id),
         blocks: state.data.blocks.filter((b) => b.task_id !== confirm.id),
       },
-      ui: taskUi,
+      ui: { ...taskUi, undo: undo(task.title, { task, index, completedSessions }) },
     };
   }
 
+  const index = state.data.blocks.findIndex((b) => b.id === confirm.id);
+  if (index < 0) return { ...state, ui };
+  const block = state.data.blocks[index];
   const editing = state.ui.forms.fixedBlock?.values.id === confirm.id;
   return {
     data: { ...state.data, blocks: state.data.blocks.filter((b) => b.id !== confirm.id) },
-    ui: editing ? withoutForm(ui, 'fixedBlock') : ui,
+    ui: { ...(editing ? withoutForm(ui, 'fixedBlock') : ui), undo: undo(block.title, { block, index }) },
   };
 };
+
+// Setter inn på samme plass som før (eller sist hvis listen er blitt kortere)
+const insertAt = (list, index, item) => [...list.slice(0, index), item, ...list.slice(index)];
+const has = (list, id) => list.some((item) => item.id === id);
+
+// «Angre»: legger tilbake det som ble slettet. Endringer gjort etterpå beholdes.
+export const undoDelete = () => (state) => {
+  const undo = state.ui.undo;
+  if (!undo) return state;
+  const { restore } = undo;
+  let data = state.data;
+
+  if (undo.kind === 'course' && !has(data.courses, restore.course.id)) {
+    const relink = (ids) => (item) => (ids.includes(item.id) && item.course_id === null ? { ...item, course_id: restore.course.id } : item);
+    data = {
+      ...data,
+      courses: insertAt(data.courses, restore.index, restore.course),
+      tasks: data.tasks.map(relink(restore.taskIds)),
+      blocks: data.blocks.map(relink(restore.blockIds)),
+    };
+  } else if (undo.kind === 'task' && !has(data.tasks, restore.task.id)) {
+    const sessions = restore.completedSessions.filter((b) => !has(data.blocks, b.id));
+    data = { ...data, tasks: insertAt(data.tasks, restore.index, restore.task), blocks: [...data.blocks, ...sessions] };
+  } else if (undo.kind === 'fixedBlock' && !has(data.blocks, restore.block.id)) {
+    data = { ...data, blocks: insertAt(data.blocks, restore.index, restore.block) };
+  }
+
+  return { data, ui: { ...state.ui, undo: null, notice: 'SLETTING_ANGRET' } };
+};
+
+// Når tiden er ute. Gjelder bare slettingen med samme `token`, ikke en nyere.
+export const expireUndo = ({ token }) => (state) =>
+  state.ui.undo?.token === token ? withUi(state, { undo: null }) : state;

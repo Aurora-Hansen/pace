@@ -7,6 +7,7 @@ import { toDateKey } from './logic/dates.js';
 import { now, isSimulated } from './data/clock.js';
 import { render } from './ui/render.js';
 import { prepareExport } from './logic/ics.js';
+import { serializeBackup, parseBackup, backupFilename, MAX_BACKUP_BYTES } from './logic/backup.js';
 import { eksport } from './tekster.js';
 import { greetingPeriod } from './logic/greeting.js';
 
@@ -99,10 +100,13 @@ const clickActions = {
   'close-wizard': actions.closeWizard,
   'restart-wizard': actions.restartWizard,
   'toggle-theme': actions.toggleTheme,
+  'confirm-import': () => actions.confirmImport(now()),
+  'cancel-import': actions.cancelImport,
   'set-theme': actions.setTheme,
   'ask-delete': actions.askDelete,
   'cancel-delete': actions.cancelDelete,
-  'confirm-delete': actions.confirmDelete,
+  'confirm-delete': () => actions.confirmDelete({ token: newId() }),
+  'undo-delete': actions.undoDelete,
 };
 
 // Laster ned en fil. Dette er en sideeffekt og hører ikke hjemme i render eller i endringene.
@@ -131,12 +135,35 @@ function exportCalendar(values) {
 
 // Alle endringer går via withReplan, så planen bygges på nytt når lagrede data endres.
 // Når veiviseren lukkes, flyttes fokus til hovedinnholdet, så tastatur- og skjermleserbrukere ikke mister plassen.
+// --- Angre sletting: 5 sekunder, men pause mens meldingen har tastaturfokus eller musepekeren over seg ---
+const UNDO_MS = 5000;
+let undoTimer = null;
+
+function scheduleUndoExpiry() {
+  clearTimeout(undoTimer);
+  const undo = store.getState().ui.undo;
+  if (!undo) return;
+  const toast = root.querySelector('.undo-toast');
+  const active = document.activeElement;
+  const keyboardFocus = toast?.contains(active) && active.matches(':focus-visible');
+  if (toast?.matches(':hover') || keyboardFocus) return;
+  undoTimer = setTimeout(() => store.update(actions.expireUndo({ token: undo.token })), UNDO_MS);
+}
+
+for (const type of ['focusin', 'focusout', 'mouseover', 'mouseout']) {
+  root.addEventListener(type, (event) => {
+    // Vent til fokus/peker har flyttet seg ferdig før vi sjekker
+    if (event.target.closest?.('.undo-toast')) setTimeout(scheduleUndoExpiry, 0);
+  });
+}
+
 // Valg av lys/mørk modus brukes på <html> og lagres med en gang.
 function update(change) {
   const before = store.getState().ui;
   store.update(actions.withReplan(change, now()));
   const after = store.getState().ui;
   if (before.wizard && !after.wizard) root.querySelector('#innhold')?.focus();
+  if (before.undo?.token !== after.undo?.token) scheduleUndoExpiry();
   if (before.theme !== after.theme) {
     applyTheme(after.theme);
     saveTheme(after.theme);
@@ -157,7 +184,24 @@ root.addEventListener('submit', (event) => {
   update(action(values));
 });
 
+// Sikkerhetskopi: last ned alle data som JSON
+function exportBackup() {
+  const state = store.getState();
+  downloadFile(backupFilename(state.ui.today), serializeBackup(state.data, now()), 'application/json');
+  update(actions.backupExported());
+}
+
+// Gjenopprett: les filen, valider den, og la brukeren bekrefte før noe erstattes
+async function importBackup(file) {
+  const result = file.size > MAX_BACKUP_BYTES ? { error: 'FILEN_ER_FOR_STOR' } : parseBackup(await file.text());
+  update(actions.importLoaded(result));
+}
+
 root.addEventListener('click', (event) => {
+  if (event.target.closest('[data-action="export-backup"]')) {
+    exportBackup();
+    return;
+  }
   const button = event.target.closest('[data-action]');
   const action = clickActions[button?.dataset.action];
   if (action) update(action({ ...button.dataset }));
@@ -166,6 +210,10 @@ root.addEventListener('click', (event) => {
 // Radioknapper (lys/mørk modus) kan også endres med piltaster
 root.addEventListener('change', (event) => {
   const input = event.target;
+  if (input.matches('[data-import]') && input.files?.[0]) {
+    importBackup(input.files[0]);
+    return;
+  }
   if (input.type !== 'radio' || !input.dataset.action) return;
   const action = clickActions[input.dataset.action];
   if (action) update(action({ ...input.dataset }));

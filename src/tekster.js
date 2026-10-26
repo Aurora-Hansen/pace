@@ -185,6 +185,9 @@ export const bekreftelser = {
     'Eksempeldataene er lagt inn. En arbeidsøkt som ikke ble gjort i går, er flyttet til ledig tid, og én frist er i fare.',
   DATA_SLETTET: 'Alle data er slettet.',
   EKSPORT_LASTET_NED: 'Kalenderfilen er lastet ned. Åpne den, eller importer den i kalenderen din.',
+  SIKKERHETSKOPI_LASTET_NED: 'Sikkerhetskopien er lastet ned. Ta vare på filen, så kan du hente dataene inn igjen senere.',
+  IMPORT_FULLFORT: 'Dataene er hentet inn fra filen, og planen er oppdatert.',
+  SLETTING_ANGRET: 'Slettingen er angret.',
 };
 
 // Ikke fra innhold.md – lys og mørk modus
@@ -287,6 +290,34 @@ export const eksempeldata = {
   knapp: 'Prøv med eksempeldata',
   sporsmal: 'Eksempeldataene erstatter emnene, timeplanen og oppgavene dine. Vil du fortsette?',
   jaErstatt: 'Ja, bruk eksempeldata',
+};
+
+// Ikke fra innhold.md – angre sletting
+export const angre = {
+  slettet: (navn) => `«${navn}» er slettet.`,
+  knapp: 'Angre',
+  knappLabel: (navn) => `Angre sletting av «${navn}»`,
+};
+
+// Ikke fra innhold.md – sikkerhetskopi (eksport og import av data)
+const antall = (tall, en, flere) => `${tall} ${tall === 1 ? en : flere}`;
+
+export const sikkerhetskopi = {
+  overskrift: 'Sikkerhetskopi',
+  tekst: 'Last ned alle dataene dine som en fil, eller hent dem inn igjen, for eksempel i en annen nettleser.',
+  lastNed: 'Last ned sikkerhetskopi',
+  velgFil: 'Gjenopprett fra fil',
+  sporsmal: ({ emner, oppgaver, aktiviteter, dato }) =>
+    `Filen${dato ? ` fra ${dato}` : ''} har ${antall(emner, 'emne', 'emner')}, ${antall(oppgaver, 'oppgave', 'oppgaver')} og ${antall(aktiviteter, 'fast aktivitet', 'faste aktiviteter')}. Den erstatter alt du har i Pace nå. Vil du fortsette?`,
+  jaErstatt: 'Ja, erstatt dataene mine',
+  hvor: {
+    data: 'oppbygningen av filen',
+    user: 'innstillingene',
+    courses: (nr) => `emne nr. ${nr}`,
+    tasks: (nr) => `oppgave nr. ${nr}`,
+    blocks: (nr) => `aktivitet eller arbeidsøkt nr. ${nr}`,
+  },
+  feilGjelder: (hvor) => `Feilen gjelder ${hvor} i filen.`,
 };
 
 export const data = {
@@ -395,6 +426,27 @@ export const feilmeldinger = {
   SLUTT_FOR_START: {
     overskrift: 'Sjekk klokkeslettet',
     tekst: 'Sluttid må være etter starttid.',
+  },
+  // Ikke fra innhold.md – import av sikkerhetskopi
+  UGYLDIG_JSON: {
+    overskrift: 'Filen kunne ikke leses',
+    tekst: 'Det ser ikke ut som en sikkerhetskopi. Velg filen du lastet ned fra Pace.',
+  },
+  IKKE_PACE_FIL: {
+    overskrift: 'Dette er ikke en sikkerhetskopi fra Pace',
+    tekst: 'Velg filen som heter «pace-sikkerhetskopi» og dato.',
+  },
+  NYERE_VERSJON: {
+    overskrift: 'Filen er fra en nyere versjon av Pace',
+    tekst: 'Last siden på nytt for å få siste versjon, og prøv igjen.',
+  },
+  UGYLDIG_INNHOLD: {
+    overskrift: 'Noe i filen stemmer ikke',
+    tekst: 'Ingenting er endret. Sjekk at filen ikke er redigert, og prøv igjen.',
+  },
+  FILEN_ER_FOR_STOR: {
+    overskrift: 'Filen er for stor',
+    tekst: 'En sikkerhetskopi fra Pace er bare noen få kilobyte. Sjekk at du har valgt riktig fil.',
   },
   // Ikke fra innhold.md – eksport uten hendelser i perioden
   INGEN_HENDELSER: {

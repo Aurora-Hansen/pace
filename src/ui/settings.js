@@ -1,5 +1,16 @@
 // Visning: innstillinger (steg 1.4)
-import { innstillinger as t, hjelpetekster, knapper, bekreftelser, data as tData, veiviser } from '../tekster.js';
+import {
+  innstillinger as t,
+  hjelpetekster,
+  knapper,
+  bekreftelser,
+  data as tData,
+  veiviser,
+  sikkerhetskopi as tBackup,
+  feilmeldinger,
+} from '../tekster.js';
+import { formatLongDate } from './format.js';
+import { toDateKey } from '../logic/dates.js';
 import { sampleDataButton } from './sample.js';
 import { exportButton, exportPanel } from './export.js';
 import { themeSettings } from './theme.js';
@@ -32,6 +43,52 @@ function dataSection(state) {
     </section>`;
 }
 
+// Sikkerhetskopi: last ned og gjenopprett. Importen viser enten spørsmål eller feil før noe endres.
+function importResult(importState) {
+  if (!importState) return '';
+  if (importState.error) {
+    const message = feilmeldinger[importState.error];
+    const where = importState.where && tBackup.hvor[importState.where];
+    const detail = where ? tBackup.feilGjelder(typeof where === 'function' ? where(importState.index + 1) : where) : '';
+    return `
+      <div class="form-error" role="alert" tabindex="-1" data-autofocus>
+        <strong>${escapeHtml(message.overskrift)}</strong>
+        <p>${escapeHtml(message.tekst)}${detail ? ` ${escapeHtml(detail)}` : ''}</p>
+        <button class="btn btn-secondary btn-small" type="button" data-action="cancel-import">${knapper.lukk}</button>
+      </div>`;
+  }
+  const { counts, exportedAt } = importState;
+  const question = tBackup.sporsmal({
+    emner: counts.courses,
+    oppgaver: counts.tasks,
+    aktiviteter: counts.fixed,
+    dato: exportedAt ? formatLongDate(toDateKey(new Date(exportedAt))) : null,
+  });
+  return `
+    <div class="confirm" role="alertdialog" aria-label="${tBackup.velgFil}">
+      <p>${escapeHtml(question)}</p>
+      <div class="row-actions">
+        <button class="btn btn-primary btn-small" type="button" data-action="confirm-import" data-autofocus>${tBackup.jaErstatt}</button>
+        <button class="btn btn-secondary btn-small" type="button" data-action="cancel-import">${knapper.avbryt}</button>
+      </div>
+    </div>`;
+}
+
+function backupSection(state) {
+  return `
+    <section class="card" aria-labelledby="backup-title">
+      <h2 id="backup-title">${tBackup.overskrift}</h2>
+      <p class="muted">${tBackup.tekst}</p>
+      ${importResult(state.ui.importState)}
+      ${state.ui.importState ? '' : `
+        <div class="data-actions">
+          <button class="btn btn-secondary" type="button" data-action="export-backup">${tBackup.lastNed}</button>
+          <input class="visually-hidden file-input" id="backup-file" type="file" accept=".json,application/json" data-import>
+          <label class="btn btn-secondary" for="backup-file">${tBackup.velgFil}</label>
+        </div>`}
+    </section>`;
+}
+
 function wizardSection() {
   const t = veiviser.innstillinger;
   return `
@@ -43,7 +100,7 @@ function wizardSection() {
 }
 
 export function renderSettings(state) {
-  return `${settingsForm(state)}${themeSettings(state)}${dataSection(state)}${exportPanel(state)}${wizardSection()}`;
+  return `${settingsForm(state)}${themeSettings(state)}${dataSection(state)}${exportPanel(state)}${backupSection(state)}${wizardSection()}`;
 }
 
 function settingsForm(state) {
