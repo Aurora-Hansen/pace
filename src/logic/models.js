@@ -27,16 +27,17 @@ export const DAY_OFF_KIND = {
 };
 
 // Standardinnstillinger. Studievinduet er en utvidelse av datamodellen (antakelse 1 i plan.md).
-// Øktinnstillingene og foretrukne tider er datamodell v2 (F6–F7). Standardverdiene gir samme plan
-// som før v2 (punkt 68 i plan.md). Ingen foretrukne tider betyr at hele studievinduet er foretrukket.
+// Øktinnstillingene og foretrukne tider er datamodell v2 (F6–F7). Pause 0 og minste øktlengde 45 gir
+// forbedringene fra F7 og F10 (punkt 68 og 94 i plan.md). Ingen foretrukne tider betyr at hele
+// studievinduet er foretrukket.
 // Listen er frosset, så den delte standardverdien ikke kan endres ved et uhell.
 export const DEFAULT_SETTINGS = {
   daily_available_study_hours: 4,
   study_window_start: '08:00',
   study_window_end: '21:00',
   preferred_session_minutes: 120,
-  min_session_minutes: 30,
-  break_minutes: 15,
+  min_session_minutes: 45,
+  break_minutes: 0,
   preferred_times: Object.freeze([]),
 };
 

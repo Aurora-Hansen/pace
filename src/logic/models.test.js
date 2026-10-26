@@ -73,11 +73,11 @@ describe('createInitialState', () => {
     expect(state.days_off).toEqual([]);
   });
 
-  it('har standardverdier for øktene som gir samme plan som før v2', () => {
+  it('har standardverdier for øktene med forbedringene fra F7 og F10', () => {
     expect(createInitialState({ userId: 'u1' }).user).toMatchObject({
       preferred_session_minutes: 120,
-      min_session_minutes: 30,
-      break_minutes: 15,
+      min_session_minutes: 45,
+      break_minutes: 0,
       preferred_times: [],
     });
   });
@@ -115,8 +115,8 @@ describe('normalizeState', () => {
     expect(state.user).toMatchObject({
       daily_available_study_hours: 3,
       preferred_session_minutes: 120,
-      min_session_minutes: 30,
-      break_minutes: 15,
+      min_session_minutes: 45,
+      break_minutes: 0,
       preferred_times: [],
     });
     expect(state.tasks[0].priority).toBe(PRIORITY.NORMAL);

@@ -260,13 +260,13 @@ Fasene bygger på kravene F5–F10 i [krav.md](krav.md). Arbeidsmåten er den sa
 
 ## Datamodell v2
 
-Godkjent. Alle nye felt har standardverdier som gir samme plan som i dag (punkt 68).
+Godkjent. Standardverdiene gir forbedringene fra F7 og F10: pause 0 og minste øktlengde 45 (punkt 68 og 94).
 
 | Hvor | Felt | Type og standard |
 | --- | --- | --- |
 | User | `preferred_session_minutes` (foretrukket øktlengde) | Tall: 25–120 i steg på 5. Standard 120. Brukes bare når pausen er over 0 (punkt 72). |
-| User | `min_session_minutes` (minste øktlengde) | Tall: 15, 30, 45 eller 60. Standard 30. |
-| User | `break_minutes` (pause) | 0, 10 eller 15. Standard 15. |
+| User | `min_session_minutes` (minste øktlengde) | Tall: 15, 30, 45 eller 60. Standard 45. |
+| User | `break_minutes` (pause) | 0, 10 eller 15. Standard 0. |
 | User | `preferred_times` | Liste med `{ id, weekdays: [1–7], start: 'HH:MM', end: 'HH:MM' }`, der 1 er mandag. Standard `[]`, som betyr hele studievinduet. |
 | Task | `priority` | `low`, `normal` eller `high`. Standard `normal`. |
 | ScheduleBlock | `is_locked` | Boolean. Standard `false`, og alltid `false` for faste aktiviteter. |
@@ -465,7 +465,8 @@ Felles for alle måtene:
   - Data med manglende eller rare felt håndteres.
   - Data fra en nyere versjon gir feil.
   - Migrering to ganger gir samme resultat, og argumentet endres ikke.
-  - `replan` på overførte data gir nøyaktig fasiten fra 9.1.
+  - Overførte data får de nye standardverdiene (pause 0 og minste øktlengde 45, punkt 94).
+  - `replan` på overførte data, kjørt med de gamle innstillingene (pause 15, minste 30), gir nøyaktig fasiten fra 9.1.
 - [ ] **9.4 Lagring** (`data/storage.js`). `load` overfører via `migrate`. Før data lagres i nytt format første gang, kopieres originalen til `pace:v1:pre-v2`. Feil i overføringen behandles som korrupte data (punkt 13).
   *Tester:* med falsk `localStorage`:
   - v1 inn gir v2 lagret, med kopi av originalen.
@@ -473,7 +474,7 @@ Felles for alle måtene:
   - v2 lastes uten endring.
 - [ ] **9.5 Sikkerhetskopi** (`logic/backup.js`). Eksporten får `version: 2`. Import godtar versjon 1 og 2 via `migrate` og validerer de nye feltene (gyldige verdier, ukedager 1–7, gyldige klokkeslett og datoer).
   *Tester:* v1-fil importeres, ugyldig `priority`, `break_minutes` og `days_off` gir feil med plassering.
-  *Ferdig når:* data lagret av den publiserte versjonen åpnes i den nye uten at noe ser annerledes ut, også en sikkerhetskopi tatt før endringen (sjekket i nettleser).
+  *Ferdig når:* data lagret av den publiserte versjonen åpnes i den nye uten at noe ser annerledes ut, også en sikkerhetskopi tatt før endringen (sjekket i nettleser). Planen er lik fordi planleggeren ikke bruker de nye standardverdiene før fase 10 (punkt 94).
 
 ## Fase 10 – Én boks per sammenhengende økt (F10) og minste øktlengde
 
@@ -494,7 +495,7 @@ Felles for alle måtene:
   - Eksemplene i eksempel C.
   - Kort hull brukes bare når fristen ellers ikke rekkes.
   - Oppgaver med mindre igjen enn minste lengde får én kort økt.
-  - Standardverdien gir samme plan som fasiten fra 9.1.
+  - Med de gamle innstillingene (pause 15, minste 30) blir planen lik fasiten fra 9.1.
 - [ ] **10.4 Innstilling «Korteste økt»** under Innstillinger i en ny gruppe «Økter og pauser», med valgene 15, 30, 45 og 60 minutter. Planen bygges på nytt når innstillingen endres.
 
 ## Fase 11 – Dra og slipp av økter (F9)
@@ -528,7 +529,7 @@ Felles for alle måtene:
   *Tester:*
   - Eksempel A med variant.
   - Overbelastning der høy prioritet får tiden.
-  - Uten prioritet blir planen lik fasiten.
+  - Uten prioritet og med de gamle innstillingene blir planen lik fasiten.
   - En egenskapstest med 200 tilfeldige oppsett (fast frø) viser at prioritet aldri gir flere manglende timer enn uten prioritet.
 - [ ] **12.4 Øktlengde og pause i planleggeren.** `preferred_session_minutes` og `break_minutes` med steg på 5 minutter (punkt 74). Med pause 0 får samme oppgave én sammenhengende økt per ledige tidsrom (punkt 72).
   *Tester:*
@@ -541,7 +542,7 @@ Felles for alle måtene:
 - [ ] **12.5 Foretrukne tider i planleggeren.** `preferredSlots(dato, ledig, bruker)` og runde 1 og 2.
   *Tester:*
   - Eksempel B.
-  - Ingen foretrukne tider gir samme plan som før.
+  - Ingen foretrukne tider gir samme plan som før (fasiten, med de gamle innstillingene).
   - Foretrukne tider utenfor studievinduet kuttes.
   - Overlappende foretrukne tider teller én gang.
 - [ ] **12.6 Innstillinger for økter og foretrukne tider.**
@@ -587,11 +588,16 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
     - Originalen kopieres én gang til `pace:v1:pre-v2`.
     - Data fra en *nyere* versjon behandles som i dag (kopieres til `pace:v1:backup`, punkt 13).
     - En fane som står åpen med gammel kode under publisering, kan lagre v1 over v2. Det overføres riktig ved neste lasting, så risikoen er godtatt.
-68. **Standardverdiene gir samme plan som i dag:** ønsket lengde 120, minste 30, pause 15, ingen foretrukne tider og normal prioritet. Brukere som ikke endrer noe, merker ingen forskjell, og fasiten fra 9.1 kan brukes som test gjennom alle fasene.
+68. **Standardverdiene gir forbedringene fra F7 og F10** (erstatter forslaget om å beholde dagens plan):
+    - Standardverdiene er foretrukket øktlengde 120, minste øktlengde 45, pause 0, ingen foretrukne tider og normal prioritet.
+    - Nye brukere og brukere som allerede har data, får de samme standardverdiene. Brukere med data får dem ved migreringen i 9.3 (punkt 94).
+    - Planen endrer seg derfor for alle når fase 10 og 12 tas i bruk. Med pause 0 blir arbeid på samme oppgave én sammenhengende økt per ledige tidsrom (punkt 72).
+    - De gamle innstillingene (pause 15, minste 30, foretrukket 120) gir fortsatt nøyaktig samme plan som før v2. Fasittestene kjører planleggeren med disse innstillingene eksplisitt (punkt 70).
 69. **Migrering** er rene funksjoner i en kjede, én per versjonsskifte. Den brukes både ved lasting og ved import av sikkerhetskopi.
 70. **Fasit før endring (9.1):** Øktene fra dagens kode lagres som testdata *før* noe endres, så vi kan bevise at planen ikke endrer seg utilsiktet.
     - `src/logic/fixtures/` har to datasett i v1-format (`{ version: 1, data }`, slik localStorage har dem). Det ene er eksempeldataene lastet mandag 2.11.2026 kl. 09.00. Det andre har fullførte, droppede og fremtidige økter, «Fordel på nytt», en ferdig oppgave med gjenstående økt og en engangsaktivitet.
     - `fasit-v1.json` har resultatet av `rollover` og `replan` (blokker, `last_checked_date` og `detectOverload`) for 8 tilfeller. `fasit.test.js` sjekker dem.
+    - `fasit.test.js` setter de gamle innstillingene (pause 15, minste 30, foretrukket 120) eksplisitt på brukeren før planleggeren kjøres. Testene sjekker dermed at v1-oppførselen er uendret med de innstillingene, selv om standardverdiene er endret (punkt 94).
     - Skriptet som laget fasiten, er `scripts/lag-fasit.mjs`. Det skal bare kjøres mot koden fra før fase 9, aldri for å oppdatere fasiten etter endringer, for da tester fasiten ingenting.
 71. **Sammenslåing (F10):**
     - Kravene for å slå sammen: samme oppgave, slutt lik start, samme dag og samme `is_completed`.
@@ -668,3 +674,8 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
     - `normalizeState` fyller inn `priority`, `is_locked` og `days_off` bare der de mangler. Elementer som ikke er objekter, får være som de er, så valideringen ved import fortsatt finner dem.
     - Eksempeldataene har alle v2-feltene.
     - Øktene planleggeren lager, får ikke `is_locked` før steg 11.2, fordi planleggeren ikke endres i fase 9. Feltet fylles inn når dataene lastes, og en økt uten feltet regnes som ulåst.
+94. **Nye standardverdier for økter (vedtatt før 9.3):**
+    - Pause 0 og minste øktlengde 45 gir forbedringene fra F7 og F10. Foretrukket øktlengde er fortsatt 120.
+    - Brukere som allerede har data, får de nye standardverdiene ved migreringen i 9.3. v1 hadde ingen egne innstillinger for økter, så det finnes ingen brukervalg som overskrives.
+    - Fasiten lages ikke på nytt. `fasit.test.js` kjører i stedet planleggeren med de gamle innstillingene eksplisitt (`V1_SETTINGS` i `src/logic/fixtures/v1.js`: pause 15, minste 30, foretrukket 120). Testene vokter dermed fortsatt at v1-oppførselen er uendret med de innstillingene.
+    - Når planleggeren begynner å bruke innstillingene (10.3 og 12.4), må den gi fasiten med `V1_SETTINGS`. De nye standardverdiene testes med egne eksempler (eksempel C og testene i 10.3 og 12.4).
