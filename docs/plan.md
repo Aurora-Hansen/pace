@@ -248,3 +248,419 @@ Planleggeren trengs allerede i «Må ha», fordi forskyvning av økter forutsett
   *Ferdig når:* import spør før data erstattes, og avbryt beholder dataene.
 - [x] **8.4 Angre sletting.** «Angre» i 5 sekunder etter sletting av oppgave, emne eller fast aktivitet.
   *Tester:* angre gjenoppretter det som ble slettet (også koblinger fra oppgaver og aktiviteter til emnet), og etter 5 sekunder kan det ikke angres.
+
+---
+
+# Fase 9–14: Smartere planlegging (F5–F10)
+
+Fasene bygger på kravene F5–F10 i [krav.md](krav.md). Arbeidsmåten er den samme som før:
+- ett steg om gangen
+- `npm test` etter hvert steg
+- axe-core i lys og mørk modus, på desktop og mobil, etter steg som endrer grensesnittet
+
+## Datamodell v2
+
+Godkjent. Alle nye felt har standardverdier som gir samme plan som i dag (punkt 68).
+
+| Hvor | Felt | Type og standard |
+| --- | --- | --- |
+| User | `preferred_session_minutes` (foretrukket øktlengde) | Tall: 25–120 i steg på 5. Standard 120. Brukes bare når pausen er over 0 (punkt 72). |
+| User | `min_session_minutes` (minste øktlengde) | Tall: 15, 30, 45 eller 60. Standard 30. |
+| User | `break_minutes` (pause) | 0, 10 eller 15. Standard 15. |
+| User | `preferred_times` | Liste med `{ id, weekdays: [1–7], start: 'HH:MM', end: 'HH:MM' }`, der 1 er mandag. Standard `[]`, som betyr hele studievinduet. |
+| Task | `priority` | `low`, `normal` eller `high`. Standard `normal`. |
+| ScheduleBlock | `is_locked` | Boolean. Standard `false`, og alltid `false` for faste aktiviteter. |
+| Data (øverst) | `days_off` | Liste med `{ date: 'YYYY-MM-DD', kind: 'sick' \| 'off' }`. Standard `[]`. |
+
+Lagringsformatet får `version: 2`. Nøkkelen er fortsatt `pace:v1` (punkt 67).
+
+## Slik kombinerer planleggeren reglene
+
+### Rekkefølgen planleggeren går frem i
+
+1. **Opptatt tid.** Disse blokkene står fast og flyttes ikke:
+   - faste aktiviteter
+   - fullførte økter
+   - låste økter
+   - dagens økter (punkt 3)
+
+   Rundt hver arbeidsøkt holdes pausen (`break_minutes`) fri. Fridager har null kapasitet.
+2. **Gjenstående tid** per oppgave er `estimert – utført – planlagt i økter som står fast`. Låste økter er med i det som står fast.
+3. **Grunnlinje.** Planleggeren kjører først dagens metode, der tidligste frist går først. Den bruker all ledig tid i studievinduet og ser bort fra prioritet og foretrukne tider. Resultatet er hvor mange timer som *uansett* ikke får plass. Det kalles grunnlinjen.
+4. **Rekkefølge.** Oppgavene sorteres etter *effektiv frist*:
+   - Høy prioritet: fristen minus 3 døgn.
+   - Lav prioritet: fristen pluss 3 døgn.
+   - Ved likhet: ekte frist, deretter når oppgaven ble opprettet.
+5. **Runde 1, foretrukne tider.** Oppgavene tas én og én i rekkefølgen fra punkt 4. Hver oppgave får økter i de første ledige foretrukne tidene:
+   - Med pause over 0 får øktene ønsket øktlengde.
+   - Med pause 0 får oppgaven én sammenhengende økt per ledige tidsrom (punkt 72).
+
+   Hver økt må gjennom en **kontroll** før den godtas. Kontrollen kjører metoden med tidligste frist først på alt arbeid som gjenstår, i all ledig tid. Økten godtas bare hvis det ikke mangler flere timer totalt enn i grunnlinjen. Ellers prøver planleggeren neste ledige tid.
+6. **Runde 2, øvrig tid i studievinduet.** Gjør det samme for det som ikke fikk plass, med samme kontroll.
+7. **Runde 3, korte hull.** Hull som er kortere enn minste øktlengde, men minst 15 minutter, brukes bare for oppgaver som ellers ikke rekker fristen.
+8. **Runde 4, «Fordel på nytt».** Bare for oppgaver med `allow_over_capacity`. Tiden plasseres uten kapasitetsgrense, som i dag.
+9. **Sammenslåing.** Økter for samme oppgave som ligger rett etter hverandre, blir én økt (F10). Med pause 0 skjer dette i den vanlige planen. Med pause over 0 skjer det bare etter flytting eller import.
+
+Det som fortsatt ikke har fått plass, gir varselet «Her hoper det seg opp».
+
+Kontrollen i punkt 5 gjør at prioritet og foretrukne tider bare *flytter* arbeid. De kan aldri føre til at det mangler flere timer før fristene enn de ellers ville gjort.
+
+### Eksempel A: prioritet uten at noen mister fristen
+
+Utgangspunkt:
+- Det er mandag kl. 08.00.
+- Kapasiteten er 3 timer om dagen, og det finnes ingen faste aktiviteter eller foretrukne tider.
+- Oppgavene er:
+  - **Rapport**, normal prioritet, 6 timer, frist onsdag
+  - **Presentasjon**, høy prioritet, 6 timer, frist fredag (effektiv frist tirsdag)
+
+Presentasjonen planlegges først:
+
+| Forsøk | Kontroll | Resultat |
+| --- | --- | --- |
+| Presentasjon mandag, 3 t | Rapporten har tirsdag og onsdag, til sammen 6 t | Godtatt |
+| Presentasjon tirsdag | Rapporten ville bare hatt onsdag, 3 t av 6 | Avvist |
+| Presentasjon onsdag | Rapporten ville bare hatt tirsdag, 3 t av 6 | Avvist |
+| Presentasjon torsdag, 3 t | Rapporten er fortsatt ok | Godtatt |
+
+Deretter får rapporten tirsdag og onsdag.
+
+Planen blir: mandag presentasjon, tirsdag rapport, onsdag rapport, torsdag presentasjon. Uten prioritet ville rapporten fått mandag og tirsdag.
+
+**Variant:** Hvis rapporten trenger 9 timer, avvises presentasjonen både mandag, tirsdag og onsdag. Presentasjonen får torsdag og fredag, selv om den har høy prioritet. Prioritet går aldri foran en frist som kan rekkes.
+
+**Når ikke alt får plass:** Ingen rekkefølge kan da redde alle fristene. Kontrollen sørger for at det ikke mangler flere timer totalt enn i grunnlinjen, mens rekkefølgen avgjør hvem som får tiden. Den med høyest prioritet får tiden først, og varselet kommer på den med lavere prioritet.
+
+### Eksempel B: foretrukne tider og «aldri etter 20»
+
+Utgangspunkt:
+- Foretrukne tider er hverdager 09–15.
+- Studievinduet er 08–20. «Aldri etter 20» er slutten på studievinduet (punkt 77).
+- Kapasiteten er 4 timer, og øktlengden er 120 minutter med 15 minutters pause.
+- Det er forelesning mandag til onsdag kl. 09–13.
+- Det er mandag kl. 08.00, og én oppgave på 10 timer har frist torsdag kl. 12.
+
+Ledig foretrukket tid:
+
+| Dag | Tid | Timer |
+| --- | --- | --- |
+| Mandag | 13–15 | 2 |
+| Tirsdag | 13–15 | 2 |
+| Onsdag | 13–15 | 2 |
+| Torsdag | 09–12 | 3 |
+| **Sum** | | **9** |
+
+Runde 1 gir 9 timer. Runde 2 legger den siste timen i den første ledige tiden utenom de foretrukne: mandag 08.00–09.00.
+
+Ingenting legges etter kl. 20, fordi studievinduet er en fast grense.
+
+Hvis oppgaven bare var på 8 timer, ville alt havnet i foretrukket tid.
+
+### Eksempel C: øktlengde, minste lengde og pause
+
+Med ønsket lengde 50 minutter og 10 minutters pause fra kl. 09.00 blir øktene 09.00–09.50, 10.00–10.50 og 11.00–11.50. Planleggeren regner derfor i steg på 5 minutter (punkt 74).
+
+Rester under minste lengde, med ønsket lengde 90 og minste lengde 45:
+
+| Gjenstår | Første oppdeling | Problem | Løsning | Resultat |
+| --- | --- | --- | --- | --- |
+| 200 min | 90 + 90 + 20 | Resten er under 45 | Forrige økt kortes ned (som i punkt 35) | 90 + 65 + 45 |
+| 130 min, ønsket 50 | 50 + 50 + 30 | Nedkorting gir 35, som er under 45 | Resten legges til forrige økt | 50 + 80 |
+
+Med pause over 0 kan en økt aldri bli lengre enn 120 minutter.
+
+Pause 0 med ønsket lengde 50, når det gjenstår 3 timer, tidsrommet 09–12 er ledig og kapasiteten er 4 timer:
+
+| Pause | Økter |
+| --- | --- |
+| 10 min | 09.00–09.50, 10.00–10.50 og 11.00–11.50. Den siste halvtimen kommer i neste ledige tidsrom. |
+| 0 | Én økt 09.00–12.00. Ønsket lengde brukes ikke, og økter rett etter hverandre slås sammen (F10). |
+
+Pause 0 med to oppgaver, når kapasiteten er 4 timer og det er ledig 09–13:
+
+| Oppgave | Gjenstår | Økt |
+| --- | --- | --- |
+| Rapport | 1 t | 09.00–10.00 |
+| Lab | 3 t | 10.00–13.00 |
+
+Øktene ligger rett etter hverandre, men blir to bokser, fordi de gjelder ulike oppgaver.
+
+Låst økt og pause: Brukeren har låst en økt tirsdag 10.00–11.30, og pausen er 10 minutter. Andre økter kan da tidligst starte 11.40. Det første ledige tidsrommet etter låste blokker og forelesninger rundes opp til nærmeste kvarter, så neste økt starter 11.45.
+
+### Låste økter som ikke blir gjort (rollover)
+
+En låst økt betyr «jeg vil gjøre dette *da*». Når det tidspunktet har passert uten at økten er huket av, gjelder ikke låsen lenger.
+
+- **Samme dag:** Økten blir liggende, som alle dagens økter (punkt 3). Brukeren kan fortsatt huke den av eller flytte den til senere i dag.
+- **Ny dag:** Den daglige sjekken fjerner økten. Tiden går tilbake til oppgavens gjenstående tid og planlegges på nytt etter de vanlige reglene. Den nye økten er *ikke* låst.
+
+  En melding forteller hva som skjedde, for eksempel «1 låst økt fra i går ble ikke gjort og er planlagt på nytt».
+- **Låste økter frem i tid** blir stående låst etter daglig sjekk.
+- **Oppgaven er ferdig:** Låste økter som ikke er gjort, slettes som andre økter (F4).
+- **Fristen flyttes før en låst økt:** Økten blir liggende, fordi brukeren har valgt tidspunktet. Den får merket «Etter fristen», og oppgaven får «Frist i fare».
+
+Eksempel:
+- Tirsdag ligger en låst økt «Rapport» kl. 18.00–19.30 som ikke blir huket av.
+- Onsdag morgen blir økten fjernet, og 1,5 timer planlegges på nytt fra onsdag, i foretrukne tider først.
+- En låst økt torsdag kl. 10.00 for samme oppgave blir liggende.
+
+### Dra og slipp med mus, tastatur og på mobil
+
+Felles for alle måtene:
+- **Hva kan flyttes:** arbeidsøkter som ikke er fullført. Faste aktiviteter og fullførte økter kan ikke flyttes.
+- **Etter flyttingen:**
+  - Økten låses og beholder lengden.
+  - Planen bygges på nytt rundt den.
+  - En melding nederst sier for eksempel «Økten er flyttet til onsdag 10.15» og har knappen «Angre». Den bruker samme 5-sekunders mekanisme som ved sletting.
+
+**Hvor økten kan og ikke kan slippes:**
+
+| Mål | Hva skjer |
+| --- | --- |
+| Oppå en fast aktivitet | Ikke lov |
+| Oppå en fullført eller låst økt | Ikke lov |
+| Oppå en annen oppgaves økt i dag | Ikke lov |
+| Før «nå» | Ikke lov |
+| Oppå en ulåst økt fra i morgen eller senere | Lov. Den andre økten planlegges på nytt. |
+| Utenfor studievinduet | Lov, med advarsel i meldingen |
+| Etter fristen | Lov, med advarsel i meldingen |
+| På en fridag | Lov, med advarsel i meldingen |
+
+**Mus:**
+- Ta tak i økten og dra den. En skygge viser ny plass og tid, for eksempel «Ons 10.15–11.45», festet til nærmeste kvarter.
+- Over et sted der økten ikke kan slippes, er skyggen markert med «Kan ikke flyttes hit». Slipper man der, skjer ingenting.
+- Esc avbryter.
+- En bevegelse under 5 piksler regnes som klikk og åpner økt-panelet.
+
+**Tastatur:**
+- Hver arbeidsøkt i kalenderen og i «I dag» er en knapp. Enter eller mellomrom åpner økt-panelet med «Marker som gjort», «Flytt økt» og «Lås opp» (når økten er låst).
+- «Flytt økt» åpner et lite skjema med dato og starttid. Feltene er fylt ut på forhånd, og starttiden går i steg på 15 minutter.
+- Skjemaet gir feil på samme måte som slipp:
+  - Et sted der økten ikke kan ligge, gir skjemafeil.
+  - Advarsler kommer i meldingen etterpå.
+- Etter flyttingen får økten fokus på det nye stedet, og meldingen leses opp, fordi den har `role="status"`.
+- Det blir ingen «dra med piltaster». Skjemaet er alternativet til dra-bevegelsen (WCAG 2.5.7).
+
+**Mobil:**
+- **Hovedvei:** Et kort trykk på en økt åpner samme økt-panel. «Flytt økt» bruker telefonens egne velgere for dato og klokkeslett.
+- **Dra:** Et langt trykk (ca. 0,5 sekunder) starter dra.
+  - Vanlig sveip scroller som før.
+  - Når dra er i gang, stoppes scrolling.
+  - Kalenderen scroller av seg selv når økten dras mot kanten.
+- **Dagsvisning:** Dra flytter bare klokkeslettet. For å bytte dag bruker man «Flytt økt».
+
+## Fase 9 – Overføring av lagrede data til nytt format
+
+- [x] **9.1 Fasit fra dagens kode.** Lag en testfil med to typiske v1-datasett som rene data (`src/logic/fixtures/`):
+  - eksempeldataene
+  - et datasett med fullførte og ulåste økter
+
+  Lagre øktene som dagens `replan` og `rollover` gir for dem.
+  *Ferdig når:* fasiten er committet før datamodellen endres.
+- [ ] **9.2 Datamodell v2** (`logic/models.js`). Nye felt med standardverdier i `createUser`, `createTask`, `createFixedBlock`, `createInitialState` og `normalizeState`. Ingen endring i planleggeren ennå.
+  *Tester:* nye objekter får standardverdier, og `normalizeState` fyller inn manglende felt uten å endre de som finnes.
+- [ ] **9.3 Migrering** (`logic/migrate.js`). `migrate(stored)` kjører en kjede av rene funksjoner (`1 → 2`, senere `2 → 3`) og gir `{ data, from, to }` eller `{ error }`.
+  *Tester:*
+  - Fasit-dataene fra 9.1 og tomme data overføres riktig.
+  - Data med manglende eller rare felt håndteres.
+  - Data fra en nyere versjon gir feil.
+  - Migrering to ganger gir samme resultat, og argumentet endres ikke.
+  - `replan` på overførte data gir nøyaktig fasiten fra 9.1.
+- [ ] **9.4 Lagring** (`data/storage.js`). `load` overfører via `migrate`. Før data lagres i nytt format første gang, kopieres originalen til `pace:v1:pre-v2`. Feil i overføringen behandles som korrupte data (punkt 13).
+  *Tester:* med falsk `localStorage`:
+  - v1 inn gir v2 lagret, med kopi av originalen.
+  - Kopien overskrives ikke ved neste lasting.
+  - v2 lastes uten endring.
+- [ ] **9.5 Sikkerhetskopi** (`logic/backup.js`). Eksporten får `version: 2`. Import godtar versjon 1 og 2 via `migrate` og validerer de nye feltene (gyldige verdier, ukedager 1–7, gyldige klokkeslett og datoer).
+  *Tester:* v1-fil importeres, ugyldig `priority`, `break_minutes` og `days_off` gir feil med plassering.
+  *Ferdig når:* data lagret av den publiserte versjonen åpnes i den nye uten at noe ser annerledes ut, også en sikkerhetskopi tatt før endringen (sjekket i nettleser).
+
+## Fase 10 – Én boks per sammenhengende økt (F10) og minste øktlengde
+
+- [ ] **10.1 Sammenslåing** (`logic/sessions.js`). `mergeAdjacentSessions(blocks)` slår sammen økter etter reglene i punkt 71.
+  *Tester:*
+  - To og tre økter på rad blir én.
+  - Økter blir ikke slått sammen når det ligger en pause, en fast aktivitet eller en annen oppgave imellom.
+  - En fullført og en ikke fullført økt blir ikke slått sammen.
+  - Låst og ulåst blir én låst økt.
+  - En økt som ender 10.00, og en som starter 10.05, blir ikke slått sammen.
+  - Den sammenslåtte økten får id-en til den første.
+  - Faste aktiviteter berøres ikke, og argumentet endres ikke.
+- [ ] **10.2 Bruk i planen.** Sammenslåing kjøres sist i `replan` og `rollover`, og ved import.
+  *Tester:* når en sammenslått økt hukes av, registreres hele lengden. Angring trekker hele lengden fra igjen.
+  *Ferdig når:* kalenderen og «I dag» viser én boks (sjekket med data der to økter ligger rett etter hverandre).
+- [ ] **10.3 Minste øktlengde i planleggeren.** `user.min_session_minutes` erstatter `SESSION_MIN`. Restregelen og runden med korte hull følger punkt 73.
+  *Tester:*
+  - Eksemplene i eksempel C.
+  - Kort hull brukes bare når fristen ellers ikke rekkes.
+  - Oppgaver med mindre igjen enn minste lengde får én kort økt.
+  - Standardverdien gir samme plan som fasiten fra 9.1.
+- [ ] **10.4 Innstilling «Korteste økt»** under Innstillinger i en ny gruppe «Økter og pauser», med valgene 15, 30, 45 og 60 minutter. Planen bygges på nytt når innstillingen endres.
+
+## Fase 11 – Dra og slipp av økter (F9)
+
+- [ ] **11.1 Logikk for flytting** (`logic/move.js`).
+  - `checkMove(data, blockId, nyStart, nå)` gir `{ ok, error }` med feilkodene `OPPTATT`, `I_FORTIDEN` og `KAN_IKKE_FLYTTES`, og `warnings` med `UTENFOR_STUDIEVINDU`, `ETTER_FRISTEN` og `FRIDAG`.
+  - `moveSession` flytter, låser og slår sammen.
+  - `unlockSession` låser opp.
+  - `snapToQuarter` fester til nærmeste kvarter.
+  *Tester:* alle reglene i tabellen over hvor økten kan slippes, og flytting over midnatt (ikke lov).
+- [ ] **11.2 Låste økter i planen.** `replan` beholder låste økter uansett dato, og `rollover` fjerner låste økter fra tidligere dager (punkt 79). Kapasitet og overbelastning teller låste økter.
+  *Tester:*
+  - Eksemplet i avsnittet om rollover.
+  - Låst økt etter fristen gir «Frist i fare».
+  - En ulåst økt som overlapper en låst, planlegges på nytt.
+- [ ] **11.3 Økt-panel og låsikon.** Et klikk eller Enter på en arbeidsøkt i kalenderen eller «I dag» åpner panelet med «Marker som gjort», «Flytt økt» og «Lås opp». Låste økter har et lite låsikon med tekst for skjermlesere. Dette erstatter punkt 24.
+- [ ] **11.4 Skjemaet «Flytt økt».** Dato og starttid, feil og advarsler som i 11.1, meldingen med «Angre» (`ui.undo` med `kind: 'move'`) og fokus på økten etterpå.
+  *Tester:* angre gir tilbake økten slik den var, også låsen.
+  *Ferdig når:* hele flyttingen kan gjøres med tastatur og på mobil (400 px).
+- [ ] **11.5 Dra med mus** (Pointer Events). Skygge med tid, festet til kvarter, markering der økten ikke kan slippes, Esc for å avbryte og klikk under 5 piksler. Tilstanden følger punkt 84.
+  *Ferdig når:* flytting fra tirsdag til onsdag i ukevisning og innenfor en dag i dagsvisning virker i Chrome og Firefox.
+- [ ] **11.6 Dra på mobil.** Langt trykk starter dra, vanlig sveip scroller, og kalenderen scroller av seg selv nær kanten. Dette testes med berøringsemulering i Chrome.
+- [ ] **11.7 (Kan ha) Endre lengde** ved å dra i nedre kant. Gjøres bare hvis du ønsker det når vi kommer hit.
+
+## Fase 12 – Prioritet, foretrukne tider, øktlengde og pauser (F5–F7)
+
+- [ ] **12.1 Prioritet på oppgaver.** Valget «Lav, Normal, Høy» i oppgaveskjemaet. Merket «Høy prioritet» eller «Lav prioritet» vises på kortet, og normal vises ikke. Eksempeldataene får én oppgave med høy prioritet. Planleggeren endres ikke ennå.
+- [ ] **12.2 Kontroll av fristene** (`logic/scheduler.js`). Dagens metode, der tidligste frist går først, skilles ut som `shortfall(oppgaver, opptatt, bruker, { fra, nå })`, som gir timer som mangler per oppgave.
+  *Tester:* samme resultat som dagens `unplaced` for fasit-dataene.
+- [ ] **12.3 Prioritet i planleggeren.** Effektiv frist og kontroll per økt (punkt 75).
+  *Tester:*
+  - Eksempel A med variant.
+  - Overbelastning der høy prioritet får tiden.
+  - Uten prioritet blir planen lik fasiten.
+  - En egenskapstest med 200 tilfeldige oppsett (fast frø) viser at prioritet aldri gir flere manglende timer enn uten prioritet.
+- [ ] **12.4 Øktlengde og pause i planleggeren.** `preferred_session_minutes` og `break_minutes` med steg på 5 minutter (punkt 74). Med pause 0 får samme oppgave én sammenhengende økt per ledige tidsrom (punkt 72).
+  *Tester:*
+  - 50/10-eksemplet.
+  - Pause 0 gir én økt 09.00–12.00 for 3 timer uansett ønsket lengde.
+  - Pause 0 med to oppgaver gir to økter rett etter hverandre.
+  - Pause 0 legger ikke nytt arbeid inntil en låst økt for samme oppgave.
+  - Pause rundt låste økter.
+  - Med pause over 0 blir ingen økt over 120 minutter.
+- [ ] **12.5 Foretrukne tider i planleggeren.** `preferredSlots(dato, ledig, bruker)` og runde 1 og 2.
+  *Tester:*
+  - Eksempel B.
+  - Ingen foretrukne tider gir samme plan som før.
+  - Foretrukne tider utenfor studievinduet kuttes.
+  - Overlappende foretrukne tider teller én gang.
+- [ ] **12.6 Innstillinger for økter og foretrukne tider.**
+  - Gruppen «Økter og pauser» får ønsket lengde og pause (0, 10 eller 15).
+  - Ny gruppe «Foretrukne studietider» med en liste over tidsrom. Hvert tidsrom har ukedager (avkrysning, med hurtigvalgene «Hverdager» og «Helg») og fra–til.
+  - Hjelpetekst om at «aldri etter» settes med studievinduet.
+- [ ] **12.7 Samlet sjekk.**
+  - Ytelse: 30 oppgaver over 16 uker planlegges på under 100 ms (test).
+  - Overbelastning, «I dag», kalender og kalendereksport virker med alle de nye innstillingene.
+  - axe-core er kjørt.
+
+## Fase 13 – Fridager og «Jeg er syk i dag» (F8)
+
+- [ ] **13.1 Logikk** (`logic/daysoff.js`). `markDaysOff(data, fra, til, type, nå)` og `unmarkDayOff(data, dato)`. Planleggeren, kontrollen og overbelastningen gir fridager null kapasitet. Ulåste og låste økter på dagen fjernes og planlegges på nytt. Daglig sjekk fjerner markeringer for dager som er passert.
+  *Tester:*
+  - Fridag midt i en plan.
+  - Periode over flere dager.
+  - Fridag fjernet gir ny plan.
+  - Faste aktiviteter blir stående.
+  - Fridag i fortiden er ikke lov.
+- [ ] **13.2 «Jeg er syk i dag»** (`markSickToday(data, nå)`). Dagens gjenværende, ikke fullførte økter flyttes, og oppgaver som *nylig* kom i fare (overbelastning før og etter) returneres.
+  *Tester:* fullførte økter blir stående, låste økter flyttes, listen over oppgaver i fare er riktig, og angre gir nøyaktig tilbake det som var.
+- [ ] **13.3 Knappen i «I dag».** Ett klikk markerer dagen. Panelet viser hvilke frister som kom i fare, eller at ingen gjorde det, med «Angre».
+- [ ] **13.4 Fridager i kalender og innstillinger.**
+  - Dagsvisningen har «Marker som fri» og «Fjern markering».
+  - Fri- og sykedager vises som nedtonede dager med merkelapp.
+  - Under Innstillinger finnes en liste over kommende fridager, og et skjema med fra–til (maks 31 dager).
+
+## Fase 14 – Designforbedringer
+
+- [ ] Stegene legges inn når listen med designforbedringer kommer.
+
+## Beslutninger og antakelser (fase 9–14)
+
+Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på samme måte. Dette er forslag som kan endres.
+
+66. **Datamodell v2** er godkjent som i tabellen. Den har tre innstillinger for økter på brukeren:
+    - foretrukket øktlengde (`preferred_session_minutes`)
+    - minste øktlengde (`min_session_minutes`)
+    - pause (`break_minutes`)
+67. **Lagring:**
+    - Nøkkelen er fortsatt `pace:v1`, og versjonsfeltet går fra 1 til 2. Navnet på nøkkelen er bare et navn, og å bytte den gir ekstra kode uten gevinst.
+    - Originalen kopieres én gang til `pace:v1:pre-v2`.
+    - Data fra en *nyere* versjon behandles som i dag (kopieres til `pace:v1:backup`, punkt 13).
+    - En fane som står åpen med gammel kode under publisering, kan lagre v1 over v2. Det overføres riktig ved neste lasting, så risikoen er godtatt.
+68. **Standardverdiene gir samme plan som i dag:** ønsket lengde 120, minste 30, pause 15, ingen foretrukne tider og normal prioritet. Brukere som ikke endrer noe, merker ingen forskjell, og fasiten fra 9.1 kan brukes som test gjennom alle fasene.
+69. **Migrering** er rene funksjoner i en kjede, én per versjonsskifte. Den brukes både ved lasting og ved import av sikkerhetskopi.
+70. **Fasit før endring (9.1):** Øktene fra dagens kode lagres som testdata *før* noe endres, så vi kan bevise at planen ikke endrer seg utilsiktet.
+    - `src/logic/fixtures/` har to datasett i v1-format (`{ version: 1, data }`, slik localStorage har dem). Det ene er eksempeldataene lastet mandag 2.11.2026 kl. 09.00. Det andre har fullførte, droppede og fremtidige økter, «Fordel på nytt», en ferdig oppgave med gjenstående økt og en engangsaktivitet.
+    - `fasit-v1.json` har resultatet av `rollover` og `replan` (blokker, `last_checked_date` og `detectOverload`) for 8 tilfeller. `fasit.test.js` sjekker dem.
+    - Skriptet som laget fasiten, er `scripts/lag-fasit.mjs`. Det skal bare kjøres mot koden fra før fase 9, aldri for å oppdatere fasiten etter endringer, for da tester fasiten ingenting.
+71. **Sammenslåing (F10):**
+    - Kravene for å slå sammen: samme oppgave, slutt lik start, samme dag og samme `is_completed`.
+    - En fullført og en ikke fullført del blir to bokser, fordi de har ulik status.
+    - Er én av dem låst, blir hele økten låst.
+    - Den sammenslåtte økten beholder id-en til den første.
+    - Med pause 0 lager planleggeren selv økter som ligger rett etter hverandre, og de slås da sammen (punkt 72). Med pause over 0 oppstår slike økter bare ved flytting eller import.
+72. **Pause 0 og øktlengde (F10):**
+    - Ønsket øktlengde brukes bare til å dele opp arbeidet når pausen er større enn 0.
+    - Når pausen er 0, slås økter for samme oppgave som ligger rett etter hverandre sammen til én økt, slik F10 krever. Oppgaven får da én sammenhengende økt per ledige tidsrom.
+    - Lengden på den sammenhengende økten begrenses bare av tidsrommet, dagskapasiteten og det som gjenstår. Grensen på 120 minutter gjelder ikke, fordi deler av økten uansett ville blitt slått sammen igjen.
+    - Ulike oppgaver kan ligge rett etter hverandre når pausen er 0. Det blir egne økter (F10).
+    - Planleggeren legger ikke nytt arbeid rett inntil en låst økt for samme oppgave. Da ville sammenslåingen låst tid som planleggeren har valgt (punkt 71). Brukeren kan selv flytte en økt inntil en annen. Da blir de én låst økt.
+73. **Minste øktlengde:**
+    - Valgene er 15, 30, 45 og 60 minutter.
+    - Blir det en rest under minste lengde, kortes forrige økt ned. Hvis det gjør forrige økt for kort, legges resten til forrige økt i stedet (maks 120 minutter). Dette gjelder bare når pausen er over 0. Med pause 0 blir arbeidet ikke delt opp (punkt 72).
+    - Har en oppgave mindre igjen enn minste lengde totalt, får den én kort økt, fordi arbeidet ellers aldri blir planlagt.
+    - Hull under minste lengde (minst 15 minutter) brukes bare i runde 3.
+74. **Steg på 5 minutter i planleggeren:** 50 minutters økter og 10 minutters pause går ikke opp i kvarter. Ledig tid som begynner av seg selv («nå», slutten på en forelesning eller låst økt) rundes fortsatt opp til nærmeste kvarter, så de fleste økter starter på hele kvarter. Dra og slipp og skjemaet «Flytt økt» bruker kvarter (F9).
+75. **Prioritet:**
+    - Effektiv frist er fristen minus 3 døgn for høy og pluss 3 døgn for lav. 3 døgn er en konstant som er lett å justere.
+    - Prioritet *flytter* oppgaver i køen, men gjør dem ikke absolutt viktigst. Ellers ville oppgaver med normal prioritet alltid ligge helt inntil fristen, uten slingringsmonn.
+    - **Lav prioritet:** I køen regnes oppgaven som om fristen var 3 døgn senere. Den kommer derfor bak oppgaver med normal prioritet som har lik frist, og også bak oppgaver med normal prioritet som har inntil 3 døgn senere frist. Den ekte fristen er alltid en fast grense: ingen økt legges etter den, og kontrollen avviser plasseringer som gjør at oppgaven ikke rekker fristen. Lav prioritet kan altså bli planlagt senere, men aldri for sent når det kunne vært unngått.
+      - *Eksempel 1, lik frist:* Det er mandag, og kapasiteten er 3 timer om dagen. «Lesing» har lav prioritet, «Øving» har normal prioritet, og begge er på 3 timer med frist torsdag. Øving får mandag og lesing tirsdag.
+      - *Eksempel 2, lav prioritet med tidligere frist:* Lesing har nå 6 timer og frist onsdag, og øving har 6 timer og frist torsdag.
+        - Den effektive fristen for lesing er lørdag, så øving kommer først i køen og får mandag.
+        - Øving tirsdag eller onsdag avvises av kontrollen, fordi lesing da ikke ville rukket fristen onsdag.
+        - Lesing får tirsdag og onsdag, og øving får torsdag.
+        - Lesing har tidligere frist, men kommer bak øving i køen fordi fristen regnes 3 døgn senere. Den ekte fristen onsdag gjør likevel at lesing får tirsdag og onsdag.
+    - Kontrollen sikrer at prioritet aldri gir flere manglende timer totalt enn uten prioritet.
+    - Metoden med tidligste frist først er ikke matematisk perfekt med daglig kapasitet og oppstykket tid, men er god nok for en students mengde oppgaver. Egenskapstesten i 12.3 sjekker garantien mot planen uten prioritet.
+76. **Prioritet går foran foretrukne tider for andre oppgaver:** En oppgave med høy prioritet kan ta formiddagen, så en vanlig oppgave havner på ettermiddagen. Det skjer bare innenfor studievinduet og aldri slik at en frist ryker.
+77. **Foretrukne tider:**
+    - Settes som tidsrom per ukedag. Ingen foretrukne tider betyr at hele studievinduet er foretrukket, som i dag.
+    - «Aldri etter 20» er slutten på studievinduet, som allerede er en fast grense. Det blir ikke egne faste grenser per ukedag.
+78. **Låste økter:**
+    - Står fast i planen på alle datoer.
+    - Teller mot dagskapasiteten og oppgavens planlagte tid.
+    - Holder pause rundt seg.
+    - En låst økt etter fristen teller som planlagt, men gir merket «Etter fristen» og «Frist i fare» på oppgaven.
+79. **Rollover av låste økter:**
+    - En låst økt fra en tidligere dag som ikke er huket av, fjernes, og tiden planlegges på nytt uten lås.
+    - En melding sier hvor mange låste økter det gjaldt.
+    - Låste økter i dag og fremover blir stående.
+80. **Lås opp** setter `is_locked: false`. Økter fra i morgen kan da flyttes ved neste nye plan, og dagens økter står som før (punkt 3).
+81. **Dagens økter står fortsatt fast (punkt 3).** Endret prioritet, foretrukne tider eller øktlengde påvirker bare planen fra i morgen og ledig tid i dag etter «nå».
+82. **Hvor økten kan slippes:** Se tabellen i avsnittet «Dra og slipp». Ulåste økter fra i morgen kan dekkes, fordi de uansett planlegges på nytt. Dagens økter kan ikke dekkes (punkt 3). Over kapasitet er lov, og dagen blir rød som før.
+83. **Flytting låser økten i samme operasjon.** Angre bruker `ui.undo` med `kind: 'move'` og gir tilbake økten slik den var. Som ved sletting kan bare siste handling angres.
+84. **Dra og slipp følger reglene for tilstand og rendering:**
+    - Skyggen ligger i `ui.drag` (lagres ikke).
+    - Den oppdateres bare når kvarteret eller dagen under pekeren endres, og høyst én gang per skjermbilde.
+    - Pekeren fanges på `#app`, som ikke tegnes på nytt, så dra ikke brytes av render.
+    - Omregning fra piksler til tid er en ren funksjon med tester.
+    - Det trengs ikke noe nytt unntak i CLAUDE.md.
+85. **Mobil:** Et kort trykk åpner økt-panelet, og «Flytt økt» er hovedveien. Langt trykk (0,5 sekunder) starter dra. Da stoppes scrolling med `touchmove` og `preventDefault`. I dagsvisningen flytter dra bare klokkeslettet.
+86. **Tastatur:** Skjemaet «Flytt økt» er alternativet til dra-bevegelsen (WCAG 2.5.7). Det blir ingen flytting med piltaster, fordi det ARIA-mønsteret for dra og slipp er avviklet og vanskelig å gjøre godt.
+87. **Arbeidsøkter blir klikkbare** (økt-panelet i 11.3). Det erstatter punkt 24.
+88. **Fridager:**
+    - Lagres som én markering per dato. Skjemaet godtar fra–til (maks 31 dager).
+    - Faste aktiviteter vises fortsatt, fordi forelesningen går uansett.
+    - Låste økter på dagen låses opp og flyttes, og spørsmålet før markeringen sier det.
+    - Dager i fortiden kan ikke markeres, og passerte markeringer fjernes ved daglig sjekk.
+89. **«Jeg er syk i dag»:**
+    - Flytter alle dagens ikke fullførte økter, også låste og den som pågår. Fullførte økter blir stående.
+    - Listen viser bare oppgaver som *kom* i fare på grunn av markeringen.
+    - «Angre» i panelet gir tilbake nøyaktig det som var.
+    - Senere kan markeringen fjernes fra kalenderen. Da bygges planen på nytt i stedet for at det gamle hentes tilbake.
+90. **Kalendereksport (.ics):** Låste økter eksporteres som andre økter, og fridager eksporteres ikke.
+91. **Nye tekster** (prioritet, økter og pauser, foretrukne tider, flytting, lås, fridager og syk) legges i `tekster.js` og merkes som ikke fra innhold.md, som før.
+92. **Endre lengde ved å dra (Kan ha)** er et eget valgfritt steg (11.7) og gjøres bare hvis du ønsker det.
+
+

@@ -1,0 +1,1772 @@
+[
+  {
+    "dataset": "eksempel",
+    "fn": "rollover",
+    "now": "2026-11-02T08:00:00.000Z",
+    "blocks": [
+      {
+        "id": "eksempel-okt-gjennomfort",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-01T07:00:00.000Z",
+        "end_time": "2026-11-01T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-02T08:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-02T08:00:00.000Z",
+        "end_time": "2026-11-02T09:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-forelesning-itf",
+        "task_id": null,
+        "course_id": "eksempel-itf",
+        "title": "Forelesning",
+        "start_time": "2026-11-02T09:15:00.000Z",
+        "end_time": "2026-11-02T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-02T11:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-02T11:00:00.000Z",
+        "end_time": "2026-11-02T13:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-02T13:15:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-02T13:15:00.000Z",
+        "end_time": "2026-11-02T14:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-03T07:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-03T07:00:00.000Z",
+        "end_time": "2026-11-03T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-03T09:15:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-03T09:15:00.000Z",
+        "end_time": "2026-11-03T11:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-jobb",
+        "task_id": null,
+        "course_id": null,
+        "title": "Deltidsjobb",
+        "start_time": "2026-11-03T15:00:00.000Z",
+        "end_time": "2026-11-03T19:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-forelesning-mat",
+        "task_id": null,
+        "course_id": "eksempel-mat",
+        "title": "Forelesning",
+        "start_time": "2026-11-04T07:15:00.000Z",
+        "end_time": "2026-11-04T09:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-04T09:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-04T09:00:00.000Z",
+        "end_time": "2026-11-04T11:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-mat-innlevering@2026-11-04T11:15:00.000Z",
+        "task_id": "eksempel-mat-innlevering",
+        "course_id": "eksempel-mat",
+        "title": "Innlevering 5",
+        "start_time": "2026-11-04T11:15:00.000Z",
+        "end_time": "2026-11-04T13:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-mat-innlevering@2026-11-05T07:00:00.000Z",
+        "task_id": "eksempel-mat-innlevering",
+        "course_id": "eksempel-mat",
+        "title": "Innlevering 5",
+        "start_time": "2026-11-05T07:00:00.000Z",
+        "end_time": "2026-11-05T08:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-05T08:15:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-05T08:15:00.000Z",
+        "end_time": "2026-11-05T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-05T10:30:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-05T10:30:00.000Z",
+        "end_time": "2026-11-05T11:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-seminar-exphil",
+        "task_id": null,
+        "course_id": "eksempel-exphil",
+        "title": "Seminar",
+        "start_time": "2026-11-05T11:15:00.000Z",
+        "end_time": "2026-11-05T13:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-06T07:00:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-06T07:00:00.000Z",
+        "end_time": "2026-11-06T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-lab-itf",
+        "task_id": null,
+        "course_id": "eksempel-itf",
+        "title": "Lab",
+        "start_time": "2026-11-06T09:15:00.000Z",
+        "end_time": "2026-11-06T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-06T11:00:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-06T11:00:00.000Z",
+        "end_time": "2026-11-06T13:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-07T07:00:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-07T07:00:00.000Z",
+        "end_time": "2026-11-07T07:45:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-refleksjon@2026-11-07T08:00:00.000Z",
+        "task_id": "eksempel-exphil-refleksjon",
+        "course_id": "eksempel-exphil",
+        "title": "Refleksjonsnotat",
+        "start_time": "2026-11-07T08:00:00.000Z",
+        "end_time": "2026-11-07T10:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      }
+    ],
+    "last_checked_date": "2026-11-02",
+    "overload": {
+      "atRisk": [
+        {
+          "taskId": "eksempel-exphil-eksamen",
+          "day": "2026-11-04",
+          "hoursNeeded": 6,
+          "missingHours": 4
+        }
+      ],
+      "overloadedDays": []
+    }
+  },
+  {
+    "dataset": "eksempel",
+    "fn": "replan",
+    "now": "2026-11-02T08:00:00.000Z",
+    "blocks": [
+      {
+        "id": "eksempel-okt-gjennomfort",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-01T07:00:00.000Z",
+        "end_time": "2026-11-01T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "eksempel-okt-droppet",
+        "task_id": "eksempel-mat-innlevering",
+        "course_id": "eksempel-mat",
+        "title": "Innlevering 5",
+        "start_time": "2026-11-01T12:00:00.000Z",
+        "end_time": "2026-11-01T14:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-02T08:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-02T08:00:00.000Z",
+        "end_time": "2026-11-02T09:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-forelesning-itf",
+        "task_id": null,
+        "course_id": "eksempel-itf",
+        "title": "Forelesning",
+        "start_time": "2026-11-02T09:15:00.000Z",
+        "end_time": "2026-11-02T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-02T11:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-02T11:00:00.000Z",
+        "end_time": "2026-11-02T13:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-02T13:15:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-02T13:15:00.000Z",
+        "end_time": "2026-11-02T14:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-03T07:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-03T07:00:00.000Z",
+        "end_time": "2026-11-03T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-03T09:15:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-03T09:15:00.000Z",
+        "end_time": "2026-11-03T11:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-jobb",
+        "task_id": null,
+        "course_id": null,
+        "title": "Deltidsjobb",
+        "start_time": "2026-11-03T15:00:00.000Z",
+        "end_time": "2026-11-03T19:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-forelesning-mat",
+        "task_id": null,
+        "course_id": "eksempel-mat",
+        "title": "Forelesning",
+        "start_time": "2026-11-04T07:15:00.000Z",
+        "end_time": "2026-11-04T09:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-04T09:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-04T09:00:00.000Z",
+        "end_time": "2026-11-04T11:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-mat-innlevering@2026-11-04T11:15:00.000Z",
+        "task_id": "eksempel-mat-innlevering",
+        "course_id": "eksempel-mat",
+        "title": "Innlevering 5",
+        "start_time": "2026-11-04T11:15:00.000Z",
+        "end_time": "2026-11-04T13:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-mat-innlevering@2026-11-05T07:00:00.000Z",
+        "task_id": "eksempel-mat-innlevering",
+        "course_id": "eksempel-mat",
+        "title": "Innlevering 5",
+        "start_time": "2026-11-05T07:00:00.000Z",
+        "end_time": "2026-11-05T08:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-05T08:15:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-05T08:15:00.000Z",
+        "end_time": "2026-11-05T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-05T10:30:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-05T10:30:00.000Z",
+        "end_time": "2026-11-05T11:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-seminar-exphil",
+        "task_id": null,
+        "course_id": "eksempel-exphil",
+        "title": "Seminar",
+        "start_time": "2026-11-05T11:15:00.000Z",
+        "end_time": "2026-11-05T13:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-06T07:00:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-06T07:00:00.000Z",
+        "end_time": "2026-11-06T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-lab-itf",
+        "task_id": null,
+        "course_id": "eksempel-itf",
+        "title": "Lab",
+        "start_time": "2026-11-06T09:15:00.000Z",
+        "end_time": "2026-11-06T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-06T11:00:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-06T11:00:00.000Z",
+        "end_time": "2026-11-06T13:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-07T07:00:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-07T07:00:00.000Z",
+        "end_time": "2026-11-07T07:45:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-refleksjon@2026-11-07T08:00:00.000Z",
+        "task_id": "eksempel-exphil-refleksjon",
+        "course_id": "eksempel-exphil",
+        "title": "Refleksjonsnotat",
+        "start_time": "2026-11-07T08:00:00.000Z",
+        "end_time": "2026-11-07T10:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      }
+    ],
+    "last_checked_date": "2026-11-01",
+    "overload": {
+      "atRisk": [
+        {
+          "taskId": "eksempel-exphil-eksamen",
+          "day": "2026-11-04",
+          "hoursNeeded": 6,
+          "missingHours": 4
+        }
+      ],
+      "overloadedDays": []
+    }
+  },
+  {
+    "dataset": "eksempel",
+    "fn": "replan",
+    "now": "2026-11-02T14:40:00.000Z",
+    "blocks": [
+      {
+        "id": "eksempel-okt-gjennomfort",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-01T07:00:00.000Z",
+        "end_time": "2026-11-01T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "eksempel-okt-droppet",
+        "task_id": "eksempel-mat-innlevering",
+        "course_id": "eksempel-mat",
+        "title": "Innlevering 5",
+        "start_time": "2026-11-01T12:00:00.000Z",
+        "end_time": "2026-11-01T14:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-forelesning-itf",
+        "task_id": null,
+        "course_id": "eksempel-itf",
+        "title": "Forelesning",
+        "start_time": "2026-11-02T09:15:00.000Z",
+        "end_time": "2026-11-02T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-02T14:45:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-02T14:45:00.000Z",
+        "end_time": "2026-11-02T16:45:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-02T17:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-02T17:00:00.000Z",
+        "end_time": "2026-11-02T19:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-03T07:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-03T07:00:00.000Z",
+        "end_time": "2026-11-03T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-03T09:15:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-03T09:15:00.000Z",
+        "end_time": "2026-11-03T11:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-jobb",
+        "task_id": null,
+        "course_id": null,
+        "title": "Deltidsjobb",
+        "start_time": "2026-11-03T15:00:00.000Z",
+        "end_time": "2026-11-03T19:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-forelesning-mat",
+        "task_id": null,
+        "course_id": "eksempel-mat",
+        "title": "Forelesning",
+        "start_time": "2026-11-04T07:15:00.000Z",
+        "end_time": "2026-11-04T09:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-04T09:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-04T09:00:00.000Z",
+        "end_time": "2026-11-04T11:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-mat-innlevering@2026-11-04T11:15:00.000Z",
+        "task_id": "eksempel-mat-innlevering",
+        "course_id": "eksempel-mat",
+        "title": "Innlevering 5",
+        "start_time": "2026-11-04T11:15:00.000Z",
+        "end_time": "2026-11-04T13:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-mat-innlevering@2026-11-05T07:00:00.000Z",
+        "task_id": "eksempel-mat-innlevering",
+        "course_id": "eksempel-mat",
+        "title": "Innlevering 5",
+        "start_time": "2026-11-05T07:00:00.000Z",
+        "end_time": "2026-11-05T08:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-05T08:15:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-05T08:15:00.000Z",
+        "end_time": "2026-11-05T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-05T10:30:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-05T10:30:00.000Z",
+        "end_time": "2026-11-05T11:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-seminar-exphil",
+        "task_id": null,
+        "course_id": "eksempel-exphil",
+        "title": "Seminar",
+        "start_time": "2026-11-05T11:15:00.000Z",
+        "end_time": "2026-11-05T13:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-06T07:00:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-06T07:00:00.000Z",
+        "end_time": "2026-11-06T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-lab-itf",
+        "task_id": null,
+        "course_id": "eksempel-itf",
+        "title": "Lab",
+        "start_time": "2026-11-06T09:15:00.000Z",
+        "end_time": "2026-11-06T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-06T11:00:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-06T11:00:00.000Z",
+        "end_time": "2026-11-06T13:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-07T07:00:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-07T07:00:00.000Z",
+        "end_time": "2026-11-07T07:45:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-refleksjon@2026-11-07T08:00:00.000Z",
+        "task_id": "eksempel-exphil-refleksjon",
+        "course_id": "eksempel-exphil",
+        "title": "Refleksjonsnotat",
+        "start_time": "2026-11-07T08:00:00.000Z",
+        "end_time": "2026-11-07T10:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      }
+    ],
+    "last_checked_date": "2026-11-01",
+    "overload": {
+      "atRisk": [
+        {
+          "taskId": "eksempel-exphil-eksamen",
+          "day": "2026-11-04",
+          "hoursNeeded": 6,
+          "missingHours": 4
+        }
+      ],
+      "overloadedDays": []
+    }
+  },
+  {
+    "dataset": "eksempel",
+    "fn": "rollover",
+    "now": "2026-11-03T06:00:00.000Z",
+    "blocks": [
+      {
+        "id": "eksempel-okt-gjennomfort",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-01T07:00:00.000Z",
+        "end_time": "2026-11-01T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "eksempel-forelesning-itf",
+        "task_id": null,
+        "course_id": "eksempel-itf",
+        "title": "Forelesning",
+        "start_time": "2026-11-02T09:15:00.000Z",
+        "end_time": "2026-11-02T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-03T07:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-03T07:00:00.000Z",
+        "end_time": "2026-11-03T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-03T09:15:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-03T09:15:00.000Z",
+        "end_time": "2026-11-03T11:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-jobb",
+        "task_id": null,
+        "course_id": null,
+        "title": "Deltidsjobb",
+        "start_time": "2026-11-03T15:00:00.000Z",
+        "end_time": "2026-11-03T19:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-forelesning-mat",
+        "task_id": null,
+        "course_id": "eksempel-mat",
+        "title": "Forelesning",
+        "start_time": "2026-11-04T07:15:00.000Z",
+        "end_time": "2026-11-04T09:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-eksamen@2026-11-04T09:00:00.000Z",
+        "task_id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "start_time": "2026-11-04T09:00:00.000Z",
+        "end_time": "2026-11-04T11:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-mat-innlevering@2026-11-04T11:15:00.000Z",
+        "task_id": "eksempel-mat-innlevering",
+        "course_id": "eksempel-mat",
+        "title": "Innlevering 5",
+        "start_time": "2026-11-04T11:15:00.000Z",
+        "end_time": "2026-11-04T13:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-mat-innlevering@2026-11-05T07:00:00.000Z",
+        "task_id": "eksempel-mat-innlevering",
+        "course_id": "eksempel-mat",
+        "title": "Innlevering 5",
+        "start_time": "2026-11-05T07:00:00.000Z",
+        "end_time": "2026-11-05T08:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-05T08:15:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-05T08:15:00.000Z",
+        "end_time": "2026-11-05T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-05T10:30:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-05T10:30:00.000Z",
+        "end_time": "2026-11-05T11:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-seminar-exphil",
+        "task_id": null,
+        "course_id": "eksempel-exphil",
+        "title": "Seminar",
+        "start_time": "2026-11-05T11:15:00.000Z",
+        "end_time": "2026-11-05T13:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-06T07:00:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-06T07:00:00.000Z",
+        "end_time": "2026-11-06T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-lab-itf",
+        "task_id": null,
+        "course_id": "eksempel-itf",
+        "title": "Lab",
+        "start_time": "2026-11-06T09:15:00.000Z",
+        "end_time": "2026-11-06T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-06T11:00:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-06T11:00:00.000Z",
+        "end_time": "2026-11-06T13:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-itf-rapport@2026-11-07T07:00:00.000Z",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-07T07:00:00.000Z",
+        "end_time": "2026-11-07T07:45:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-exphil-refleksjon@2026-11-07T08:00:00.000Z",
+        "task_id": "eksempel-exphil-refleksjon",
+        "course_id": "eksempel-exphil",
+        "title": "Refleksjonsnotat",
+        "start_time": "2026-11-07T08:00:00.000Z",
+        "end_time": "2026-11-07T10:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      }
+    ],
+    "last_checked_date": "2026-11-03",
+    "overload": {
+      "atRisk": [
+        {
+          "taskId": "eksempel-exphil-eksamen",
+          "day": "2026-11-04",
+          "hoursNeeded": 10,
+          "missingHours": 8
+        }
+      ],
+      "overloadedDays": []
+    }
+  },
+  {
+    "dataset": "okter",
+    "fn": "rollover",
+    "now": "2026-11-04T09:00:00.000Z",
+    "blocks": [
+      {
+        "id": "forelesning",
+        "task_id": null,
+        "course_id": "fasit-emne",
+        "title": "Forelesning",
+        "start_time": "2026-10-26T09:15:00.000Z",
+        "end_time": "2026-10-26T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "rapport@man",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "rapport",
+        "start_time": "2026-11-02T07:00:00.000Z",
+        "end_time": "2026-11-02T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "prosjekt@man",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "prosjekt",
+        "start_time": "2026-11-02T12:00:00.000Z",
+        "end_time": "2026-11-02T13:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "lab@2026-11-04T09:00:00.000Z",
+        "task_id": "lab",
+        "course_id": "fasit-emne",
+        "title": "Lab",
+        "start_time": "2026-11-04T09:00:00.000Z",
+        "end_time": "2026-11-04T11:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "lab@2026-11-04T11:15:00.000Z",
+        "task_id": "lab",
+        "course_id": "fasit-emne",
+        "title": "Lab",
+        "start_time": "2026-11-04T11:15:00.000Z",
+        "end_time": "2026-11-04T12:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-04T12:30:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-04T12:30:00.000Z",
+        "end_time": "2026-11-04T13:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "tannlege",
+        "task_id": null,
+        "course_id": null,
+        "title": "Tannlege",
+        "start_time": "2026-11-04T13:00:00.000Z",
+        "end_time": "2026-11-04T15:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-04T15:00:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-04T15:00:00.000Z",
+        "end_time": "2026-11-04T17:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-04T17:15:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-04T17:15:00.000Z",
+        "end_time": "2026-11-04T19:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "lab@2026-11-05T07:00:00.000Z",
+        "task_id": "lab",
+        "course_id": "fasit-emne",
+        "title": "Lab",
+        "start_time": "2026-11-05T07:00:00.000Z",
+        "end_time": "2026-11-05T08:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-05T08:15:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-05T08:15:00.000Z",
+        "end_time": "2026-11-05T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-05T10:30:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-05T10:30:00.000Z",
+        "end_time": "2026-11-05T12:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-05T12:45:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-05T12:45:00.000Z",
+        "end_time": "2026-11-05T14:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "rapport@2026-11-06T07:00:00.000Z",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "Rapport",
+        "start_time": "2026-11-06T07:00:00.000Z",
+        "end_time": "2026-11-06T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "rapport@2026-11-06T09:15:00.000Z",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "Rapport",
+        "start_time": "2026-11-06T09:15:00.000Z",
+        "end_time": "2026-11-06T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "prosjekt@2026-11-07T07:00:00.000Z",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "Prosjekt",
+        "start_time": "2026-11-07T07:00:00.000Z",
+        "end_time": "2026-11-07T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "prosjekt@2026-11-07T09:15:00.000Z",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "Prosjekt",
+        "start_time": "2026-11-07T09:15:00.000Z",
+        "end_time": "2026-11-07T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "prosjekt@2026-11-08T07:00:00.000Z",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "Prosjekt",
+        "start_time": "2026-11-08T07:00:00.000Z",
+        "end_time": "2026-11-08T08:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      }
+    ],
+    "last_checked_date": "2026-11-04",
+    "overload": {
+      "atRisk": [
+        {
+          "taskId": "rapport",
+          "day": "2026-11-06",
+          "hoursNeeded": 6,
+          "missingHours": 3
+        }
+      ],
+      "overloadedDays": [
+        "2026-11-04",
+        "2026-11-05"
+      ]
+    }
+  },
+  {
+    "dataset": "okter",
+    "fn": "replan",
+    "now": "2026-11-04T09:00:00.000Z",
+    "blocks": [
+      {
+        "id": "forelesning",
+        "task_id": null,
+        "course_id": "fasit-emne",
+        "title": "Forelesning",
+        "start_time": "2026-10-26T09:15:00.000Z",
+        "end_time": "2026-10-26T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "rapport@man",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "rapport",
+        "start_time": "2026-11-02T07:00:00.000Z",
+        "end_time": "2026-11-02T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "prosjekt@man",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "prosjekt",
+        "start_time": "2026-11-02T12:00:00.000Z",
+        "end_time": "2026-11-02T13:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "rapport@tir",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "rapport",
+        "start_time": "2026-11-03T12:00:00.000Z",
+        "end_time": "2026-11-03T14:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "lab@tir",
+        "task_id": "lab",
+        "course_id": "fasit-emne",
+        "title": "lab",
+        "start_time": "2026-11-03T15:00:00.000Z",
+        "end_time": "2026-11-03T16:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "lab@2026-11-04T09:00:00.000Z",
+        "task_id": "lab",
+        "course_id": "fasit-emne",
+        "title": "Lab",
+        "start_time": "2026-11-04T09:00:00.000Z",
+        "end_time": "2026-11-04T11:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "lab@2026-11-04T11:15:00.000Z",
+        "task_id": "lab",
+        "course_id": "fasit-emne",
+        "title": "Lab",
+        "start_time": "2026-11-04T11:15:00.000Z",
+        "end_time": "2026-11-04T12:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-04T12:30:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-04T12:30:00.000Z",
+        "end_time": "2026-11-04T13:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "tannlege",
+        "task_id": null,
+        "course_id": null,
+        "title": "Tannlege",
+        "start_time": "2026-11-04T13:00:00.000Z",
+        "end_time": "2026-11-04T15:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-04T15:00:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-04T15:00:00.000Z",
+        "end_time": "2026-11-04T17:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-04T17:15:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-04T17:15:00.000Z",
+        "end_time": "2026-11-04T19:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "lab@2026-11-05T07:00:00.000Z",
+        "task_id": "lab",
+        "course_id": "fasit-emne",
+        "title": "Lab",
+        "start_time": "2026-11-05T07:00:00.000Z",
+        "end_time": "2026-11-05T08:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-05T08:15:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-05T08:15:00.000Z",
+        "end_time": "2026-11-05T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-05T10:30:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-05T10:30:00.000Z",
+        "end_time": "2026-11-05T12:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-05T12:45:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-05T12:45:00.000Z",
+        "end_time": "2026-11-05T14:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "rapport@2026-11-06T07:00:00.000Z",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "Rapport",
+        "start_time": "2026-11-06T07:00:00.000Z",
+        "end_time": "2026-11-06T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "rapport@2026-11-06T09:15:00.000Z",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "Rapport",
+        "start_time": "2026-11-06T09:15:00.000Z",
+        "end_time": "2026-11-06T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "prosjekt@2026-11-07T07:00:00.000Z",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "Prosjekt",
+        "start_time": "2026-11-07T07:00:00.000Z",
+        "end_time": "2026-11-07T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "prosjekt@2026-11-07T09:15:00.000Z",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "Prosjekt",
+        "start_time": "2026-11-07T09:15:00.000Z",
+        "end_time": "2026-11-07T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "prosjekt@2026-11-08T07:00:00.000Z",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "Prosjekt",
+        "start_time": "2026-11-08T07:00:00.000Z",
+        "end_time": "2026-11-08T08:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      }
+    ],
+    "last_checked_date": "2026-11-03",
+    "overload": {
+      "atRisk": [
+        {
+          "taskId": "rapport",
+          "day": "2026-11-06",
+          "hoursNeeded": 4,
+          "missingHours": 1
+        }
+      ],
+      "overloadedDays": [
+        "2026-11-04",
+        "2026-11-05"
+      ]
+    }
+  },
+  {
+    "dataset": "okter",
+    "fn": "rollover",
+    "now": "2026-11-04T18:50:00.000Z",
+    "blocks": [
+      {
+        "id": "forelesning",
+        "task_id": null,
+        "course_id": "fasit-emne",
+        "title": "Forelesning",
+        "start_time": "2026-10-26T09:15:00.000Z",
+        "end_time": "2026-10-26T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "rapport@man",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "rapport",
+        "start_time": "2026-11-02T07:00:00.000Z",
+        "end_time": "2026-11-02T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "prosjekt@man",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "prosjekt",
+        "start_time": "2026-11-02T12:00:00.000Z",
+        "end_time": "2026-11-02T13:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "tannlege",
+        "task_id": null,
+        "course_id": null,
+        "title": "Tannlege",
+        "start_time": "2026-11-04T13:00:00.000Z",
+        "end_time": "2026-11-04T15:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "lab@2026-11-05T07:00:00.000Z",
+        "task_id": "lab",
+        "course_id": "fasit-emne",
+        "title": "Lab",
+        "start_time": "2026-11-05T07:00:00.000Z",
+        "end_time": "2026-11-05T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "lab@2026-11-05T09:15:00.000Z",
+        "task_id": "lab",
+        "course_id": "fasit-emne",
+        "title": "Lab",
+        "start_time": "2026-11-05T09:15:00.000Z",
+        "end_time": "2026-11-05T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-05T10:30:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-05T10:30:00.000Z",
+        "end_time": "2026-11-05T12:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-05T12:45:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-05T12:45:00.000Z",
+        "end_time": "2026-11-05T14:45:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-05T15:00:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-05T15:00:00.000Z",
+        "end_time": "2026-11-05T17:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "rapport@2026-11-06T07:00:00.000Z",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "Rapport",
+        "start_time": "2026-11-06T07:00:00.000Z",
+        "end_time": "2026-11-06T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "rapport@2026-11-06T09:15:00.000Z",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "Rapport",
+        "start_time": "2026-11-06T09:15:00.000Z",
+        "end_time": "2026-11-06T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "prosjekt@2026-11-07T07:00:00.000Z",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "Prosjekt",
+        "start_time": "2026-11-07T07:00:00.000Z",
+        "end_time": "2026-11-07T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "prosjekt@2026-11-07T09:15:00.000Z",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "Prosjekt",
+        "start_time": "2026-11-07T09:15:00.000Z",
+        "end_time": "2026-11-07T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "prosjekt@2026-11-08T07:00:00.000Z",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "Prosjekt",
+        "start_time": "2026-11-08T07:00:00.000Z",
+        "end_time": "2026-11-08T08:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      }
+    ],
+    "last_checked_date": "2026-11-04",
+    "overload": {
+      "atRisk": [
+        {
+          "taskId": "lab",
+          "day": "2026-11-05",
+          "hoursNeeded": 4,
+          "missingHours": 1
+        },
+        {
+          "taskId": "eksamen",
+          "day": "2026-11-05",
+          "hoursNeeded": 10,
+          "missingHours": 4
+        },
+        {
+          "taskId": "rapport",
+          "day": "2026-11-06",
+          "hoursNeeded": 6,
+          "missingHours": 3
+        }
+      ],
+      "overloadedDays": [
+        "2026-11-05"
+      ]
+    }
+  },
+  {
+    "dataset": "okter",
+    "fn": "rollover",
+    "now": "2026-11-05T06:00:00.000Z",
+    "blocks": [
+      {
+        "id": "forelesning",
+        "task_id": null,
+        "course_id": "fasit-emne",
+        "title": "Forelesning",
+        "start_time": "2026-10-26T09:15:00.000Z",
+        "end_time": "2026-10-26T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "rapport@man",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "rapport",
+        "start_time": "2026-11-02T07:00:00.000Z",
+        "end_time": "2026-11-02T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "prosjekt@man",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "prosjekt",
+        "start_time": "2026-11-02T12:00:00.000Z",
+        "end_time": "2026-11-02T13:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "tannlege",
+        "task_id": null,
+        "course_id": null,
+        "title": "Tannlege",
+        "start_time": "2026-11-04T13:00:00.000Z",
+        "end_time": "2026-11-04T15:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "lab@2026-11-05T07:00:00.000Z",
+        "task_id": "lab",
+        "course_id": "fasit-emne",
+        "title": "Lab",
+        "start_time": "2026-11-05T07:00:00.000Z",
+        "end_time": "2026-11-05T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "lab@2026-11-05T09:15:00.000Z",
+        "task_id": "lab",
+        "course_id": "fasit-emne",
+        "title": "Lab",
+        "start_time": "2026-11-05T09:15:00.000Z",
+        "end_time": "2026-11-05T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-05T10:30:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-05T10:30:00.000Z",
+        "end_time": "2026-11-05T12:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-05T12:45:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-05T12:45:00.000Z",
+        "end_time": "2026-11-05T14:45:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "eksamen@2026-11-05T15:00:00.000Z",
+        "task_id": "eksamen",
+        "course_id": "fasit-emne",
+        "title": "Eksamen",
+        "start_time": "2026-11-05T15:00:00.000Z",
+        "end_time": "2026-11-05T17:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "rapport@2026-11-06T07:00:00.000Z",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "Rapport",
+        "start_time": "2026-11-06T07:00:00.000Z",
+        "end_time": "2026-11-06T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "rapport@2026-11-06T09:15:00.000Z",
+        "task_id": "rapport",
+        "course_id": "fasit-emne",
+        "title": "Rapport",
+        "start_time": "2026-11-06T09:15:00.000Z",
+        "end_time": "2026-11-06T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "prosjekt@2026-11-07T07:00:00.000Z",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "Prosjekt",
+        "start_time": "2026-11-07T07:00:00.000Z",
+        "end_time": "2026-11-07T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "prosjekt@2026-11-07T09:15:00.000Z",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "Prosjekt",
+        "start_time": "2026-11-07T09:15:00.000Z",
+        "end_time": "2026-11-07T10:15:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      },
+      {
+        "id": "prosjekt@2026-11-08T07:00:00.000Z",
+        "task_id": "prosjekt",
+        "course_id": "fasit-emne",
+        "title": "Prosjekt",
+        "start_time": "2026-11-08T07:00:00.000Z",
+        "end_time": "2026-11-08T08:30:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      }
+    ],
+    "last_checked_date": "2026-11-05",
+    "overload": {
+      "atRisk": [
+        {
+          "taskId": "lab",
+          "day": "2026-11-05",
+          "hoursNeeded": 4,
+          "missingHours": 1
+        },
+        {
+          "taskId": "eksamen",
+          "day": "2026-11-05",
+          "hoursNeeded": 10,
+          "missingHours": 4
+        },
+        {
+          "taskId": "rapport",
+          "day": "2026-11-06",
+          "hoursNeeded": 6,
+          "missingHours": 3
+        }
+      ],
+      "overloadedDays": [
+        "2026-11-05"
+      ]
+    }
+  }
+]

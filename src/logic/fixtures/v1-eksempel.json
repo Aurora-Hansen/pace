@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "data": {
+    "user": {
+      "id": "fasit-bruker",
+      "name": "",
+      "daily_available_study_hours": 4,
+      "study_window_start": "08:00",
+      "study_window_end": "21:00"
+    },
+    "courses": [
+      {
+        "id": "eksempel-itf",
+        "name": "ITF10619 Programmering 2",
+        "color": "#2E5B88"
+      },
+      {
+        "id": "eksempel-mat",
+        "name": "MAT1100 Matematikk",
+        "color": "#3F8F6B"
+      },
+      {
+        "id": "eksempel-exphil",
+        "name": "EXPHIL Examen philosophicum",
+        "color": "#7B5EA7"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "eksempel-exphil-eksamen",
+        "course_id": "eksempel-exphil",
+        "title": "Eksamensforberedelse",
+        "description": "Les gjennom pensum og løs tidligere eksamensoppgaver.",
+        "deadline": "2026-11-04T11:00:00.000Z",
+        "estimated_hours": 14,
+        "completed_hours": 0,
+        "status": "not_started",
+        "created_at": "2026-10-26T11:00:00.000Z",
+        "allow_over_capacity": false
+      },
+      {
+        "id": "eksempel-mat-innlevering",
+        "course_id": "eksempel-mat",
+        "title": "Innlevering 5",
+        "description": "Oppgavesett med derivasjon og integrasjon.",
+        "deadline": "2026-11-05T15:00:00.000Z",
+        "estimated_hours": 3,
+        "completed_hours": 0,
+        "status": "not_started",
+        "created_at": "2026-10-26T11:00:00.000Z",
+        "allow_over_capacity": false
+      },
+      {
+        "id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "description": "Skriv en rapport på 1500 ord om personvern i skytjenester. Bruk minst 4 kilder.",
+        "deadline": "2026-11-08T22:59:00.000Z",
+        "estimated_hours": 9.5,
+        "completed_hours": 2,
+        "status": "in_progress",
+        "created_at": "2026-10-26T11:00:00.000Z",
+        "allow_over_capacity": false
+      },
+      {
+        "id": "eksempel-exphil-refleksjon",
+        "course_id": "eksempel-exphil",
+        "title": "Refleksjonsnotat",
+        "description": "Kort refleksjonsnotat etter seminaret.",
+        "deadline": "2026-11-14T22:59:00.000Z",
+        "estimated_hours": 2,
+        "completed_hours": 0,
+        "status": "not_started",
+        "created_at": "2026-10-26T11:00:00.000Z",
+        "allow_over_capacity": false
+      }
+    ],
+    "blocks": [
+      {
+        "id": "eksempel-forelesning-itf",
+        "task_id": null,
+        "course_id": "eksempel-itf",
+        "title": "Forelesning",
+        "start_time": "2026-11-02T09:15:00.000Z",
+        "end_time": "2026-11-02T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-jobb",
+        "task_id": null,
+        "course_id": null,
+        "title": "Deltidsjobb",
+        "start_time": "2026-11-03T15:00:00.000Z",
+        "end_time": "2026-11-03T19:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-forelesning-mat",
+        "task_id": null,
+        "course_id": "eksempel-mat",
+        "title": "Forelesning",
+        "start_time": "2026-11-04T07:15:00.000Z",
+        "end_time": "2026-11-04T09:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-seminar-exphil",
+        "task_id": null,
+        "course_id": "eksempel-exphil",
+        "title": "Seminar",
+        "start_time": "2026-11-05T11:15:00.000Z",
+        "end_time": "2026-11-05T13:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-lab-itf",
+        "task_id": null,
+        "course_id": "eksempel-itf",
+        "title": "Lab",
+        "start_time": "2026-11-06T09:15:00.000Z",
+        "end_time": "2026-11-06T11:00:00.000Z",
+        "is_fixed": true,
+        "recurrence": "weekly",
+        "is_completed": false
+      },
+      {
+        "id": "eksempel-okt-gjennomfort",
+        "task_id": "eksempel-itf-rapport",
+        "course_id": "eksempel-itf",
+        "title": "Arbeidskrav 2: Rapport",
+        "start_time": "2026-11-01T07:00:00.000Z",
+        "end_time": "2026-11-01T09:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": true
+      },
+      {
+        "id": "eksempel-okt-droppet",
+        "task_id": "eksempel-mat-innlevering",
+        "course_id": "eksempel-mat",
+        "title": "Innlevering 5",
+        "start_time": "2026-11-01T12:00:00.000Z",
+        "end_time": "2026-11-01T14:00:00.000Z",
+        "is_fixed": false,
+        "recurrence": "none",
+        "is_completed": false
+      }
+    ],
+    "last_checked_date": "2026-11-01",
+    "onboarding_done": true
+  }
+}

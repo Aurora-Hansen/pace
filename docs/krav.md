@@ -55,6 +55,45 @@ Brukerhistoriene er prioritert etter MoSCoW-metoden (Må ha, Bør ha, Kan ha).
 - Når en oppgave markeres som fullført, slettes gjenstående planlagte økter for oppgaven, og tiden frigjøres i kalenderen.
 - Uferdige økter flyttes etter logikken i del 5.
 
+### F5: Prioritet på oppgaver
+
+- Oppgaver skal ha prioriteten lav, normal eller høy. Standard er normal.
+- Høy prioritet planlegges tidligere, men aldri slik at en annen oppgave mister fristen når det kunne vært unngått.
+
+### F6: Foretrukne studietider
+
+- Brukeren kan angi foretrukne tidsrom per ukedag, f.eks. «hverdager 09–15» og «aldri etter 20».
+- Planleggeren bruker foretrukne tidsrom først. Øvrig ledig tid i studievinduet brukes bare når det trengs for å rekke en frist.
+
+### F7: Øktlengde og pauser
+
+- Brukeren kan velge foretrukket øktlengde (f.eks. 50 eller 90 minutter), minste øktlengde (f.eks. 45 minutter) og pause mellom økter (0, 10 eller 15 minutter).
+- Planleggeren lager ikke økter som er kortere enn minste øktlengde, med mindre det er nødvendig for å rekke en frist.
+
+### F8: Fridager og «Jeg er syk i dag»
+
+- Brukeren kan markere en dag som syk eller fri. Dagen får null studiekapasitet.
+- Ved «syk i dag» flyttes dagens gjenstående økter med ett klikk, og brukeren ser hvilke frister som eventuelt kommer i fare.
+- Markeringen kan angres.
+
+### F9: Flytte økter med dra og slipp
+
+- Brukeren kan dra en arbeidsøkt til en annen dag eller et annet tidspunkt i kalenderen, f.eks. fra tirsdag til onsdag.
+- Økten fester seg til nærmeste kvarter.
+- Økten kan ikke slippes oppå en fast aktivitet. Slippes den utenfor studievinduet eller etter fristen, får brukeren en advarsel.
+- En økt brukeren har flyttet selv, blir **låst**. Planleggeren flytter den ikke når planen bygges på nytt, men den teller med i dagskapasiteten.
+- Låste økter vises med et lite låsikon og kan låses opp.
+- Flyttingen kan angres.
+- Faste aktiviteter (forelesninger) kan ikke dras.
+- Det finnes et alternativ uten mus: «Flytt økt» med valg av dato og klokkeslett. Det skal også fungere på mobil.
+- **Kan ha:** Endre lengden på en økt ved å dra i nedre kant.
+
+### F10: Én boks per sammenhengende økt
+
+- Økter for samme oppgave som ligger rett etter hverandre, uten noe imellom, vises og lagres som **én** økt.
+- Ligger det en pause, en annen aktivitet eller en annen oppgave imellom, blir det egne økter.
+- Når en sammenslått økt hukes av, registreres hele lengden som utført tid.
+
 ## 4. Datamodell
 
 I første versjon lagres alle data lokalt i nettleseren (localStorage), uten innlogging.
