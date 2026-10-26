@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { scheduleTasks, removeFutureSessions } from './scheduler.js';
+import { scheduleTasks, removeFutureSessions, sessionLength } from './scheduler.js';
+import { V1_SETTINGS } from './fixtures/v1.js';
 import { DEFAULT_SETTINGS, STATUS, createFixedBlock } from './models.js';
 import { atMinutes, toDateKey, minutesSinceMidnight, formatTime } from './dates.js';
 
@@ -10,7 +11,10 @@ const MON = '2026-11-02';
 const TUE = '2026-11-03';
 const WED = '2026-11-04';
 const now = atMinutes(MON, h(7));
-const user = { ...DEFAULT_SETTINGS, daily_available_study_hours: 4 };
+// Testene i den første delen beskriver v1-reglene (økter på 30–120 minutter), så de bruker v1-innstillingene.
+// Minste øktlengde fra v2 (standard 45) testes til slutt i filen (steg 10.3).
+const user = { ...DEFAULT_SETTINGS, ...V1_SETTINGS, daily_available_study_hours: 4 };
+const v2User = { ...DEFAULT_SETTINGS, daily_available_study_hours: 4 };
 
 function task(id, hours, deadlineDate, deadlineHour = 23.99, extra = {}) {
   return {
@@ -273,5 +277,105 @@ describe('removeFutureSessions', () => {
     const result = removeFutureSessions(blocks, 'a', at);
     expect(result.find((b) => b.id === `a-${MON}-8`)).toBeDefined();
     expect(result.find((b) => b.id === `a-${TUE}-8`).is_completed).toBe(true);
+  });
+});
+
+// Steg 10.3: minste øktlengde (F7, punkt 73 og 101). Lengdene går i hele kvarter frem til steg 12.4.
+describe('sessionLength', () => {
+  const rules = (preferred, min) => ({ preferred, min });
+
+  it('tar hele resten når den får plass innenfor ønsket lengde', () => {
+    expect(sessionLength(90, 120, rules(120, 45))).toBe(90);
+  });
+
+  it('gir ønsket lengde når resten blir minst minste lengde', () => {
+    expect(sessionLength(165, 120, rules(120, 45))).toBe(120);
+  });
+
+  it('korter ned økten så resten blir minste lengde', () => {
+    // 120 + 15 ville gitt en rest under 45: 90 + 45
+    expect(sessionLength(135, 120, rules(120, 45))).toBe(90);
+    // 60 + 60 + 30 med ønsket 60: andre økt kortes ned til 45, så det blir 60 + 45 + 45
+    expect(sessionLength(90, 120, rules(60, 45))).toBe(45);
+  });
+
+  it('legger resten til økten når nedkorting ville gjort den for kort', () => {
+    // Ønsket 60, minste 60, 90 igjen: 60 + 30 går ikke, 30 + 60 går ikke, så det blir én økt på 90
+    expect(sessionLength(90, 120, rules(60, 60))).toBe(90);
+  });
+
+  it('lager ingen økt når verken nedkorting eller tillegg får plass', () => {
+    // 75 igjen, plass til 60, minste 45: 60 + 15 og 30 + 45 går ikke, og 75 får ikke plass
+    expect(sessionLength(75, 60, rules(120, 45))).toBe(0);
+  });
+
+  it('bruker ikke restregelen i runden med korte hull', () => {
+    expect(sessionLength(75, 60, { ...rules(120, 45), relaxed: true })).toBe(60);
+  });
+
+  it('runder plassen ned til hele kvarter', () => {
+    expect(sessionLength(200, 100, rules(120, 45))).toBe(90);
+  });
+});
+
+describe('scheduleTasks med minste øktlengde 45 (standard i v2)', () => {
+  it('lager ingen økter under 45 minutter når det er tid nok', () => {
+    // 2 t 15 min: 120 + 15 ville gitt en rest på 15, så det blir 90 + 45
+    const { blocks } = scheduleTasks([task('a', 2.25, WED)], [], v2User, { from: MON, now });
+    expect(describeSessions(blocks)).toEqual(['a 2026-11-02 08:00–09:30', 'a 2026-11-02 09:45–10:30']);
+  });
+
+  it('bruker ikke tidsrom under 45 minutter når fristen kan rekkes uten', () => {
+    // 30 minutter ledig mellom to forelesninger mandag
+    const busy = [fixed('f1', MON, 8, 10), fixed('f2', MON, 10.5, 21)];
+    const { blocks } = scheduleTasks([task('a', 1, WED)], busy, v2User, { from: MON, now });
+    expect(describeSessions(blocks)).toEqual(['a 2026-11-03 08:00–09:00']);
+  });
+
+  it('bruker korte hull (minst 30 minutter) når fristen ellers ikke rekkes', () => {
+    // Frist mandag kl. 21, og bare 10.00–10.30 og 12.00–13.00 er ledig
+    const busy = [fixed('f1', MON, 8, 10), fixed('f2', MON, 10.5, 12), fixed('f3', MON, 13, 21)];
+    const { blocks, unplaced } = scheduleTasks([task('a', 1.5, MON, 21)], busy, v2User, { from: MON, now });
+    expect(describeSessions(blocks).sort()).toEqual(['a 2026-11-02 10:00–10:30', 'a 2026-11-02 12:00–13:00']);
+    expect(unplaced).toEqual([]);
+  });
+
+  it('bruker ikke hull under 30 minutter, heller ikke når fristen er i fare', () => {
+    // Bare 20 minutter ledig før fristen
+    const busy = [fixed('f1', MON, 8, 10), fixed('f2', MON, 10.33, 21)];
+    const { blocks, unplaced } = scheduleTasks([task('a', 0.5, MON, 21)], busy, v2User, { from: MON, now });
+    expect(blocks).toEqual([]);
+    expect(unplaced).toEqual([{ task_id: 'a', hours: 0.5 }]);
+  });
+
+  it('gir oppgaver med mindre igjen enn minste lengde én kort økt', () => {
+    const { blocks } = scheduleTasks([task('a', 0.5, WED)], [], v2User, { from: MON, now });
+    expect(describeSessions(blocks)).toEqual(['a 2026-11-02 08:00–08:30']);
+  });
+
+  it('bruker ønsket øktlengde som øvre grense', () => {
+    const shortSessions = { ...v2User, preferred_session_minutes: 60 };
+    const { blocks } = scheduleTasks([task('a', 2.5, WED)], [], shortSessions, { from: MON, now });
+    // 60 + 60 + 30 ville gitt en rest under 45: 60 + 45 + 45
+    expect(describeSessions(blocks)).toEqual([
+      'a 2026-11-02 08:00–09:00',
+      'a 2026-11-02 09:15–10:00',
+      'a 2026-11-02 10:15–11:00',
+    ]);
+  });
+
+  it('med v1-innstillingene brukes fortsatt ikke hull under 30 minutter når fristen er i fare (punkt 33)', () => {
+    const busy = [fixed('f1', MON, 8, 10), fixed('f2', MON, 10.33, 21)];
+    const { blocks } = scheduleTasks([task('a', 0.5, MON, 21)], busy, user, { from: MON, now });
+    expect(blocks).toEqual([]);
+  });
+
+  it('hopper over runden med korte hull når minste lengde er 30 (v1), så v1-planen er uendret', () => {
+    // Samme oppsett som over, der runden med korte hull redder fristen med minste lengde 45
+    const busy = [fixed('f1', MON, 8, 10), fixed('f2', MON, 10.5, 12), fixed('f3', MON, 13, 21)];
+    const { blocks, unplaced } = scheduleTasks([task('a', 1.75, MON, 21)], busy, user, { from: MON, now });
+    // v1: 30 min kl. 10, og økten kl. 12 kortes ned til 45 min av restregelen, så 30 min får ikke plass
+    expect(describeSessions(blocks)).toEqual(['a 2026-11-02 10:00–10:30', 'a 2026-11-02 12:00–12:45']);
+    expect(unplaced).toEqual([{ task_id: 'a', hours: 0.5 }]);
   });
 });

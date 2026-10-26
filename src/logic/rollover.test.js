@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { replan, rollover } from './rollover.js';
+import { V1_SETTINGS } from './fixtures/v1.js';
 import { DEFAULT_SETTINGS, STATUS, createFixedBlock } from './models.js';
 import { atMinutes, toDateKey, minutesSinceMidnight, formatTime } from './dates.js';
 
@@ -47,7 +48,8 @@ function fixed(id, date, from, to) {
 
 function data({ tasks = [], blocks = [], capacity = 4, last_checked_date = null } = {}) {
   return {
-    user: { id: 'u1', name: '', ...DEFAULT_SETTINGS, daily_available_study_hours: capacity },
+    // Testene her beskriver v1-reglene (økter på 30–120 minutter), så de bruker v1-innstillingene (punkt 94)
+    user: { id: 'u1', name: '', ...DEFAULT_SETTINGS, ...V1_SETTINGS, daily_available_study_hours: capacity },
     courses: [],
     tasks,
     blocks,

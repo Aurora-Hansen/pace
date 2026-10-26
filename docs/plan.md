@@ -495,9 +495,9 @@ Felles for alle måtene:
 - [x] **10.2 Bruk i planen.** Sammenslåing kjøres sist i `replan` og `rollover`, ved import og når appen åpnes (`startDay`).
   *Tester:* når en sammenslått økt hukes av, registreres hele lengden. Angring trekker hele lengden fra igjen.
   *Ferdig når:* kalenderen og «I dag» viser én boks (sjekket med data der to økter ligger rett etter hverandre).
-- [ ] **10.3 Minste øktlengde i planleggeren.** `user.min_session_minutes` erstatter `SESSION_MIN`. Restregelen og runden med korte hull følger punkt 73.
+- [x] **10.3 Minste øktlengde i planleggeren.** `user.min_session_minutes` erstatter `SESSION_MIN`. Restregelen og runden med korte hull følger punkt 73 og 101.
   *Tester:*
-  - Eksemplene i eksempel C.
+  - Reglene fra eksempel C, med lengder i hele kvarter. De nøyaktige tallene i eksempel C (50/10 og 90 + 65 + 45) trenger steg på 5 minutter og testes i 12.4.
   - Kort hull brukes bare når fristen ellers ikke rekkes.
   - Oppgaver med mindre igjen enn minste lengde får én kort økt.
   - Med de gamle innstillingene (pause 15, minste 30) blir planen lik fasiten fra 9.1.
@@ -627,7 +627,7 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
     - Valgene er 15, 30, 45 og 60 minutter.
     - Blir det en rest under minste lengde, kortes forrige økt ned. Hvis det gjør forrige økt for kort, legges resten til forrige økt i stedet (maks 120 minutter). Dette gjelder bare når pausen er over 0. Med pause 0 blir arbeidet ikke delt opp (punkt 72).
     - Har en oppgave mindre igjen enn minste lengde totalt, får den én kort økt, fordi arbeidet ellers aldri blir planlagt.
-    - Hull under minste lengde (minst 15 minutter) brukes bare i runde 3.
+    - Hull under minste lengde (minst 30 minutter, punkt 101) brukes bare i runde 3.
 74. **Steg på 5 minutter i planleggeren:** 50 minutters økter og 10 minutters pause går ikke opp i kvarter. Ledig tid som begynner av seg selv («nå», slutten på en forelesning eller låst økt) rundes fortsatt opp til nærmeste kvarter, så de fleste økter starter på hele kvarter. Dra og slipp og skjemaet «Flytt økt» bruker kvarter (F9).
 75. **Prioritet:**
     - Effektiv frist er fristen minus 3 døgn for høy og pluss 3 døgn for lav. 3 døgn er en konstant som er lett å justere.
@@ -757,3 +757,20 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
     - Grensen er økter *lengre enn* 1 time. Økter på 1 time eller kortere hukes av med ett klikk som før.
     - Den gjennomførte delen regnes fra starten av økten og blir en fullført økt. Resten av økten fjernes og planlegges på nytt etter de vanlige reglene. Resten er dagens tid, så den kan havne i ledig tid i dag etter «nå» eller senere.
     - Angring må fjerne resten som ble planlagt på nytt, og gi tilbake den hele, planlagte økten. Ellers ville dagen blitt planlagt dobbelt, fordi dagens økter står fast (punkt 3). Hvordan dette lagres, avgjøres i steget.
+101. **Minste øktlengde i planleggeren (10.3):**
+    - **Grenser:** `sessionLength(gjenstår, plass, { preferred, min })` i `scheduler.js` avgjør lengden på hver økt. Den har egne tester.
+      - Den øvre grensen er ønsket øktlengde, høyst 120. Planleggeren bruker den allerede nå, fordi «legg resten til forrige økt» bare kan skje når ønsket lengde er under 120. Standard og v1-innstillingene er begge 120, så ingenting endres for dem.
+      - Pausen og steg på 5 minutter kommer fortsatt i 12.4.
+    - **Korte hull er minst 30 minutter, ikke 15.** v1 brukte aldri tidsrom under 30 minutter (punkt 33). Med 15 ville v1-innstillingene gitt en annen plan når en frist er i fare. 15 minutters økter er dessuten sjelden nyttige.
+      - Med minste lengde 30 eller kortere finnes det derfor ingen korte hull, og runden hoppes over. Da er v1-planen garantert uendret.
+      - Med standard 45 brukes hull på 30–44 minutter bare når fristen ellers ikke rekkes.
+    - **Rekkefølgen på rundene:**
+      1. vanlig runde innenfor kapasiteten
+      2. korte hull
+      3. «Fordel på nytt» uten kapasitetsgrense
+
+      Runde 1–3 i «Rekkefølgen planleggeren går frem i» (foretrukne tider og øvrig tid) kommer i 12.5. Til da er runde 1 hele studievinduet.
+    - **Ny plan i runden med korte hull:** En oppgave som ikke fikk plass i første runde, planlegges på nytt fra bunnen uten restregelen. Grunnen er at første runde kan ha kortet ned en økt i håp om et senere tidsrom som ikke finnes.
+      - Eksempel: 1,5 timer med frist i kveld og bare 10.00–10.30 og 12.00–13.00 ledig. Første runde ga 12.00–12.45 og en rest på 45 minutter. Ny plan gir 10.00–10.30 og 12.00–13.00, og alt rekkes.
+      - Den nye planen brukes bare hvis mindre blir igjen.
+    - **Gamle tester:** Testene i `scheduler.test.js` og `rollover.test.js` som beskriver v1-reglene, bruker nå `V1_SETTINGS`. De nye reglene med standard 45 har egne tester.
