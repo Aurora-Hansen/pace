@@ -453,6 +453,32 @@ describe('planlegging i appen', () => {
     expect(hoursOf(sessionsOf(state))).toBe(3);
   });
 
+  // Steg 10.2 (F10)
+  it('daglig sjekk slår sammen lagrede økter som ligger rett etter hverandre, også samme dag', () => {
+    const planned = withPlannedTask();
+    const first = sessionsOf(planned)[0];
+    const end = new Date(new Date(first.end_time).getTime() + 30 * 60_000).toISOString();
+    const withNext = {
+      ...planned,
+      data: {
+        ...planned.data,
+        last_checked_date: TODAY,
+        blocks: [...planned.data.blocks, { ...first, id: 'rett-etter', start_time: first.end_time, end_time: end }],
+      },
+    };
+    const state = startDay(new Date(first.start_time))(withNext);
+    const merged = sessionsOf(state).find((b) => b.id === first.id);
+    expect(merged.end_time).toBe(end);
+    expect(sessionsOf(state).some((b) => b.id === 'rett-etter')).toBe(false);
+    expect(state.data.last_checked_date).toBe(TODAY);
+  });
+
+  it('daglig sjekk gir samme tilstand når ingenting er endret samme dag', () => {
+    const planned = withPlannedTask();
+    const sameDay = { ...planned, data: { ...planned.data, last_checked_date: TODAY } };
+    expect(startDay(new Date(2026, 10, 4, 9, 0))(sameDay).data).toBe(sameDay.data);
+  });
+
   it('ny dag oppdaterer dagens dato og kalenderen', () => {
     const state = newDay(new Date(2026, 10, 5, 8, 0))(withPlannedTask());
     expect(state.ui.today).toBe('2026-11-05');

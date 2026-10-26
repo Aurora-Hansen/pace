@@ -25,6 +25,7 @@ import { registerProgress, completeTask, reopenTask } from '../logic/progress.js
 import { addDays, isValidDateKey, toDateKey } from '../logic/dates.js';
 import { replan, rollover } from '../logic/rollover.js';
 import { completeSession, uncompleteSession } from '../logic/today.js';
+import { mergeAdjacentSessions } from '../logic/sessions.js';
 import { detectOverload } from '../logic/overload.js';
 import { estimateHours } from '../logic/estimate.js';
 import { createSampleData } from '../logic/sample.js';
@@ -108,8 +109,12 @@ export const withReplan = (change, now) => (state) => {
 };
 
 // Daglig sjekk når appen åpnes. Overbelastning regnes alltid ut, også når planen ikke endres.
+// Lagrede økter som ligger rett etter hverandre, slås sammen først (F10), også samme dag,
+// når rollover ellers ikke gjør noe.
 export const startDay = (now) => (state) => {
-  const data = rollover(state.data, now);
+  const blocks = mergeAdjacentSessions(state.data.blocks);
+  const merged = blocks === state.data.blocks ? state.data : { ...state.data, blocks };
+  const data = rollover(merged, now);
   return withOverload(data === state.data ? state : { ...state, data }, now);
 };
 

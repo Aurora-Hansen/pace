@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { todayAgenda, completeSession, uncompleteSession } from './today.js';
 import { STATUS, createFixedBlock } from './models.js';
 import { atMinutes } from './dates.js';
+import { mergeAdjacentSessions } from './sessions.js';
 
 const h = (hours) => Math.round(hours * 60);
 const TODAY = '2026-11-04';
@@ -102,5 +103,15 @@ describe('uncompleteSession', () => {
   it('gjør ingenting med en økt som ikke er huket av', () => {
     const state = data([session('a', 't1', TODAY, 8, 9)]);
     expect(uncompleteSession(state, 'a')).toBe(state);
+  });
+});
+
+// Steg 10.2: en sammenslått økt registrerer hele lengden (F10)
+describe('sammenslått økt', () => {
+  it('registrerer hele lengden når den hukes av, og trekker hele lengden fra igjen', () => {
+    const [merged] = mergeAdjacentSessions([session('a', 't1', TODAY, 9, 10), session('b', 't1', TODAY, 10, 11.5)]);
+    const done = completeSession(data([merged]), 'a');
+    expect(done.tasks[0].completed_hours).toBe(2.5);
+    expect(uncompleteSession(done, 'a').tasks[0].completed_hours).toBe(0);
   });
 });

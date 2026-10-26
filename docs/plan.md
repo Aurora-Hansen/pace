@@ -489,7 +489,7 @@ Felles for alle måtene:
   - En økt som ender 10.00, og en som starter 10.05, blir ikke slått sammen.
   - Den sammenslåtte økten får id-en til den første.
   - Faste aktiviteter berøres ikke, og argumentet endres ikke.
-- [ ] **10.2 Bruk i planen.** Sammenslåing kjøres sist i `replan` og `rollover`, og ved import.
+- [x] **10.2 Bruk i planen.** Sammenslåing kjøres sist i `replan` og `rollover`, ved import og når appen åpnes (`startDay`).
   *Tester:* når en sammenslått økt hukes av, registreres hele lengden. Angring trekker hele lengden fra igjen.
   *Ferdig når:* kalenderen og «I dag» viser én boks (sjekket med data der to økter ligger rett etter hverandre).
 - [ ] **10.3 Minste øktlengde i planleggeren.** `user.min_session_minutes` erstatter `SESSION_MIN`. Restregelen og runden med korte hull følger punkt 73.
@@ -728,3 +728,11 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
     - Den sammenslåtte økten står der den første sto i listen.
     - Økter som overlapper (samme oppgave), røres ikke, fordi de ikke ligger «rett etter hverandre». Slike økter lages ikke av planleggeren. Om de skal hindres ved flytting, avgjøres i 11.1.
     - Økter på ulike dager slås aldri sammen, heller ikke over midnatt.
+99. **Sammenslåing i planen (10.2):**
+    - Skjer sist i `planAround`, altså i både `replan` og `rollover`, i `parseBackup` og i `startDay` før `rollover`.
+    - `startDay` er med fordi `rollover` ikke gjør noe samme dag. Uten den ville lagrede økter rett etter hverandre vist seg som to bokser til neste endring.
+    - Når en økt hukes av slik at to fullførte økter for samme oppgave ligger rett etter hverandre, slås de sammen ved neste nye plan. Angres avhukingen etterpå, gjelder angringen hele den sammenslåtte økten.
+    - **Sjekket i nettleser:**
+      - To lagrede økter (13–14 og 14–15.30) vises som én boks 13.00–15.30 i både «I dag» og kalenderen, og lagres som én.
+      - Avhuking gir 2,5 timer, og angring gir 0.
+      - axe-core fant ingen feil.

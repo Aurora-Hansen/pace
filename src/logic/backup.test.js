@@ -255,3 +255,23 @@ describe('parseBackup med datamodell v2', () => {
     });
   });
 });
+
+// Steg 10.2: import slår sammen økter som ligger rett etter hverandre (F10)
+describe('parseBackup og sammenslåing', () => {
+  it('gjør to økter for samme oppgave rett etter hverandre om til én', () => {
+    const minutesOf = (block) => (new Date(block.end_time) - new Date(block.start_time)) / 60_000;
+    const open = (blocks) => blocks.filter((b) => !b.is_fixed && !b.is_completed);
+    const before = open(sample().blocks);
+    expect(before).toHaveLength(1);
+    const file = fileWith((d) => {
+      const first = open(d.blocks)[0];
+      const end = new Date(new Date(first.end_time).getTime() + 60 * 60_000).toISOString();
+      d.blocks.push({ ...first, id: 'rett-etter', start_time: first.end_time, end_time: end });
+      return d;
+    });
+    const after = open(parseBackup(file).data.blocks);
+    expect(after).toHaveLength(1);
+    expect(after[0].id).toBe(before[0].id);
+    expect(minutesOf(after[0])).toBe(minutesOf(before[0]) + 60);
+  });
+});

@@ -206,3 +206,45 @@ describe('rollover', () => {
     expect(result.blocks).toEqual([lecture]);
   });
 });
+
+// Steg 10.2: økter for samme oppgave som ligger rett etter hverandre, blir én økt (F10)
+describe('sammenslåing i replan og rollover', () => {
+  it('replan slår sammen to av dagens økter som ligger rett etter hverandre', () => {
+    const now = atMinutes(MON, h(9));
+    const state = data({
+      // Oppgaven trenger akkurat de 2,5 timene som allerede ligger i dag
+      tasks: [task('rapport', 2.5, THU)],
+      blocks: [session('rapport', MON, 10, 11), session('rapport', MON, 11, 12.5)],
+    });
+    const result = replan(state, now);
+    expect(sessions(result)).toEqual([`rapport ${MON} 10:00–12:30`]);
+    expect(result.blocks.find((b) => b.task_id === 'rapport' && b.start_time.startsWith('2026-11-02')).id).toBe(
+      state.blocks[0].id,
+    );
+  });
+
+  it('rollover slår sammen fullførte økter fra i går som ligger rett etter hverandre', () => {
+    const now = atMinutes(TUE, h(7));
+    const state = data({
+      tasks: [task('rapport', 2, THU, 23.99, { completed_hours: 2, status: STATUS.IN_PROGRESS })],
+      blocks: [
+        session('rapport', MON, 8, 9, { is_completed: true }),
+        session('rapport', MON, 9, 10, { is_completed: true }),
+      ],
+      last_checked_date: MON,
+    });
+    expect(sessions(rollover(state, now))).toEqual([`rapport ${MON} 08:00–10:00 (ferdig)`]);
+  });
+
+  it('slår ikke sammen økter med pause imellom', () => {
+    const now = atMinutes(MON, h(9));
+    const state = data({
+      tasks: [task('rapport', 1.75, THU)],
+      blocks: [session('rapport', MON, 10, 11), session('rapport', MON, 11.25, 12)],
+    });
+    expect(sessions(replan(state, now))).toEqual([
+      `rapport ${MON} 10:00–11:00`,
+      `rapport ${MON} 11:15–12:00`,
+    ]);
+  });
+});

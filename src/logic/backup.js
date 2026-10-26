@@ -4,6 +4,7 @@ import { normalizeState, STATUS, RECURRENCE, PRIORITY, DAY_OFF_KIND } from './mo
 import { validateSettings } from './validation.js';
 import { migrate, CURRENT_VERSION } from './migrate.js';
 import { parseTime, isValidDateKey } from './dates.js';
+import { mergeAdjacentSessions } from './sessions.js';
 
 export const BACKUP_FORMAT = 'pace-sikkerhetskopi';
 // Versjonen til filen er versjonen til dataene i den, så filer fra v1 overføres med migrate (punkt 97)
@@ -153,8 +154,9 @@ export function parseBackup(text) {
   if (dayOffIndex >= 0) return invalid('daysOff', dayOffIndex);
 
   return {
-    // Den som henter inn data, trenger ikke førstegangsveiviseren
-    data: { ...data, onboarding_done: true },
+    // Den som henter inn data, trenger ikke førstegangsveiviseren.
+    // Økter som ligger rett etter hverandre, blir én økt (F10), også i filer fra før sammenslåingen fantes.
+    data: { ...data, blocks: mergeAdjacentSessions(data.blocks), onboarding_done: true },
     exportedAt: isTime(backup.exported_at) ? backup.exported_at : null,
     counts: {
       courses: data.courses.length,

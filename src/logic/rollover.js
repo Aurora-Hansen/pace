@@ -3,14 +3,16 @@
 import { toDateKey } from './dates.js';
 import { STATUS } from './models.js';
 import { scheduleTasks } from './scheduler.js';
+import { mergeAdjacentSessions } from './sessions.js';
 
 const sessionDate = (block) => toDateKey(new Date(block.start_time));
 
-// Beholder blokkene `keep` godtar og planlegger resten av arbeidet fra `from`
+// Beholder blokkene `keep` godtar og planlegger resten av arbeidet fra `from`.
+// Til slutt blir økter for samme oppgave som ligger rett etter hverandre, én økt (F10).
 function planAround(data, keep, from, now) {
   const kept = data.blocks.filter(keep);
   const { blocks } = scheduleTasks(data.tasks, kept, data.user, { from, now });
-  return { ...data, blocks: [...kept, ...blocks] };
+  return { ...data, blocks: mergeAdjacentSessions([...kept, ...blocks]) };
 }
 
 // Ved endring (ny oppgave, fremgang, endret estimat eller frist):
