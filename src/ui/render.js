@@ -1,6 +1,6 @@
 // Den felles render-funksjonen. Tegner hele appen ut fra tilstanden.
 // Kalles av store etter hver endring – aldri direkte fra hendelser.
-import { feilmeldinger, knapper, navigasjon, testmodus, bekreftelser, angre } from '../tekster.js';
+import { feilmeldinger, knapper, navigasjon, testmodus, bekreftelser, angre, lagredeData } from '../tekster.js';
 import { toDateKey } from '../logic/dates.js';
 import { escapeHtml } from './html.js';
 import { formatFullDate, formatClock } from './format.js';
@@ -32,7 +32,7 @@ const icons = {
   innstillinger: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
 };
 
-function header(state) {
+function header(state, { nav = true } = {}) {
   const tabs = Object.keys(views)
     .map((view) => {
       const current = state.ui.view === view ? ' aria-current="page"' : '';
@@ -50,7 +50,7 @@ function header(state) {
         <img src="${logoUrl}" alt="" width="32" height="32">
         <span>Pace</span>
       </a>
-      <nav class="app-nav" aria-label="${navigasjon.meny}">${tabs}</nav>
+      ${nav ? `<nav class="app-nav" aria-label="${navigasjon.meny}">${tabs}</nav>` : ''}
       ${themeToggle(effectiveTheme(state.ui.theme, state.ui.systemDark))}
     </header>`;
 }
@@ -99,6 +99,28 @@ function noticeBanner(code) {
     </div>`;
 }
 
+// Lagrede data som ikke kan brukes (steg 9.4): bare feilen, nedlasting av rådataene og ny lasting.
+// Menyen vises ikke, fordi visningene ville vært tomme og kunne gitt inntrykk av at planen er borte.
+function renderBlocked(state, root) {
+  const message = feilmeldinger[state.ui.blocked.error];
+  root.innerHTML = `
+    <div class="app-shell">
+      ${header(state, { nav: false })}
+      <main id="innhold" class="app-main" tabindex="-1">
+        <h1 class="visually-hidden">Pace</h1>
+        <section class="card blocked" role="alert" aria-labelledby="blocked-title">
+          <h2 id="blocked-title">${escapeHtml(message.overskrift)}</h2>
+          <p>${escapeHtml(message.tekst)}</p>
+          <p class="muted">${escapeHtml(lagredeData.hjelp)}</p>
+          <div class="data-actions">
+            <button class="btn btn-primary" type="button" data-action="download-raw">${lagredeData.lastNed}</button>
+            <button class="btn btn-secondary" type="button" data-action="reload">${lagredeData.lastInnPaNytt}</button>
+          </div>
+        </section>
+      </main>
+    </div>`;
+}
+
 // --- Fokus ---
 // Hele appen tegnes på nytt ved hver endring, så elementet med fokus erstattes. For at tastatur- og
 // skjermleserbrukere ikke skal miste plassen, gjenkjennes elementet på id eller data-attributter og får fokus igjen.
@@ -118,6 +140,10 @@ const autofocusKey = (element) =>
   element ? `${focusSelector(element) ?? element.className}|${element.textContent.trim().slice(0, 60)}` : null;
 
 export function render(state, root) {
+  if (state.ui.blocked) {
+    renderBlocked(state, root);
+    return;
+  }
   const previousFocus = focusSelector(root.contains(document.activeElement) ? document.activeElement : null);
   const previousAutofocus = autofocusKey(root.querySelector('[data-autofocus]'));
 

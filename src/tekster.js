@@ -320,6 +320,14 @@ export const sikkerhetskopi = {
   feilGjelder: (hvor) => `Feilen gjelder ${hvor} i filen.`,
 };
 
+// Ikke fra innhold.md – lagrede data som denne versjonen ikke kan bruke (steg 9.4).
+// Dataene er ikke endret, og brukeren kan laste dem ned. Overskrift og forklaring står i feilmeldinger.
+export const lagredeData = {
+  hjelp: 'Filen inneholder planen din akkurat slik den er lagret i nettleseren. Ta vare på den, så går ingenting tapt.',
+  lastNed: 'Last ned dataene',
+  lastInnPaNytt: 'Last inn siden på nytt',
+};
+
 export const data = {
   overskrift: 'Data',
   tekst: 'Alt du legger inn, lagres bare i denne nettleseren. Eksempeldata viser hvordan planlegging, flytting av økter og varsler fungerer.',
@@ -452,6 +460,19 @@ export const feilmeldinger = {
   INGEN_HENDELSER: {
     overskrift: 'Ingenting å eksportere',
     tekst: 'Det finnes ingen hendelser i perioden du valgte. Prøv en lengre periode, eller ta med flere typer hendelser.',
+  },
+  // Ikke fra innhold.md – lagrede data som ikke kan overføres til nytt format (steg 9.4)
+  LAGRET_NYERE_VERSJON: {
+    overskrift: 'Planen din er lagret av en nyere versjon av Pace',
+    tekst: 'Denne siden er en eldre versjon. Last inn siden på nytt for å få siste versjon. Dataene dine er ikke endret.',
+  },
+  LAGRET_UKJENT_FORMAT: {
+    overskrift: 'Vi kjenner ikke igjen dataene i nettleseren',
+    tekst: 'Pace har ikke endret eller slettet noe. Last ned dataene og ta vare på filen før du gjør noe annet.',
+  },
+  LAGRET_KOPI_FEILET: {
+    overskrift: 'Vi fikk ikke tatt en kopi av planen din',
+    tekst: 'Pace må oppdatere hvordan planen er lagret, og tar alltid en kopi først. Det gikk ikke, kanskje fordi lagringen i nettleseren er full. Ingenting er endret.',
   },
   // Ikke fra innhold.md – lagrede data som ikke kan leses (steg 1.3)
   LESING_FEILET: {

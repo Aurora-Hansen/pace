@@ -467,11 +467,13 @@ Felles for alle måtene:
   - Migrering to ganger gir samme resultat, og argumentet endres ikke.
   - Overførte data får de nye standardverdiene (pause 0 og minste øktlengde 45, punkt 94).
   - `replan` på overførte data, kjørt med de gamle innstillingene (pause 15, minste 30), gir nøyaktig fasiten fra 9.1.
-- [ ] **9.4 Lagring** (`data/storage.js`). `load` overfører via `migrate`. Før data lagres i nytt format første gang, kopieres originalen til `pace:v1:pre-v2`. Feil i overføringen behandles som korrupte data (punkt 13).
+- [x] **9.4 Lagring** (`data/storage.js`). `load` overfører via `migrate`. Før data i v1 overskrives med v2, lagres en kopi under `pace:v1:kopi-v1`, og kopien overskrives aldri. Hvis `migrate` gir feil, blir lagrede data verken overskrevet eller slettet. Appen viser en tydelig melding og tilbyr nedlasting av rådataene i stedet for å starte tom (punkt 96).
   *Tester:* med falsk `localStorage`:
   - v1 inn gir v2 lagret, med kopi av originalen.
   - Kopien overskrives ikke ved neste lasting.
   - v2 lastes uten endring.
+  - Kopien finnes og er uendret etter migrering, også etter at en gammel fane har lagret v1 igjen.
+  - Feil fra `migrate`, eller at kopien ikke kan lagres, endrer ingenting i localStorage.
 - [ ] **9.5 Sikkerhetskopi** (`logic/backup.js`). Eksporten får `version: 2`. Import godtar versjon 1 og 2 via `migrate` og validerer de nye feltene (gyldige verdier, ukedager 1–7, gyldige klokkeslett og datoer).
   *Tester:* v1-fil importeres, ugyldig `priority`, `break_minutes` og `days_off` gir feil med plassering.
   *Ferdig når:* data lagret av den publiserte versjonen åpnes i den nye uten at noe ser annerledes ut, også en sikkerhetskopi tatt før endringen (sjekket i nettleser). Planen er lik fordi planleggeren ikke bruker de nye standardverdiene før fase 10 (punkt 94).
@@ -585,8 +587,8 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
     - pause (`break_minutes`)
 67. **Lagring:**
     - Nøkkelen er fortsatt `pace:v1`, og versjonsfeltet går fra 1 til 2. Navnet på nøkkelen er bare et navn, og å bytte den gir ekstra kode uten gevinst.
-    - Originalen kopieres én gang til `pace:v1:pre-v2`.
-    - Data fra en *nyere* versjon behandles som i dag (kopieres til `pace:v1:backup`, punkt 13).
+    - Originalen kopieres én gang til `pace:v1:kopi-v1` (punkt 96).
+    - Data fra en *nyere* versjon eller i ukjent format blir ikke rørt (punkt 96). Det erstatter forslaget om å behandle dem som korrupte data.
     - En fane som står åpen med gammel kode under publisering, kan lagre v1 over v2. Det overføres riktig ved neste lasting, så risikoen er godtatt.
 68. **Standardverdiene gir forbedringene fra F7 og F10** (erstatter forslaget om å beholde dagens plan):
     - Standardverdiene er foretrukket øktlengde 120, minste øktlengde 45, pause 0, ingen foretrukne tider og normal prioritet.
@@ -687,3 +689,23 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
     - Andre manglende felt fylles fortsatt inn av `normalizeState` etter overføringen.
     - Testene bruker fasiten med `V1_SETTINGS`. De sammenligner uten `is_locked`, fordi nye økter fra planleggeren ikke har feltet før 11.2 (punkt 93).
     - `V1_SETTINGS`, datasettene og fasiten deles mellom testene via `src/logic/fixtures/v1.js`.
+96. **Lagrede data skal aldri gå tapt ved overføring (9.4, ditt krav):**
+    - **Kopi først:**
+      - Før data i et eldre format overskrives, lagres rådataene uendret under `pace:v1:kopi-v{versjon}`, altså `pace:v1:kopi-v1` for v1.
+      - Kopien skrives bare når nøkkelen mangler, og overskrives aldri. Det gjelder også om en gammel fane senere lagrer v1 igjen.
+      - Deretter lagres v2 med en gang i `load`, så overføringen skjer én gang.
+      - Kan kopien ikke lagres (f.eks. full lagring), skrives ingenting, og appen behandles som ved feil fra `migrate` (`LAGRET_KOPI_FEILET`).
+      - Feiler lagringen av v2 etter at kopien er tatt, brukes de overførte dataene likevel. Lagringen prøves igjen ved neste endring.
+    - **Feil fra `migrate`:**
+      - Feilene er `NYERE_VERSJON` og `UKJENT_FORMAT`. Da skriver og sletter `load` ingenting, og svarer `{ state: null, error, blocked: true, raw }`.
+      - Appen starter ikke tom. Den viser en egen skjerm uten meny, med feilmeldingen, «Last ned dataene» (rådataene akkurat slik de er lagret, som `pace-data-ÅÅÅÅ-MM-DD.json`) og «Last inn siden på nytt».
+      - Store får en lagringsfunksjon som ikke gjør noe, og daglig sjekk og veiviseren kjøres ikke.
+      - Lys og mørk modus virker fortsatt, fordi valget ligger under egen nøkkel.
+    - **Korrupt JSON** behandles som før (punkt 13): kopi til `pace:v1:backup`, og appen starter tom med `LESING_FEILET`. Kravet ditt gjaldt feil fra `migrate`, og korrupt JSON kan uansett ikke leses av noen versjon.
+    - **Ingen «slett og start på nytt»** på feilskjermen. En bruker med data i ukjent format kan derfor ikke bruke appen før dataene er fjernet eller rettet. Det kan legges til senere, for eksempel bak et spørsmål og etter nedlasting.
+    - **Nye tekster:** `LAGRET_NYERE_VERSJON`, `LAGRET_UKJENT_FORMAT` og `LAGRET_KOPI_FEILET` i `feilmeldinger`, og `lagredeData` (knapper og hjelpetekst). De er merket som ikke fra innhold.md.
+    - **Sjekket i nettleser:**
+      - v1-data får kopi og v2, og vises som før.
+      - Nyere versjon og ukjent format gir feilskjermen.
+      - Etter temabytte, skjult og vist fane og nedlasting er appdataene i localStorage uendret, og den nedlastede filen er lik rådataene.
+      - axe-core fant ingen feil i lys og mørk modus, på desktop og mobil.

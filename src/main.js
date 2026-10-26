@@ -16,6 +16,9 @@ const newId = () => crypto.randomUUID();
 
 const loaded = load();
 const data = loaded.state ?? createInitialState({ userId: newId() });
+// Lagrede data som ikke kan brukes: appen starter ikke tom, men viser feilen og lagrer ingenting,
+// så dataene i localStorage verken overskrives eller slettes (steg 9.4)
+const blocked = loaded.blocked ? { error: loaded.error } : null;
 
 // Ukevisningen er for trang på mobil, så smale skjermer starter i dagsvisning
 const calendarMode = window.matchMedia('(max-width: 40rem)').matches ? 'day' : 'week';
@@ -33,7 +36,8 @@ const store = createStore({
   state: {
     data,
     ui: actions.createInitialUi({
-      error: loaded.error,
+      error: blocked ? null : loaded.error,
+      blocked,
       today: toDateKey(startNow),
       calendarMode,
       simulatedNow: isSimulated() ? startNow.toISOString() : null,
@@ -42,7 +46,7 @@ const store = createStore({
       systemDark: darkQuery.matches,
     }),
   },
-  save,
+  save: blocked ? () => ({ ok: true }) : save,
   render: (state) => render(state, root),
 });
 
@@ -202,6 +206,15 @@ root.addEventListener('click', (event) => {
     exportBackup();
     return;
   }
+  // Lagrede data som ikke kan brukes: last ned rådataene akkurat slik de er lagret, eller last inn på nytt
+  if (event.target.closest('[data-action="download-raw"]')) {
+    downloadFile(`pace-data-${toDateKey(now())}.json`, loaded.raw, 'application/json');
+    return;
+  }
+  if (event.target.closest('[data-action="reload"]')) {
+    window.location.reload();
+    return;
+  }
   const button = event.target.closest('[data-action]');
   const action = clickActions[button?.dataset.action];
   if (action) update(action({ ...button.dataset }));
@@ -249,10 +262,12 @@ document.addEventListener('keydown', (event) => {
 // Daglig sjekk når appen åpnes, og når den vises igjen etter å ha stått åpen over midnatt.
 // Veiviseren vises første gang appen åpnes.
 store.start();
-store.update(actions.startDay(startNow));
-store.update(actions.showWizardIfNew());
+if (!blocked) {
+  store.update(actions.startDay(startNow));
+  store.update(actions.showWizardIfNew());
+}
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) return;
+  if (document.hidden || blocked) return;
   store.update(actions.newDay(now()));
   store.update(actions.refreshGreeting(now()));
 });

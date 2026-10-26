@@ -41,6 +41,7 @@ export const VIEWS = ['idag', 'kalender', 'oppgaver', 'timeplan', 'innstillinger
 // `theme` er lagret valg ('light', 'dark', 'system'), og `systemDark` er systeminnstillingen.
 export function createInitialUi({
   error = null,
+  blocked = null,
   today,
   calendarMode = 'week',
   simulatedNow = null,
@@ -67,6 +68,8 @@ export function createInitialUi({
     // Siste sletting som kan angres: { token, kind, title, restore }
     undo: null,
     error,
+    // Lagrede data som ikke kan brukes: { error }. Da vises bare feilen, og ingenting lagres (steg 9.4).
+    blocked,
     notice: null,
     confirm: null,
     forms: {},
