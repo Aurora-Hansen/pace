@@ -275,3 +275,47 @@ describe('parseBackup og sammenslåing', () => {
     expect(minutesOf(after[0])).toBe(minutesOf(before[0]) + 60);
   });
 });
+
+// Punkt 99: avhuking med nummer og deler
+describe('parseBackup og deler i sammenslåtte økter', () => {
+  const done = (d) => d.blocks.find((b) => !b.is_fixed && b.is_completed);
+  const withParts = (change = (parts) => parts) =>
+    fileWith((d) => {
+      const block = done(d);
+      const middle = new Date((Date.parse(block.start_time) + Date.parse(block.end_time)) / 2).toISOString();
+      block.completed_order = 2;
+      block.parts = change([
+        { id: block.id, start_time: block.start_time, end_time: middle, completed_order: 1 },
+        { id: 'del-2', start_time: middle, end_time: block.end_time, completed_order: 2 },
+      ]);
+      return d;
+    });
+
+  it('godtar en sammenslått økt med gyldige deler', () => {
+    expect(parseBackup(withParts()).error).toBeUndefined();
+  });
+
+  it.each([
+    ['deler som ikke er en liste', () => 'tull'],
+    ['bare én del', (parts) => parts.slice(0, 1)],
+    ['hull mellom delene', (parts) => [parts[0], { ...parts[1], start_time: parts[1].end_time }]],
+    ['del uten nummer', (parts) => [parts[0], { ...parts[1], completed_order: 'to' }]],
+    ['del uten id', (parts) => [parts[0], { ...parts[1], id: '' }]],
+  ])('avviser %s', (_name, change) => {
+    expect(parseBackup(withParts(change))).toMatchObject({ error: 'UGYLDIG_INNHOLD', where: 'blocks' });
+  });
+
+  it('avviser deler på en økt som ikke er fullført, og ugyldig nummer', () => {
+    const planned = fileWith((d) => {
+      const block = d.blocks.find((b) => !b.is_fixed && !b.is_completed);
+      block.parts = [];
+      return d;
+    });
+    expect(parseBackup(planned)).toMatchObject({ where: 'blocks' });
+    const badOrder = fileWith((d) => {
+      done(d).completed_order = -1;
+      return d;
+    });
+    expect(parseBackup(badOrder)).toMatchObject({ where: 'blocks' });
+  });
+});

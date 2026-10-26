@@ -59,6 +59,25 @@ function validPreferredTime(slot) {
   return start !== null && end !== null && end > start;
 }
 
+// Avhuking (punkt 99): nummer for når økten ble huket av, og delene i en sammenslått, fullført økt
+const isOrder = (value) => Number.isInteger(value) && value >= 0;
+const validPart = (part) =>
+  isObject(part) && isText(part.id) && isTime(part.start_time) && isTime(part.end_time) && isOrder(part.completed_order);
+
+function validCompletion(block) {
+  if (block.completed_order !== undefined && !isOrder(block.completed_order)) return false;
+  if (block.parts === undefined) return true;
+  // Bare fullførte arbeidsøkter har deler, og delene må dekke økten fra start til slutt uten hull
+  if (block.is_fixed || !block.is_completed || !Array.isArray(block.parts) || block.parts.length < 2) return false;
+  if (!block.parts.every(validPart)) return false;
+  const ends = block.parts.every((part, i) => i === 0 || Date.parse(part.start_time) === Date.parse(block.parts[i - 1].end_time));
+  return (
+    ends &&
+    Date.parse(block.parts[0].start_time) === Date.parse(block.start_time) &&
+    Date.parse(block.parts.at(-1).end_time) === Date.parse(block.end_time)
+  );
+}
+
 const validDayOff = (day) => isObject(day) && isValidDateKey(day.date) && Object.values(DAY_OFF_KIND).includes(day.kind);
 
 function validTask(task, courseIds) {
@@ -83,6 +102,7 @@ function validBlock(block, courseIds, taskIds) {
   if (typeof block.is_fixed !== 'boolean' || typeof block.is_completed !== 'boolean') return false;
   // Bare arbeidsøkter kan være låst
   if (typeof block.is_locked !== 'boolean' || (block.is_fixed && block.is_locked)) return false;
+  if (!validCompletion(block)) return false;
   if (!Object.values(RECURRENCE).includes(block.recurrence)) return false;
   if (!isOptionalRef(block.course_id, courseIds)) return false;
   // Faste aktiviteter har ingen oppgave. Arbeidsøkter må høre til en oppgave som finnes.

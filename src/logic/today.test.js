@@ -106,12 +106,86 @@ describe('uncompleteSession', () => {
   });
 });
 
-// Steg 10.2: en sammenslått økt registrerer hele lengden (F10)
+// Steg 10.2: en sammenslått økt registrerer hele lengden (F10), og angring gir tilbake tilstanden fra før
 describe('sammenslått økt', () => {
-  it('registrerer hele lengden når den hukes av, og trekker hele lengden fra igjen', () => {
+  const ids = (d) => d.blocks.map((b) => [b.id, b.is_completed]);
+  // Som replan: fullførte økter rett etter hverandre slås sammen
+  const merge = (d) => ({ ...d, blocks: mergeAdjacentSessions(d.blocks) });
+
+  it('registrerer hele lengden når en planlagt sammenslått økt hukes av, og angring trekker alt fra', () => {
     const [merged] = mergeAdjacentSessions([session('a', 't1', TODAY, 9, 10), session('b', 't1', TODAY, 10, 11.5)]);
     const done = completeSession(data([merged]), 'a');
     expect(done.tasks[0].completed_hours).toBe(2.5);
     expect(uncompleteSession(done, 'a').tasks[0].completed_hours).toBe(0);
+  });
+
+  it('B er fullført, A hukes av og slås sammen med B: angring gir to økter der bare B er fullført', () => {
+    const before = completeSession(data([session('A', 't1', TODAY, 9, 10), session('B', 't1', TODAY, 10, 11.5)]), 'B');
+    expect(before.tasks[0].completed_hours).toBe(1.5);
+
+    const merged = merge(completeSession(before, 'A'));
+    expect(merged.blocks).toHaveLength(1);
+    expect(merged.tasks[0].completed_hours).toBe(2.5);
+
+    // Angring: bare As tid trekkes fra, og øktene er som før
+    const undone = uncompleteSession(merged, merged.blocks[0].id);
+    expect(ids(undone)).toEqual([
+      ['A', false],
+      ['B', true],
+    ]);
+    expect(undone.tasks[0].completed_hours).toBe(1.5);
+    expect(undone.blocks).toEqual(before.blocks);
+  });
+
+  it('angrer også når den siste avhukingen er den andre delen i tid', () => {
+    const start = data([session('A', 't1', TODAY, 9, 10), session('B', 't1', TODAY, 10, 11)]);
+    const merged = merge(completeSession(completeSession(start, 'A'), 'B'));
+    const undone = uncompleteSession(merged, 'A');
+    expect(ids(undone)).toEqual([
+      ['A', true],
+      ['B', false],
+    ]);
+    expect(undone.tasks[0].completed_hours).toBe(1);
+  });
+
+  it('deler opp tre deler riktig når den midterste angres', () => {
+    const start = data([session('A', 't1', TODAY, 9, 10), session('B', 't1', TODAY, 10, 11), session('C', 't1', TODAY, 11, 12)]);
+    const merged = merge(completeSession(completeSession(completeSession(start, 'A'), 'C'), 'B'));
+    expect(merged.blocks).toHaveLength(1);
+    const undone = uncompleteSession(merged, 'A');
+    expect(ids(undone)).toEqual([
+      ['A', true],
+      ['B', false],
+      ['C', true],
+    ]);
+    expect(undone.tasks[0].completed_hours).toBe(2);
+  });
+
+  it('kan angre del for del, i omvendt rekkefølge av avhukingen', () => {
+    const start = data([session('A', 't1', TODAY, 9, 10), session('B', 't1', TODAY, 10, 11)]);
+    const merged = merge(completeSession(completeSession(start, 'B'), 'A'));
+    const once = uncompleteSession(merged, 'A');
+    expect(ids(once)).toEqual([
+      ['A', false],
+      ['B', true],
+    ]);
+    // Når begge er planlagt igjen, har de lik status og blir én økt, som før de ble huket av
+    const twice = uncompleteSession(once, 'B');
+    expect(ids(twice)).toEqual([['A', false]]);
+    expect(twice.blocks[0].end_time).toBe(start.blocks[1].end_time);
+    expect(twice.tasks[0].completed_hours).toBe(0);
+  });
+
+  it('gir hver avhuking et høyere nummer, også når tidligere deler er slått sammen', () => {
+    const start = data([session('A', 't1', TODAY, 9, 10), session('B', 't1', TODAY, 10, 11), session('C', 't1', TODAY, 14, 15)]);
+    const three = completeSession(merge(completeSession(completeSession(start, 'A'), 'B')), 'C');
+    expect(three.blocks.find((b) => b.id === 'C').completed_order).toBe(3);
+  });
+
+  it('angrer en fullført økt uten nummer (data fra før nummereringen) som før', () => {
+    const old = data([session('A', 't1', TODAY, 9, 10, { is_completed: true })], [task({ completed_hours: 1 })]);
+    const undone = uncompleteSession(old, 'A');
+    expect(ids(undone)).toEqual([['A', false]]);
+    expect(undone.tasks[0].completed_hours).toBe(0);
   });
 });

@@ -479,6 +479,38 @@ describe('planlegging i appen', () => {
     expect(startDay(new Date(2026, 10, 4, 9, 0))(sameDay).data).toBe(sameDay.data);
   });
 
+  // Punkt 99: angring gir tilstanden fra før avhukingen, også når replan har slått øktene sammen
+  it('angrer avhuking av en økt som replan har slått sammen med en fullført nabo', () => {
+    const now = new Date(2026, 10, 4, 12, 0);
+    const at = (hour) => new Date(2026, 10, 4, Math.floor(hour), (hour % 1) * 60).toISOString();
+    const part = (id, from, to, extra = {}) => ({
+      id, task_id: 't1', course_id: null, title: 'Rapport', start_time: at(from), end_time: at(to),
+      is_fixed: false, recurrence: 'none', is_completed: false, is_locked: false, ...extra,
+    });
+    const start = initial();
+    const before = {
+      ...start,
+      data: {
+        ...start.data,
+        last_checked_date: TODAY,
+        // Oppgaven trenger akkurat de 2,5 timene som ligger i dag, så replan legger ikke til nye økter
+        tasks: [{ id: 't1', course_id: null, title: 'Rapport', description: '', deadline: new Date(2026, 10, 6, 23, 59).toISOString(),
+          estimated_hours: 2.5, completed_hours: 1.5, status: 'in_progress', created_at: at(8), allow_over_capacity: false, priority: 'normal' }],
+        blocks: [part('A', 9, 10), part('B', 10, 11.5, { is_completed: true, completed_order: 1 })],
+      },
+    };
+    const afterA = withReplan(toggleSession({ id: 'A' }), now)(before);
+    expect(sessionsOf(afterA)).toHaveLength(1);
+    expect(afterA.data.tasks[0].completed_hours).toBe(2.5);
+
+    const undone = withReplan(toggleSession({ id: sessionsOf(afterA)[0].id }), now)(afterA);
+    expect(sessionsOf(undone).map((b) => [b.id, b.is_completed])).toEqual([
+      ['A', false],
+      ['B', true],
+    ]);
+    expect(undone.data.tasks[0].completed_hours).toBe(1.5);
+  });
+
   it('ny dag oppdaterer dagens dato og kalenderen', () => {
     const state = newDay(new Date(2026, 10, 5, 8, 0))(withPlannedTask());
     expect(state.ui.today).toBe('2026-11-05');

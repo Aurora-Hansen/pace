@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mergeAdjacentSessions } from './sessions.js';
+import { mergeAdjacentSessions, splitParts } from './sessions.js';
 import { atMinutes } from './dates.js';
 
 const DAY = '2026-11-04';
@@ -96,17 +96,63 @@ describe('mergeAdjacentSessions', () => {
     expect(result[0].is_completed).toBe(true);
   });
 
-  it('gjør låst og ulåst til én låst økt, uansett rekkefølge', () => {
-    const lockedFirst = mergeAdjacentSessions([
-      session('a1', 'a', '09:00', '10:00', { is_locked: true }),
-      session('a2', 'a', '10:00', '11:00'),
+  // Alle kombinasjoner av status og lås for to økter rett etter hverandre (punkt 71)
+  const STATES = [
+    ['planlagt', { is_completed: false, is_locked: false }],
+    ['planlagt låst', { is_completed: false, is_locked: true }],
+    ['fullført', { is_completed: true, is_locked: false }],
+    ['fullført låst', { is_completed: true, is_locked: true }],
+  ];
+  const combinations = STATES.flatMap(([nameA, a]) => STATES.map(([nameB, b]) => [nameA, nameB, a, b]));
+
+  it.each(combinations)('%s + %s: slås bare sammen ved lik status og lik lås', (_a, _b, a, b) => {
+    const blocks = [session('a1', 'a', '09:00', '10:00', a), session('a2', 'a', '10:00', '11:00', b)];
+    const same = a.is_completed === b.is_completed && a.is_locked === b.is_locked;
+    expect(mergeAdjacentSessions(blocks)).toHaveLength(same ? 1 : 2);
+  });
+
+  it.each(combinations)(
+    '%s + %s, når brukeren har flyttet den andre inntil: slås sammen ved lik status, uansett lås',
+    (_a, _b, a, b) => {
+      const blocks = [session('a1', 'a', '09:00', '10:00', a), session('a2', 'a', '10:00', '11:00', b)];
+      const result = mergeAdjacentSessions(blocks, { join: ['a2'] });
+      expect(result).toHaveLength(a.is_completed === b.is_completed ? 1 : 2);
+      if (result.length === 1) expect(result[0].is_locked).toBe(a.is_locked || b.is_locked);
+    },
+  );
+
+  it('slår sammen en flyttet økt med naboer på begge sider', () => {
+    const result = mergeAdjacentSessions(
+      [
+        session('a1', 'a', '08:00', '09:00'),
+        session('flyttet', 'a', '09:00', '10:00', { is_locked: true }),
+        session('a3', 'a', '10:00', '11:00'),
+      ],
+      { join: ['flyttet'] },
+    );
+    expect(result.map(span)).toEqual([['a1', at('08:00'), at('11:00')]]);
+    expect(result[0].is_locked).toBe(true);
+  });
+
+  it('husker delene når fullførte økter slås sammen, så avhukingen kan angres', () => {
+    const [result] = mergeAdjacentSessions([
+      session('a1', 'a', '09:00', '10:00', { is_completed: true, completed_order: 2 }),
+      session('a2', 'a', '10:00', '11:00', { is_completed: true, completed_order: 1 }),
     ]);
-    const lockedLast = mergeAdjacentSessions([
-      session('a1', 'a', '09:00', '10:00'),
-      session('a2', 'a', '10:00', '11:00', { is_locked: true }),
+    expect(result.parts).toEqual([
+      { id: 'a1', start_time: at('09:00'), end_time: at('10:00'), completed_order: 2 },
+      { id: 'a2', start_time: at('10:00'), end_time: at('11:00'), completed_order: 1 },
     ]);
-    expect(lockedFirst[0].is_locked).toBe(true);
-    expect(lockedLast[0].is_locked).toBe(true);
+    expect(result.completed_order).toBe(2);
+    expect(splitParts(result).map(span)).toEqual([
+      ['a1', at('09:00'), at('10:00')],
+      ['a2', at('10:00'), at('11:00')],
+    ]);
+  });
+
+  it('lagrer ikke deler for planlagte økter', () => {
+    const [result] = mergeAdjacentSessions([session('a1', 'a', '09:00', '10:00'), session('a2', 'a', '10:00', '11:00')]);
+    expect(result.parts).toBeUndefined();
   });
 
   it('slår ikke sammen økter på ulike dager', () => {
@@ -142,7 +188,7 @@ describe('mergeAdjacentSessions', () => {
   });
 
   it('endrer ikke argumentet', () => {
-    const blocks = [session('a1', 'a', '09:00', '10:00'), session('a2', 'a', '10:00', '11:00', { is_locked: true })];
+    const blocks = [session('a1', 'a', '09:00', '10:00'), session('a2', 'a', '10:00', '11:00')];
     const copy = structuredClone(blocks);
     mergeAdjacentSessions(blocks);
     expect(blocks).toEqual(copy);

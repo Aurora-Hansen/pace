@@ -270,6 +270,8 @@ Godkjent. Standardverdiene gir forbedringene fra F7 og F10: pause 0 og minste ø
 | User | `preferred_times` | Liste med `{ id, weekdays: [1–7], start: 'HH:MM', end: 'HH:MM' }`, der 1 er mandag. Standard `[]`, som betyr hele studievinduet. |
 | Task | `priority` | `low`, `normal` eller `high`. Standard `normal`. |
 | ScheduleBlock | `is_locked` | Boolean. Standard `false`, og alltid `false` for faste aktiviteter. |
+| ScheduleBlock | `completed_order` | Heltall, bare på fullførte økter. Nummeret på avhukingen, så det går an å se hvilken som var sist (punkt 99). |
+| ScheduleBlock | `parts` | Liste med `{ id, start_time, end_time, completed_order }`, bare på sammenslåtte, fullførte økter. De opprinnelige øktene, så avhukingen kan angres del for del (punkt 99). |
 | Data (øverst) | `days_off` | Liste med `{ date: 'YYYY-MM-DD', kind: 'sick' \| 'off' }`. Standard `[]`. |
 
 Lagringsformatet får `version: 2`. Nøkkelen er fortsatt `pace:v1` (punkt 67).
@@ -485,7 +487,8 @@ Felles for alle måtene:
   - To og tre økter på rad blir én.
   - Økter blir ikke slått sammen når det ligger en pause, en fast aktivitet eller en annen oppgave imellom.
   - En fullført og en ikke fullført økt blir ikke slått sammen.
-  - Låst og ulåst blir én låst økt.
+  - Alle kombinasjoner av status (planlagt, fullført) og lås: bare lik status og lik lås slås sammen.
+  - Med en økt brukeren har flyttet (`join`): lik status slås sammen uansett lås, og blir låst. Ulik status slås aldri sammen.
   - En økt som ender 10.00, og en som starter 10.05, blir ikke slått sammen.
   - Den sammenslåtte økten får id-en til den første.
   - Faste aktiviteter berøres ikke, og argumentet endres ikke.
@@ -499,6 +502,13 @@ Felles for alle måtene:
   - Oppgaver med mindre igjen enn minste lengde får én kort økt.
   - Med de gamle innstillingene (pause 15, minste 30) blir planen lik fasiten fra 9.1.
 - [ ] **10.4 Innstilling «Korteste økt»** under Innstillinger i en ny gruppe «Økter og pauser», med valgene 15, 30, 45 og 60 minutter. Planen bygges på nytt når innstillingen endres.
+- [ ] **10.5 Delvis avhuking** (punkt 100). Ved avhuking av en økt som er lengre enn 1 time, velger brukeren «Hele økten» eller «Delvis». «Delvis» gir et felt for antall timer. Den gjennomførte delen registreres, og resten planlegges på nytt.
+  *Tester:*
+  - Delvis avhuking registrerer bare timene som er oppgitt, og resten planlegges på nytt.
+  - Feil antall timer (0, negativt, mer enn økten eller tekst) gir skjemafeil.
+  - Økter på 1 time eller kortere hukes av direkte, som før.
+  - Angring gir tilbake tilstanden fra før avhukingen: hele økten planlagt, og resten som ble planlagt på nytt, er fjernet.
+  *Ferdig når:* valget virker med tastatur og på mobil, og axe-core finner ingen feil.
 
 ## Fase 11 – Dra og slipp av økter (F9)
 
@@ -538,7 +548,7 @@ Felles for alle måtene:
   - 50/10-eksemplet.
   - Pause 0 gir én økt 09.00–12.00 for 3 timer uansett ønsket lengde.
   - Pause 0 med to oppgaver gir to økter rett etter hverandre.
-  - Pause 0 legger ikke nytt arbeid inntil en låst økt for samme oppgave.
+  - Pause 0: ny økt rett etter en låst økt for samme oppgave blir en egen boks (ulik lås, punkt 71).
   - Pause rundt låste økter.
   - Med pause over 0 blir ingen økt over 120 minutter.
 - [ ] **12.5 Foretrukne tider i planleggeren.** `preferredSlots(dato, ledig, bruker)` og runde 1 og 2.
@@ -601,18 +611,18 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
     - `fasit-v1.json` har resultatet av `rollover` og `replan` (blokker, `last_checked_date` og `detectOverload`) for 8 tilfeller. `fasit.test.js` sjekker dem.
     - `fasit.test.js` setter de gamle innstillingene (pause 15, minste 30, foretrukket 120) eksplisitt på brukeren før planleggeren kjøres. Testene sjekker dermed at v1-oppførselen er uendret med de innstillingene, selv om standardverdiene er endret (punkt 94).
     - Skriptet som laget fasiten, er `scripts/lag-fasit.mjs`. Det skal bare kjøres mot koden fra før fase 9, aldri for å oppdatere fasiten etter endringer, for da tester fasiten ingenting.
-71. **Sammenslåing (F10):**
-    - Kravene for å slå sammen: samme oppgave, slutt lik start, samme dag og samme `is_completed`.
-    - En fullført og en ikke fullført del blir to bokser, fordi de har ulik status.
-    - Er én av dem låst, blir hele økten låst.
+71. **Sammenslåing (F10), endret før 10.3:**
+    - Kravene for å slå sammen: samme oppgave, slutt lik start, samme dag, lik status (begge planlagt eller begge fullført) og lik lås.
+    - **Unntak:** En økt brukeren selv har flyttet inntil en annen (F9), slås sammen med naboen selv om låsen er ulik, og hele økten blir låst. Status må fortsatt være lik, fordi en planlagt og en fullført del ikke kan være én økt.
     - Den sammenslåtte økten beholder id-en til den første.
-    - Med pause 0 lager planleggeren selv økter som ligger rett etter hverandre, og de slås da sammen (punkt 72). Med pause over 0 oppstår slike økter bare ved flytting eller import.
+    - Fullførte økter som slås sammen, beholder delene sine i `parts`, så avhukingen kan angres (punkt 99).
+    - Med pause 0 lager planleggeren selv økter som ligger rett etter hverandre. De slås sammen når status og lås er lik (punkt 72). Med pause over 0 oppstår slike økter bare ved flytting eller import.
 72. **Pause 0 og øktlengde (F10):**
     - Ønsket øktlengde brukes bare til å dele opp arbeidet når pausen er større enn 0.
     - Når pausen er 0, slås økter for samme oppgave som ligger rett etter hverandre sammen til én økt, slik F10 krever. Oppgaven får da én sammenhengende økt per ledige tidsrom.
     - Lengden på den sammenhengende økten begrenses bare av tidsrommet, dagskapasiteten og det som gjenstår. Grensen på 120 minutter gjelder ikke, fordi deler av økten uansett ville blitt slått sammen igjen.
     - Ulike oppgaver kan ligge rett etter hverandre når pausen er 0. Det blir egne økter (F10).
-    - Planleggeren legger ikke nytt arbeid rett inntil en låst økt for samme oppgave. Da ville sammenslåingen låst tid som planleggeren har valgt (punkt 71). Brukeren kan selv flytte en økt inntil en annen. Da blir de én låst økt.
+    - Planleggeren kan legge nytt arbeid rett inntil en låst økt for samme oppgave. Det blir to bokser, fordi låsen er ulik (punkt 71). Brukeren kan selv flytte en økt inntil en annen. Da blir de én låst økt.
 73. **Minste øktlengde:**
     - Valgene er 15, 30, 45 og 60 minutter.
     - Blir det en rest under minste lengde, kortes forrige økt ned. Hvis det gjør forrige økt for kort, legges resten til forrige økt i stedet (maks 120 minutter). Dette gjelder bare når pausen er over 0. Med pause 0 blir arbeidet ikke delt opp (punkt 72).
@@ -731,8 +741,19 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
 99. **Sammenslåing i planen (10.2):**
     - Skjer sist i `planAround`, altså i både `replan` og `rollover`, i `parseBackup` og i `startDay` før `rollover`.
     - `startDay` er med fordi `rollover` ikke gjør noe samme dag. Uten den ville lagrede økter rett etter hverandre vist seg som to bokser til neste endring.
-    - Når en økt hukes av slik at to fullførte økter for samme oppgave ligger rett etter hverandre, slås de sammen ved neste nye plan. Angres avhukingen etterpå, gjelder angringen hele den sammenslåtte økten.
+    - **Angring gir tilstanden fra før avhukingen** (endret før 10.3):
+      - Hver avhuking får et løpenummer (`completed_order`), og en sammenslått, fullført økt husker delene sine (`parts`).
+      - Angring deler økten opp igjen og gjør bare den delen som ble huket av sist, planlagt. Bare den delens tid trekkes fra. Resten slås sammen igjen hvis delene fortsatt henger sammen.
+      - Eksempel: B er fullført, og A hukes av og slås sammen med B. Angring gir A planlagt og B fullført, og bare As tid er trukket fra.
+      - Løpenummer i stedet for tidspunkt, fordi `?dato=` kan flytte tiden bakover.
+      - Lagres i dataene, så angring virker også etter at siden er lastet på nytt. Fullførte økter fra før nummereringen regnes som eldst.
+      - Sikkerhetskopien validerer `completed_order` og `parts`: delene må henge sammen og dekke økten fra start til slutt.
     - **Sjekket i nettleser:**
       - To lagrede økter (13–14 og 14–15.30) vises som én boks 13.00–15.30 i både «I dag» og kalenderen, og lagres som én.
       - Avhuking gir 2,5 timer, og angring gir 0.
       - axe-core fant ingen feil.
+100. **Delvis avhuking (steg 10.5, ditt ønske før 10.3):**
+    - Lagt inn som eget steg etter 10.4, fordi det trenger nytt grensesnitt i «I dag». Avhukingen i økt-panelet i 11.3 bruker samme valg.
+    - Grensen er økter *lengre enn* 1 time. Økter på 1 time eller kortere hukes av med ett klikk som før.
+    - Den gjennomførte delen regnes fra starten av økten og blir en fullført økt. Resten av økten fjernes og planlegges på nytt etter de vanlige reglene. Resten er dagens tid, så den kan havne i ledig tid i dag etter «nå» eller senere.
+    - Angring må fjerne resten som ble planlagt på nytt, og gi tilbake den hele, planlagte økten. Ellers ville dagen blitt planlagt dobbelt, fordi dagens økter står fast (punkt 3). Hvordan dette lagres, avgjøres i steget.
