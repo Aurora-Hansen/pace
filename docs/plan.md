@@ -459,7 +459,7 @@ Felles for alle måtene:
   *Ferdig når:* fasiten er committet før datamodellen endres.
 - [x] **9.2 Datamodell v2** (`logic/models.js`). Nye felt med standardverdier i `createUser`, `createTask`, `createFixedBlock`, `createInitialState` og `normalizeState`. Ingen endring i planleggeren ennå.
   *Tester:* nye objekter får standardverdier, og `normalizeState` fyller inn manglende felt uten å endre de som finnes.
-- [ ] **9.3 Migrering** (`logic/migrate.js`). `migrate(stored)` kjører en kjede av rene funksjoner (`1 → 2`, senere `2 → 3`) og gir `{ data, from, to }` eller `{ error }`.
+- [x] **9.3 Migrering** (`logic/migrate.js`). `migrate(stored)` kjører en kjede av rene funksjoner (`1 → 2`, senere `2 → 3`) og gir `{ data, from, to }` eller `{ error }`.
   *Tester:*
   - Fasit-dataene fra 9.1 og tomme data overføres riktig.
   - Data med manglende eller rare felt håndteres.
@@ -679,3 +679,11 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
     - Brukere som allerede har data, får de nye standardverdiene ved migreringen i 9.3. v1 hadde ingen egne innstillinger for økter, så det finnes ingen brukervalg som overskrives.
     - Fasiten lages ikke på nytt. `fasit.test.js` kjører i stedet planleggeren med de gamle innstillingene eksplisitt (`V1_SETTINGS` i `src/logic/fixtures/v1.js`: pause 15, minste 30, foretrukket 120). Testene vokter dermed fortsatt at v1-oppførselen er uendret med de innstillingene.
     - Når planleggeren begynner å bruke innstillingene (10.3 og 12.4), må den gi fasiten med `V1_SETTINGS`. De nye standardverdiene testes med egne eksempler (eksempel C og testene i 10.3 og 12.4).
+95. **Migrering i koden (9.3):**
+    - `migrate(stored)` i `logic/migrate.js` gir `{ data, from, to }`, eller `{ error }` med koden `UKJENT_FORMAT` eller `NYERE_VERSJON`.
+    - `UKJENT_FORMAT` betyr at det ikke er et objekt med heltallsversjon fra 1 og et dataobjekt.
+    - `v1ToV2` skriver v2-verdiene rett inn (120, 45, 0, `[]`, `normal`, `false`) i stedet for å bruke `DEFAULT_SETTINGS`. Da blir overføringen fra v1 den samme selv om standardverdiene endres senere.
+    - Felt som allerede finnes, beholdes. Felt og elementer med feil type får være i fred, så valideringen finner dem.
+    - Andre manglende felt fylles fortsatt inn av `normalizeState` etter overføringen.
+    - Testene bruker fasiten med `V1_SETTINGS`. De sammenligner uten `is_locked`, fordi nye økter fra planleggeren ikke har feltet før 11.2 (punkt 93).
+    - `V1_SETTINGS`, datasettene og fasiten deles mellom testene via `src/logic/fixtures/v1.js`.
