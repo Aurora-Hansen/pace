@@ -316,6 +316,9 @@ export const sikkerhetskopi = {
     courses: (nr) => `emne nr. ${nr}`,
     tasks: (nr) => `oppgave nr. ${nr}`,
     blocks: (nr) => `aktivitet eller arbeidsøkt nr. ${nr}`,
+    // Datamodell v2 (steg 9.5)
+    preferredTimes: (nr) => `foretrukket studietid nr. ${nr}`,
+    daysOff: (nr) => `fridag nr. ${nr}`,
   },
   feilGjelder: (hvor) => `Feilen gjelder ${hvor} i filen.`,
 };

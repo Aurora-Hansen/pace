@@ -474,7 +474,7 @@ Felles for alle måtene:
   - v2 lastes uten endring.
   - Kopien finnes og er uendret etter migrering, også etter at en gammel fane har lagret v1 igjen.
   - Feil fra `migrate`, eller at kopien ikke kan lagres, endrer ingenting i localStorage.
-- [ ] **9.5 Sikkerhetskopi** (`logic/backup.js`). Eksporten får `version: 2`. Import godtar versjon 1 og 2 via `migrate` og validerer de nye feltene (gyldige verdier, ukedager 1–7, gyldige klokkeslett og datoer).
+- [x] **9.5 Sikkerhetskopi** (`logic/backup.js`). Eksporten får `version: 2`. Import godtar versjon 1 og 2 via `migrate` og validerer de nye feltene (gyldige verdier, ukedager 1–7, gyldige klokkeslett og datoer).
   *Tester:* v1-fil importeres, ugyldig `priority`, `break_minutes` og `days_off` gir feil med plassering.
   *Ferdig når:* data lagret av den publiserte versjonen åpnes i den nye uten at noe ser annerledes ut, også en sikkerhetskopi tatt før endringen (sjekket i nettleser). Planen er lik fordi planleggeren ikke bruker de nye standardverdiene før fase 10 (punkt 94).
 
@@ -709,3 +709,17 @@ Nummereringen fortsetter fra listen øverst, så punktene kan henvises til på s
       - Nyere versjon og ukjent format gir feilskjermen.
       - Etter temabytte, skjult og vist fane og nedlasting er appdataene i localStorage uendret, og den nedlastede filen er lik rådataene.
       - axe-core fant ingen feil i lys og mørk modus, på desktop og mobil.
+97. **Sikkerhetskopi i versjon 2 (9.5):**
+    - Versjonen til filen er versjonen til dataene (`BACKUP_VERSION = CURRENT_VERSION`). Filer fra versjon 1 overføres med `migrate` før valideringen, og får de nye standardverdiene som ved lagring (punkt 94).
+    - V2-felt som mangler i en fil, fylles inn med `normalizeState`. Verdier som finnes, valideres som de er.
+    - Det som valideres:
+      - **Innstillinger** (stedet er «innstillingene»): foretrukket øktlengde 25–120 i steg på 5, minste øktlengde 15, 30, 45 eller 60, og pause 0, 10 eller 15.
+      - **Foretrukne tider:** liste med id, minst én ukedag 1–7 uten dobbelt, og gyldig fra–til med slutt etter start. Feilen peker på «foretrukket studietid nr. N».
+      - **Oppgaver:** `priority` er lav, normal eller høy.
+      - **Blokker:** `is_locked` er sann eller usann, og faste aktiviteter kan ikke være låst.
+      - **Fridager:** gyldig dato, type `sick` eller `off`, og én markering per dato. Feilen peker på «fridag nr. N». Er `days_off` ikke en liste, gjelder feilen oppbygningen av filen.
+    - Valideringen av de nye innstillingene ligger foreløpig i `backup.js`. Den flyttes til `validation.js` når skjemaene for innstillingene kommer (10.4 og 12.6).
+    - **Sjekket mot den publiserte versjonen:**
+      - Eksempeldata lagt inn på https://pacewa.netlify.app (v1), med `?dato=2026-11-04T10:00`.
+      - Både lagrede data og sikkerhetskopien derfra ga nøyaktig samme tekst i «I dag», «Kalender», «Oppgaver» og «Timeplan» i den nye versjonen. Bare bekreftelsesmeldingen øverst var ulik, slik den skal være.
+      - Ny eksport er versjon 2, og axe-core fant ingen feil.
